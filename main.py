@@ -11,21 +11,22 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
+from AgentMatrix.model import (CharacterModel, CommitIdentifier,
+                               CreateWorldModel, DeleteWorldCommitModel,
+                               ForkWorldModel, GetAllWorldsModel,
+                               GetCharactersModel, InputActionModel,
+                               LoginModel, LoginResponse, MissionModel,
+                               PublicWorldModel, RegisterModel,
+                               RegisterResponse, SceneModel,
+                               SeedPromptToWorldModel, SelectOptionModel, User,
+                               WorldCharacteristicModel, WorldIdentifier,
+                               WorldModel, WorldNewsModel,
+                               character_info_to_model, create_access_token,
+                               get_current_user, message_to_event_model)
 from AgentMatrix.src.graph import Graph, GroupChatStatus, HostLayer
 from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
 from AgentMatrix.src.memory import SentenceEmbedding
 from AgentMatrix.src.world import seed_prompt_to_universe_metadata
-from AgentMatrix.model import (CharacterModel, CommitIdentifier, CreateWorldModel,
-                           DeleteWorldCommitModel, ForkWorldModel,
-                           GetAllWorldsModel, GetCharactersModel,
-                           InputActionModel, LoginModel, LoginResponse,
-                           MissionModel, PublicWorldModel, RegisterModel,
-                           RegisterResponse, SceneModel,
-                           SeedPromptToWorldModel, SelectOptionModel, User,
-                           WorldCharacteristicModel, WorldIdentifier,
-                           WorldModel, WorldNewsModel, character_info_to_model,
-                           create_access_token, get_current_user,
-                           message_to_event_model)
 from backend.utils import start_scene_from_graph
 from backend.utils.commit_task import commit_task_manager
 from backend.utils.commit_tree import CommitTree
@@ -335,10 +336,6 @@ async def background_world_initialization(
 ):
     try:
         await G.init_world()
-        # 保存world
-        await save_graph(
-            user_id=user_id, world_id=world_id, commit_id=commit_id, graph=G
-        )
         task = await world_task_manager.get_task(user_id, world_id, commit_id)
         if task:
             task.set_completed()
@@ -1108,6 +1105,10 @@ async def public_world(request: Request, current_user: str = Depends(get_current
     # Start background fork process
     background_task = asyncio.create_task(
         background_fork_world(
+            world_dict=world_dict,
+            world_lock=world_lock,
+            commit_tree_lock=commit_tree_lock,
+            commit_trees_dict=commit_trees_dict,
             source_graph=world_dict[world_identifier],
             user_id=PUBLIC_WORLD_USER_ID,
             world_id=data.world_id,
@@ -1153,6 +1154,10 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
     # Start background fork process
     background_task = asyncio.create_task(
         background_fork_world(
+            world_dict=world_dict,
+            world_lock=world_lock,
+            commit_tree_lock=commit_tree_lock,
+            commit_trees_dict=commit_trees_dict,
             source_graph=world_dict[world_identifier],
             user_id=current_user,
             world_id=data.world_id,

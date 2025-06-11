@@ -1,4 +1,4 @@
-import logging
+import asyncio
 import traceback
 from typing import Literal, Optional
 
@@ -13,6 +13,10 @@ from .fork_task import fork_task_manager
 
 
 async def background_fork_world(
+    world_dict: dict[WorldIdentifier, Graph],
+    world_lock: asyncio.Lock,
+    commit_tree_lock: asyncio.Lock,
+    commit_trees_dict: dict[CommitIdentifier, CommitTree],
     source_graph: Graph,
     user_id: str,
     world_id: str,
@@ -36,8 +40,7 @@ async def background_fork_world(
         new_commit_id = await new_graph.generate_world_status_uuid()
 
         # Save the new graph
-        from main import (commit_tree_lock, commit_trees_dict,
-                          save_commit_tree, save_graph, world_dict, world_lock)
+        from main import save_commit_tree, save_graph
 
         await save_graph(user_id, new_world_id, new_commit_id, new_graph)
 
