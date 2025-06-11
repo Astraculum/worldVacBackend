@@ -1138,6 +1138,9 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
         user_id=data.user_id, world_id=data.world_id, commit_id=data.commit_id
     )
     if world_identifier not in world_dict:
+        get_logger_backend().error(
+            f"World commit not found: {world_identifier}, all identifiers: {world_dict.keys()}"
+        )
         raise HTTPException(status_code=404, detail="World commit not found")
 
     # Create new world ID
