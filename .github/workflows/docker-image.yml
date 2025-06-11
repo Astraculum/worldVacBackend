@@ -1,0 +1,27 @@
+name: Docker Image CI
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository with submodules
+      uses: actions/checkout@v3
+      with:
+          submodules: true  # 确保子模块被检出
+          token: ${{ secrets.ACCESS_TOKEN }}
+    - name: Docker login to Aliyun Registry
+      uses: docker/login-action@v1
+      with:
+        registry: crpi-tl3k804h0bv0lfiv.cn-hongkong.personal.cr.aliyuncs.com
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    - name: Build the Docker image
+      run: docker build --file Dockerfile -t worldvac-backend:latest .
+    - name: Tag Docker image
+      run: docker tag worldvac-backend:latest crpi-tl3k804h0bv0lfiv.cn-hongkong.personal.cr.aliyuncs.com/worldvac/agm:latest
+    - name: Push Docker image to Aliyun Registry
+      run: docker push crpi-tl3k804h0bv0lfiv.cn-hongkong.personal.cr.aliyuncs.com/worldvac/agm:latest

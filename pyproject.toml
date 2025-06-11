@@ -1,0 +1,44 @@
+[project]
+name = "world-vac-backend"
+version = "0.1.0"
+description = ""
+authors = [
+    { name = "yanjunbo", email = "13008250033@163.com" },
+    { name = "maxwell-gao", email = "maxwell-gao314@outlook.com" },
+]
+requires-python = "~=3.9"
+readme = "README.md"
+dependencies = [
+    "openai>=1.64.0,<2",
+    "dotenv>=0.9.9,<0.10",
+    "shapely>=2.0.7,<3",
+    "networkx==3.2.0",
+    "xmltodict>=0.14.2,<0.15",
+    "black>=25.1.0",
+    "langchain>=0.3.22",
+    "torch>=2.6.0",
+    "transformers>=4.50.3",
+    "faiss-cpu>=1.10.0",
+    "langchain-community>=0.3.20",
+    "json-with-comments>=1.2.10",
+    "commentjson>=0.9.0",
+    "nanoid>=2.0.0",
+    "casdoor>=1.29.0",
+    "fastapi>=0.115.12",
+    "starlette>=0.46.1",
+    "uvicorn>=0.34.0",
+]
+
+[dependency-groups]
+dev = ["ipykernel>=6.29.5,<7"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["agentmatrix"]
+
+[[tool.uv.index]]
+url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
+default = true

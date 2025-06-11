@@ -1,0 +1,3 @@
+[submodule "AgentMatrix"]
+	path = AgentMatrix
+	url = git@github.com:Astraculum/AgentMatrix.git
