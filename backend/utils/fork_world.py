@@ -3,7 +3,7 @@ import traceback
 from typing import Literal, Optional
 
 from AgentMatrix.model import CommitIdentifier, WorldIdentifier
-from AgentMatrix.src.graph import Graph
+from AgentMatrix.src.graph import ForkRelationEntity, Graph
 from AgentMatrix.src.llm import LLMClient
 from AgentMatrix.src.memory import SentenceEmbedding
 from logger import get_logger as get_logger_backend
@@ -21,6 +21,7 @@ async def background_fork_world(
     user_id: str,
     world_id: str,
     commit_id: str,
+    new_user_id: str,
     new_world_id: str,
     llm_client: LLMClient,
     embeddings: Optional[SentenceEmbedding] = None,
@@ -39,10 +40,32 @@ async def background_fork_world(
         )
         new_commit_id = await new_graph.generate_world_status_uuid()
 
-        # Save the new graph
-        from main import save_commit_tree, save_graph
+        # add `fork from` to new graph
+        async with new_graph.fork_from_lock:
+            new_graph.fork_from.append(
+                ForkRelationEntity(
+                    user_id=user_id,
+                    world_id=world_id,
+                    commit_id=commit_id,
+                )
+            )
 
-        await save_graph(user_id, new_world_id, new_commit_id, new_graph)
+        # add `fork to` to source graph
+        async with source_graph.fork_to_lock:
+            source_graph.fork_to.append(
+                ForkRelationEntity(
+                    user_id=new_user_id,
+                    world_id=new_world_id,
+                    commit_id=new_commit_id,
+                )
+            )
+            # Save the new graph
+            from main import save_commit_tree, save_graph
+
+            # Save the updated source graph
+            await save_graph(user_id, world_id, commit_id, source_graph)
+
+            await save_graph(new_user_id, new_world_id, new_commit_id, new_graph)
 
         # Get the source world's commit tree
         source_commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
@@ -51,7 +74,7 @@ async def background_fork_world(
             source_commit_tree = None
 
         # Create new commit tree
-        commit_identifier = CommitIdentifier(user_id=user_id, world_id=new_world_id)
+        commit_identifier = CommitIdentifier(user_id=new_user_id, world_id=new_world_id)
         async with commit_tree_lock:
             if commit_identifier not in commit_trees_dict:
                 commit_trees_dict[commit_identifier] = CommitTree()
@@ -62,8 +85,8 @@ async def background_fork_world(
                 # Copy all commits from source tree
                 for node in await source_commit_tree.get_all_commits():
                     await commit_tree.add_commit(
-                        world_id=world_id,
                         user_id=user_id,
+                        world_id=world_id,
                         commit_id=node.commit_id,
                         graph=source_graph,  # We'll use the source graph for historical commits
                         parent_id=node.parent_id,
@@ -71,8 +94,8 @@ async def background_fork_world(
 
             # Add the new fork commit
             await commit_tree.add_commit(
+                user_id=new_user_id,
                 world_id=new_world_id,
-                user_id=user_id,
                 commit_id=new_commit_id,
                 graph=new_graph,
                 parent_id=commit_id,  # Set parent to the commit we forked from
@@ -83,7 +106,7 @@ async def background_fork_world(
         # Store the new graph in world_dict
 
         new_world_identifier = WorldIdentifier(
-            user_id=user_id, world_id=new_world_id, commit_id=new_commit_id
+            user_id=new_user_id, world_id=new_world_id, commit_id=new_commit_id
         )
         async with world_lock:
             world_dict[new_world_identifier] = new_graph

@@ -13,17 +13,18 @@ from starlette.requests import Request
 
 from AgentMatrix.model import (CharacterModel, CommitIdentifier,
                                CreateWorldModel, DeleteWorldCommitModel,
-                               ForkWorldModel, GetAllWorldsModel,
-                               GetCharactersModel, InputActionModel,
-                               LoginModel, LoginResponse, MissionModel,
-                               PublicWorldModel, RegisterModel,
+                               ForkRelationModel, ForkWorldModel,
+                               GetAllWorldsModel, GetCharactersModel,
+                               InputActionModel, LoginModel, LoginResponse,
+                               MissionModel, PublicWorldModel, RegisterModel,
                                RegisterResponse, SceneModel,
                                SeedPromptToWorldModel, SelectOptionModel, User,
                                WorldCharacteristicModel, WorldIdentifier,
                                WorldModel, WorldNewsModel,
                                character_info_to_model, create_access_token,
                                get_current_user, message_to_event_model)
-from AgentMatrix.src.graph import Graph, GroupChatStatus, HostLayer
+from AgentMatrix.src.graph import (ForkRelationEntity, Graph, GroupChatStatus,
+                                   HostLayer)
 from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
 from AgentMatrix.src.memory import SentenceEmbedding
 from AgentMatrix.src.world import seed_prompt_to_universe_metadata
@@ -999,6 +1000,24 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
             )
             for n in world_meta.world_characteristics
         ],
+        forkFrom=[
+            ForkRelationModel(
+                user_id=f.user_id,
+                world_id=f.world_id,
+                commit_id=f.commit_id,
+                timestamp=f.timestamp,
+            )
+            for f in G.fork_from
+        ],
+        forkTo=[
+            ForkRelationModel(
+                user_id=f.user_id,
+                world_id=f.world_id,
+                commit_id=f.commit_id,
+                timestamp=f.timestamp,
+            )
+            for f in G.fork_to
+        ],
     )
     get_logger_backend().debug(f"World model: {response}")
     return response
@@ -1110,9 +1129,10 @@ async def public_world(request: Request, current_user: str = Depends(get_current
             commit_tree_lock=commit_tree_lock,
             commit_trees_dict=commit_trees_dict,
             source_graph=world_dict[world_identifier],
-            user_id=PUBLIC_WORLD_USER_ID,
+            user_id=data.user_id,
             world_id=data.world_id,
             commit_id=data.commit_id,
+            new_user_id=PUBLIC_WORLD_USER_ID,
             new_world_id=new_world_id,
             llm_client=Graph.llm_client,
             embeddings=GLOBAL_EMBEDDINGS,
@@ -1162,9 +1182,10 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
             commit_tree_lock=commit_tree_lock,
             commit_trees_dict=commit_trees_dict,
             source_graph=world_dict[world_identifier],
-            user_id=current_user,
+            user_id=data.user_id,
             world_id=data.world_id,
             commit_id=data.commit_id,
+            new_user_id=current_user,
             new_world_id=new_world_id,
             llm_client=Graph.llm_client,
             embeddings=GLOBAL_EMBEDDINGS,
