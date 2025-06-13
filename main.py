@@ -5,6 +5,8 @@ import os
 import time
 import traceback
 from uuid import uuid4
+from enum import Enum
+from typing import List, Dict, Optional
 
 import jwt
 from fastapi import Depends, FastAPI, HTTPException
@@ -76,9 +78,47 @@ os.makedirs(WORLD_JSON_PATH, exist_ok=True)
 os.makedirs(COMMIT_TREE_JSON_PATH, exist_ok=True)
 GLOBAL_EMBEDDINGS = SentenceEmbedding()
 
-# special user: public worlds
-PUBLIC_WORLD_USER_NAME = "public worlds"
-PUBLIC_WORLD_USER_ID = ""
+class WorldVisibility(Enum):
+    PRIVATE = "private"
+    PUBLIC = "public"
+    SHARED = "shared"
+
+class WorldMetadata:
+    def __init__(self, world_id: str, owner_id: str, visibility: WorldVisibility = WorldVisibility.PRIVATE):
+        self.world_id = world_id
+        self.owner_id = owner_id
+        self.visibility = visibility
+        self.shared_with: List[str] = []
+
+class WorldPermissionManager:
+    def __init__(self):
+        self.world_metadata: Dict[str, WorldMetadata] = {}
+        
+    async def add_world(self, world_id: str, owner_id: str, visibility: WorldVisibility = WorldVisibility.PRIVATE):
+        self.world_metadata[world_id] = WorldMetadata(world_id, owner_id, visibility)
+        
+    async def get_world_metadata(self, world_id: str) -> Optional[WorldMetadata]:
+        return self.world_metadata.get(world_id)
+        
+    async def can_access(self, world_id: str, user_id: str) -> bool:
+        metadata = await self.get_world_metadata(world_id)
+        if not metadata:
+            return False
+        return (metadata.visibility == WorldVisibility.PUBLIC or 
+                metadata.owner_id == user_id or 
+                user_id in metadata.shared_with)
+        
+    async def set_visibility(self, world_id: str, visibility: WorldVisibility):
+        if world_id in self.world_metadata:
+            self.world_metadata[world_id].visibility = visibility
+            
+    async def share_with(self, world_id: str, user_id: str):
+        if world_id in self.world_metadata:
+            if user_id not in self.world_metadata[world_id].shared_with:
+                self.world_metadata[world_id].shared_with.append(user_id)
+
+# Initialize the permission manager
+world_permission_manager = WorldPermissionManager()
 
 # uuid -> graph
 
@@ -124,20 +164,6 @@ async def load_user_dict():
                 _user_dict = json.load(f)
             _user_dict = {k: User(**v) for k, v in _user_dict.items()}
             user_dict.update(_user_dict)
-            # add `public worlds` if not in user_dict
-            user_name_2_id = {
-                user.username: user.user_id for user in user_dict.values()
-            }
-            if PUBLIC_WORLD_USER_NAME not in user_name_2_id:
-                user_id = str(uuid4())
-                user_dict[user_id] = User(
-                    token=create_access_token(
-                        {"id": user_id, "username": PUBLIC_WORLD_USER_NAME},
-                        expire_days=36500,
-                    ),
-                    user_id=user_id,
-                    username=PUBLIC_WORLD_USER_NAME,
-                )
             get_logger_backend().debug(f"User dict loaded: {_user_dict}")
 
 
@@ -1113,9 +1139,12 @@ async def public_world(request: Request, current_user: str = Depends(get_current
     # Create new world ID for public world
     new_world_id = str(uuid4())
 
+    # Set world visibility to public
+    await world_permission_manager.add_world(new_world_id, data.user_id, WorldVisibility.PUBLIC)
+
     # Create fork task
     task = await fork_task_manager.create_task(
-        user_id=PUBLIC_WORLD_USER_ID,
+        user_id=data.user_id,  # Use original user as owner
         world_id=data.world_id,
         commit_id=data.commit_id,
         new_world_id=new_world_id,
@@ -1132,18 +1161,18 @@ async def public_world(request: Request, current_user: str = Depends(get_current
             user_id=data.user_id,
             world_id=data.world_id,
             commit_id=data.commit_id,
-            new_user_id=PUBLIC_WORLD_USER_ID,
+            new_user_id=data.user_id,  # Use original user as owner
             new_world_id=new_world_id,
             llm_client=Graph.llm_client,
             embeddings=GLOBAL_EMBEDDINGS,
-            fork_seed_prompt=None,  # No need to modify the world when making it public
-            mode="full",  # Use full mode to keep the world exactly the same
+            fork_seed_prompt=None,
+            mode="full",
         )
     )
     task.set_task(background_task)
 
     return {
-        "user_id": PUBLIC_WORLD_USER_ID,
+        "user_id": data.user_id,
         "world_id": new_world_id,
         "status": "publishing_world",
     }
@@ -1152,8 +1181,6 @@ async def public_world(request: Request, current_user: str = Depends(get_current
 @app.post("/world/fork")
 async def fork_world(request: Request, current_user: str = Depends(get_current_user)):
     data = ForkWorldModel(**(await request.json()))
-    if data.user_id != PUBLIC_WORLD_USER_ID:
-        raise HTTPException(status_code=403, detail="无权限fork非公开世界")
     world_identifier = WorldIdentifier(
         user_id=data.user_id, world_id=data.world_id, commit_id=data.commit_id
     )
@@ -1162,6 +1189,10 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
             f"World commit not found: {world_identifier}, all identifiers: {world_dict.keys()}"
         )
         raise HTTPException(status_code=404, detail="World commit not found")
+        
+    # Check if user has access to the world
+    if not await world_permission_manager.can_access(data.world_id, current_user):
+        raise HTTPException(status_code=403, detail="无权限访问该世界")
 
     # Create new world ID
     new_world_id = str(uuid4())
@@ -1204,16 +1235,14 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
 
 @app.get("/world/public_worlds")
 async def get_all_public_worlds(current_user: str = Depends(get_current_user)):
-    # Get all worlds owned by PUBLIC_WORLD_USER_ID
+    # Get all worlds with public visibility
     public_worlds = [
         {"world_id": w.world_id, "commit_id": w.commit_id}
         for w in world_dict
-        if w.user_id == PUBLIC_WORLD_USER_ID
+        if await world_permission_manager.can_access(w.world_id, current_user)
     ]
 
     return {
-        "user_id": PUBLIC_WORLD_USER_ID,
-        "username": PUBLIC_WORLD_USER_NAME,
         "worlds": public_worlds,
     }
 
@@ -1270,16 +1299,7 @@ if __name__ == "__main__":
     asyncio.run(load_commit_trees())
     asyncio.run(load_graph())
     asyncio.run(load_user_dict())
-    public_user = next(
-        (
-            user
-            for user in user_dict.values()
-            if user.username == PUBLIC_WORLD_USER_NAME
-        ),
-        None,
-    )
-    assert public_user is not None, "public user not found"
-    PUBLIC_WORLD_USER_ID = public_user.user_id
+    
     # support for https
     if args.ssl_keyfile != "" and args.ssl_certfile != "":
         uvicorn.run(
