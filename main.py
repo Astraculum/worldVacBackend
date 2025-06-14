@@ -1269,17 +1269,15 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
 
 
 @app.get("/world/public_worlds")
-async def get_all_public_worlds(current_user: str = Depends(get_current_user)):
+async def get_all_public_worlds(current_user: str = Depends(get_current_user),response_model=list[WorldIdentifier]):
     # Get all worlds with public visibility
     public_worlds = [
-        {"user_id": w.user_id, "world_id": w.world_id, "commit_id": w.commit_id}
+        WorldIdentifier(user_id=w.user_id, world_id=w.world_id, commit_id=w.commit_id)
         for w in world_dict
         if await world_permission_manager.can_access(w.commit_id, current_user)
     ]
 
-    return {
-        "worlds": public_worlds,
-    }
+    return public_worlds
 
 
 def get_args():
@@ -1335,6 +1333,50 @@ if __name__ == "__main__":
     asyncio.run(load_graph())
     asyncio.run(load_user_dict())
     
+    # support for https
+    if args.ssl_keyfile != "" and args.ssl_certfile != "":
+        uvicorn.run(
+            app,
+            host=args.host,
+            port=args.port,
+            ssl_keyfile=args.ssl_keyfile,
+            ssl_certfile=args.ssl_certfile,
+            log_config=args.log_config,
+        )
+    else:
+        # runs on http
+        get_logger_backend().warning("Runs on http!")
+        uvicorn.run(
+            app,
+            host=args.host,
+            port=args.port,
+            log_config=args.log_config,
+        )
+    if args.proxies_port != -1:
+        get_logger_backend().info(f"Proxies: http://localhost:{args.proxies_port}")
+        GLOBAL_LLM_CONFIG.proxies = {
+            "http_proxy": f"http://localhost:{args.proxies_port}",
+            "https_proxy": f"http://localhost:{args.proxies_port}",
+        }
+    if (
+        args.fast_chat_api_key != ""
+        and args.fast_chat_model != ""
+        and args.fast_chat_provider != ""
+    ):
+        GLOBAL_FAST_CHAT_LLM_CONFIG.api_key = args.fast_chat_api_key
+        GLOBAL_FAST_CHAT_LLM_CONFIG.model = args.fast_chat_model
+        GLOBAL_FAST_CHAT_LLM_CONFIG.provider = LLMProvider(args.fast_chat_provider)
+        fast_chat_llm_client = LLMClient(semaphore=100)
+        fast_chat_llm_client.set_llm_config(GLOBAL_FAST_CHAT_LLM_CONFIG)
+        scene_task_manager.fast_chat_llm_client = fast_chat_llm_client
+        get_logger_backend().info(
+            f"Fast chat LLM config: {GLOBAL_FAST_CHAT_LLM_CONFIG}"
+        )
+    get_logger_backend().debug(f"LLM config: {GLOBAL_LLM_CONFIG}")
+    asyncio.run(load_commit_trees())
+    asyncio.run(load_graph())
+    asyncio.run(load_user_dict())
+
     # support for https
     if args.ssl_keyfile != "" and args.ssl_certfile != "":
         uvicorn.run(
