@@ -248,7 +248,6 @@ async def load_graph():
             get_logger_backend().debug(
                 f"World loaded: ({user_id}, {world_id}, {commit_id})"
             )
-
             # Check scene status and initialize if needed
             context = G.org_tree.layer_manager.group_chat_context
             scene_status = await context.get_groupchat_status()
@@ -468,11 +467,13 @@ async def background_scene_initialization(
     G: Graph, user_id: str, world_id: str, commit_id: str, is_first_scene: bool
 ):
     try:
+        get_logger_backend().debug(f"Starting scene initialization for ({user_id}, {world_id}, {commit_id})")
         current_scene = await start_scene_from_graph(
             G=G,
             is_first_scene=is_first_scene,
             fast_chat_llm_client=scene_task_manager.fast_chat_llm_client,
         )
+        get_logger_backend().debug(f"Scene initialization completed for ({user_id}, {world_id}, {commit_id})")
         # 保存world
         await save_graph(
             user_id=user_id, world_id=world_id, commit_id=commit_id, graph=G
@@ -480,8 +481,10 @@ async def background_scene_initialization(
         task = await scene_task_manager.get_task(user_id, world_id, commit_id)
         if task:
             task.set_completed()
+            get_logger_backend().debug(f"Scene task marked as completed for ({user_id}, {world_id}, {commit_id})")
     except Exception as e:
-        get_logger_backend().error(f"Scene initialization failed: {e}")
+        get_logger_backend().error(f"Scene initialization failed for ({user_id}, {world_id}, {commit_id}): {e}")
+        get_logger_backend().error(traceback.format_exc())
         task = await scene_task_manager.get_task(user_id, world_id, commit_id)
         if task:
             task.set_failed(str(e))
