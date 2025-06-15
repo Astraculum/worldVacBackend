@@ -232,6 +232,32 @@ async def load_graph():
             get_logger_backend().debug(
                 f"World loaded: ({user_id}, {world_id}, {commit_id})"
             )
+
+            # Check scene status and initialize if needed
+            context = G.org_tree.layer_manager.group_chat_context
+            scene_status = await context.get_groupchat_status()
+            if scene_status == GroupChatStatus.NOT_STARTED:
+                # Check if scene is already being initialized
+                scene_task = await scene_task_manager.get_task(user_id, world_id, commit_id)
+                if scene_task and scene_task.is_in_progress():
+                    get_logger_backend().debug(f"Scene initialization already in progress for ({user_id}, {world_id}, {commit_id})")
+                elif scene_task and scene_task.is_failed():
+                    get_logger_backend().error(f"Scene initialization failed for ({user_id}, {world_id}, {commit_id}): {scene_task.error}")
+                else:
+                    # Start scene initialization
+                    task = await scene_task_manager.create_task(user_id, world_id, commit_id)
+                    # Check if this is the first commit
+                    commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
+                    async with commit_tree_lock:
+                        is_first_scene = commit_trees_dict[commit_identifier].root_id == commit_id
+                    background_task = asyncio.create_task(
+                        background_scene_initialization(
+                            G, user_id, world_id, commit_id, is_first_scene
+                        )
+                    )
+                    task.set_task(background_task)
+                    get_logger_backend().debug(f"Started scene initialization for ({user_id}, {world_id}, {commit_id})")
+
         except Exception as e:
             get_logger_backend().debug(traceback.format_exc())
             get_logger_backend().error(
