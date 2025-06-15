@@ -13,36 +13,20 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
-from AgentMatrix.model import (
-    CharacterModel,
-    CommitIdentifier,
-    CreateWorldModel,
-    DeleteWorldCommitModel,
-    ForkRelationModel,
-    ForkWorldModel,
-    GetAllWorldsModel,
-    GetCharactersModel,
-    InputActionModel,
-    LoginModel,
-    LoginResponse,
-    MissionModel,
-    PublicWorldModel,
-    RegisterModel,
-    RegisterResponse,
-    SceneModel,
-    SeedPromptToWorldModel,
-    SelectOptionModel,
-    User,
-    WorldCharacteristicModel,
-    WorldIdentifier,
-    WorldModel,
-    WorldNewsModel,
-    character_info_to_model,
-    create_access_token,
-    get_current_user,
-    message_to_event_model,
-)
-from AgentMatrix.src.graph import ForkRelationEntity, Graph, GroupChatStatus, HostLayer
+from AgentMatrix.model import (CharacterModel, CommitIdentifier,
+                               CreateWorldModel, DeleteWorldCommitModel,
+                               ForkRelationModel, ForkWorldModel,
+                               GetAllWorldsModel, GetCharactersModel,
+                               InputActionModel, LoginModel, LoginResponse,
+                               MissionModel, PublicWorldModel, RegisterModel,
+                               RegisterResponse, SceneModel,
+                               SeedPromptToWorldModel, SelectOptionModel, User,
+                               WorldCharacteristicModel, WorldIdentifier,
+                               WorldModel, WorldNewsModel,
+                               character_info_to_model, create_access_token,
+                               get_current_user, message_to_event_model)
+from AgentMatrix.src.graph import (ForkRelationEntity, Graph, GroupChatStatus,
+                                   HostLayer)
 from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
 from AgentMatrix.src.memory import SentenceEmbedding
 from AgentMatrix.src.world import seed_prompt_to_universe_metadata
@@ -467,13 +451,17 @@ async def background_scene_initialization(
     G: Graph, user_id: str, world_id: str, commit_id: str, is_first_scene: bool
 ):
     try:
-        get_logger_backend().debug(f"Starting scene initialization for ({user_id}, {world_id}, {commit_id})")
+        get_logger_backend().debug(
+            f"Starting scene initialization for ({user_id}, {world_id}, {commit_id})"
+        )
         current_scene = await start_scene_from_graph(
             G=G,
             is_first_scene=is_first_scene,
             fast_chat_llm_client=scene_task_manager.fast_chat_llm_client,
         )
-        get_logger_backend().debug(f"Scene initialization completed for ({user_id}, {world_id}, {commit_id})")
+        get_logger_backend().debug(
+            f"Scene initialization completed for ({user_id}, {world_id}, {commit_id})"
+        )
         # 保存world
         await save_graph(
             user_id=user_id, world_id=world_id, commit_id=commit_id, graph=G
@@ -481,9 +469,13 @@ async def background_scene_initialization(
         task = await scene_task_manager.get_task(user_id, world_id, commit_id)
         if task:
             task.set_completed()
-            get_logger_backend().debug(f"Scene task marked as completed for ({user_id}, {world_id}, {commit_id})")
+            get_logger_backend().debug(
+                f"Scene task marked as completed for ({user_id}, {world_id}, {commit_id})"
+            )
     except Exception as e:
-        get_logger_backend().error(f"Scene initialization failed for ({user_id}, {world_id}, {commit_id}): {e}")
+        get_logger_backend().error(
+            f"Scene initialization failed for ({user_id}, {world_id}, {commit_id}): {e}"
+        )
         get_logger_backend().error(traceback.format_exc())
         task = await scene_task_manager.get_task(user_id, world_id, commit_id)
         if task:
@@ -677,9 +669,8 @@ async def get_events(
                 "status": "initializing_scene",
             }
         elif scene_task and scene_task.is_failed():
-            raise HTTPException(
-                status_code=500,
-                detail=f"Scene initialization failed: {scene_task.error}",
+            get_logger_backend().error(
+                f"Scene initialization failed: {scene_task.error}"
             )
         # Start scene initialization
         task = await scene_task_manager.create_task(user_id, world_id, commit_id)
@@ -788,9 +779,8 @@ async def is_event_generated(
         if scene_task and scene_task.is_in_progress():
             return False
         elif scene_task and scene_task.is_failed():
-            raise HTTPException(
-                status_code=500,
-                detail=f"Scene initialization failed: {scene_task.error}",
+            get_logger_backend().error(
+                f"Scene initialization failed: {scene_task.error}"
             )
         # Start scene initialization
         task = await scene_task_manager.create_task(user_id, world_id, commit_id)
@@ -1005,13 +995,21 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
         scene_task = await scene_task_manager.get_task(user_id, world_id, commit_id)
         if scene_task and scene_task.is_in_progress():
             # 检查任务是否真的在运行
-            if not hasattr(scene_task, '_task') or scene_task._task is None or scene_task._task.done():
+            if (
+                not hasattr(scene_task, "_task")
+                or scene_task._task is None
+                or scene_task._task.done()
+            ):
                 # 如果任务不存在或已完成但没有更新状态，重新启动初始化
-                get_logger_backend().debug(f"Reactivating scene initialization for ({user_id}, {world_id}, {commit_id})")
+                get_logger_backend().debug(
+                    f"Reactivating scene initialization for ({user_id}, {world_id}, {commit_id})"
+                )
                 # 根据commit tree判断当前commit是否是第一个commit
                 commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
                 async with commit_tree_lock:
-                    is_first_scene = commit_trees_dict[commit_identifier].root_id == commit_id
+                    is_first_scene = (
+                        commit_trees_dict[commit_identifier].root_id == commit_id
+                    )
                 # 重新启动场景初始化
                 background_task = asyncio.create_task(
                     background_scene_initialization(
@@ -1026,9 +1024,8 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
                 "status": "initializing_scene",
             }
         elif scene_task and scene_task.is_failed():
-            raise HTTPException(
-                status_code=500,
-                detail=f"Scene initialization failed: {scene_task.error}",
+            get_logger_backend().error(
+                f"Scene initialization failed: {scene_task.error}"
             )
         # Start scene initialization
         task = await scene_task_manager.create_task(user_id, world_id, commit_id)
