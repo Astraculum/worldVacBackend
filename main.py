@@ -1004,6 +1004,21 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
         # Check if scene is already being initialized
         scene_task = await scene_task_manager.get_task(user_id, world_id, commit_id)
         if scene_task and scene_task.is_in_progress():
+            # 检查任务是否真的在运行
+            if not hasattr(scene_task, '_task') or scene_task._task is None or scene_task._task.done():
+                # 如果任务不存在或已完成但没有更新状态，重新启动初始化
+                get_logger_backend().debug(f"Reactivating scene initialization for ({user_id}, {world_id}, {commit_id})")
+                # 根据commit tree判断当前commit是否是第一个commit
+                commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
+                async with commit_tree_lock:
+                    is_first_scene = commit_trees_dict[commit_identifier].root_id == commit_id
+                # 重新启动场景初始化
+                background_task = asyncio.create_task(
+                    background_scene_initialization(
+                        G, user_id, world_id, commit_id, is_first_scene
+                    )
+                )
+                scene_task.set_task(background_task)
             return {
                 "user_id": user_id,
                 "world_id": world_id,
@@ -1040,18 +1055,12 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
             return {
                 "status": "waiting_for_dialogues",
             }
-        # while dialogues is None:
-        #     await asyncio.sleep(ASYNC_SLEEP_TIME)
-        #     dialogues = await context.get_dialogues()
         # wait for options
         options = await context.get_options()
         if options is None:
             return {
                 "status": "waiting_for_options",
             }
-        # while options is None:
-        #     await asyncio.sleep(ASYNC_SLEEP_TIME)
-        #     options = await context.get_options()
         classified_events = [
             e for m in dialogues + [options] for e in message_to_event_model(m)
         ]
