@@ -29,6 +29,7 @@ from AgentMatrix.src.graph import (ForkRelationEntity, Graph, GroupChatStatus,
                                    HostLayer)
 from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
 from AgentMatrix.src.memory import SentenceEmbedding
+from AgentMatrix.src.spritesheet_generator import AnnotationParams
 from AgentMatrix.src.world import seed_prompt_to_universe_metadata
 from backend.utils import start_scene_from_graph
 from backend.utils.commit_task import commit_task_manager
@@ -76,7 +77,13 @@ WORLD_JSON_PATH = "worlds-json"
 COMMIT_TREE_JSON_PATH = "commit-trees-json"
 os.makedirs(WORLD_JSON_PATH, exist_ok=True)
 os.makedirs(COMMIT_TREE_JSON_PATH, exist_ok=True)
+CHOOSER_TO_AVAILABLE_OPTIONS_PATH = (
+    "backend/spritesheet_generator/chooser_to_available_options.json"
+)
 GLOBAL_EMBEDDINGS = SentenceEmbedding()
+GLOBAL_ANNOTATION_PARAMS = AnnotationParams(
+    chooser_to_available_options=json.load(open(CHOOSER_TO_AVAILABLE_OPTIONS_PATH, "r"))
+)
 
 
 class WorldVisibility(Enum):
@@ -203,7 +210,9 @@ async def save_graph(user_id: str, world_id: str, commit_id: str, graph: Graph):
 
 
 async def load_graph():
-    async def load_graph_from_file(file: str, embeddings: SentenceEmbedding):
+    async def load_graph_from_file(
+        file: str, embeddings: SentenceEmbedding, annotation_params: AnnotationParams
+    ):
         user_id, world_id, commit_id = "-", "-", "-"
         try:
             user_id, world_id, commit_id = file.split(".")[0].split("_")
@@ -222,7 +231,11 @@ async def load_graph():
                     f"Commit id mismatch: {json_data['commit_id']} != {commit_id}"
                 )
             json_data["llm_config"] = GLOBAL_LLM_CONFIG.to_json()
-            G = await Graph.from_json(data=json_data, embeddings=embeddings)
+            G = await Graph.from_json(
+                data=json_data,
+                embeddings=embeddings,
+                annotation_params=annotation_params,
+            )
             async with world_lock:
                 world_dict[
                     WorldIdentifier(
@@ -264,7 +277,7 @@ async def load_graph():
             )
 
     tasks = [
-        load_graph_from_file(file, GLOBAL_EMBEDDINGS)
+        load_graph_from_file(file, GLOBAL_EMBEDDINGS, GLOBAL_ANNOTATION_PARAMS)
         for file in os.listdir(WORLD_JSON_PATH)
     ]
     await asyncio.gather(*tasks)
@@ -514,6 +527,7 @@ async def seed_prompt_to_world(
         ),
         llm_config=GLOBAL_LLM_CONFIG,
         embeddings=GLOBAL_EMBEDDINGS,
+        annotation_params=GLOBAL_ANNOTATION_PARAMS,
     )
     world_id = str(uuid4())
     commit_id = await G.generate_world_status_uuid()
@@ -567,6 +581,7 @@ async def create_world(request: Request, user_id: str = Depends(get_current_user
         tone=data.tone if data.tone is not None else "neutral",
         llm_config=GLOBAL_LLM_CONFIG,
         embeddings=GLOBAL_EMBEDDINGS,
+        annotation_params=GLOBAL_ANNOTATION_PARAMS,
     )
     world_id = str(uuid4())
     commit_id = await G.generate_world_status_uuid()
@@ -1183,6 +1198,7 @@ async def background_commit_creation(
         new_graph = await Graph.from_json(
             await G.to_json(user_id, world_id, new_commit_id),
             embeddings=GLOBAL_EMBEDDINGS,
+            annotation_params=GLOBAL_ANNOTATION_PARAMS,
         )
         async with world_lock:
             world_dict[new_world_identifier] = new_graph
@@ -1206,7 +1222,11 @@ async def background_commit_creation(
         )
         with open(f"{WORLD_JSON_PATH}/{user_id}_{world_id}_{commit_id}.json", "r") as f:
             json_data = json.load(f)
-        old_graph = await Graph.from_json(json_data, embeddings=GLOBAL_EMBEDDINGS)
+        old_graph = await Graph.from_json(
+            json_data,
+            embeddings=GLOBAL_EMBEDDINGS,
+            annotation_params=GLOBAL_ANNOTATION_PARAMS,
+        )
         world_dict[old_world_identifier] = old_graph
         # clear group chat context
         await G.org_tree.layer_manager.group_chat_context.clear_all()
@@ -1280,6 +1300,7 @@ async def public_world(request: Request, current_user: str = Depends(get_current
             new_world_id=new_world_id,
             llm_client=Graph.llm_client,
             embeddings=GLOBAL_EMBEDDINGS,
+            annotation_params=GLOBAL_ANNOTATION_PARAMS,
             fork_seed_prompt=None,
             mode="full",
         )
@@ -1335,6 +1356,7 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
             new_world_id=new_world_id,
             llm_client=Graph.llm_client,
             embeddings=GLOBAL_EMBEDDINGS,
+            annotation_params=GLOBAL_ANNOTATION_PARAMS,
             fork_seed_prompt=data.fork_seed_prompt,
             mode=data.mode,
         )

@@ -6,6 +6,7 @@ from AgentMatrix.model import CommitIdentifier, WorldIdentifier
 from AgentMatrix.src.graph import ForkRelationEntity, Graph
 from AgentMatrix.src.llm import LLMClient
 from AgentMatrix.src.memory import SentenceEmbedding
+from AgentMatrix.src.spritesheet_generator import AnnotationParams
 from logger import get_logger as get_logger_backend
 
 from .commit_tree import CommitTree
@@ -25,6 +26,7 @@ async def background_fork_world(
     new_world_id: str,
     llm_client: LLMClient,
     embeddings: Optional[SentenceEmbedding] = None,
+    annotation_params: Optional[AnnotationParams] = None,   
     fork_seed_prompt: Optional[str] = None,
     mode: Literal["full", "remodify"] = "remodify",
 ):
@@ -37,6 +39,7 @@ async def background_fork_world(
             embeddings=embeddings,
             fork_seed_prompt=fork_seed_prompt,
             mode=mode,
+            annotation_params=annotation_params,
         )
         new_commit_id = await new_graph.generate_world_status_uuid()
 
