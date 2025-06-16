@@ -16,6 +16,7 @@ character-images/
 *.ipynb
 cache/
 nohup.out
+world-permission-manager.json
 TODO
 
 # C extensions
