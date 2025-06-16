@@ -59,6 +59,7 @@ async def background_fork_world(
                     character_images_path, new_user_id, new_world_id, new_commit_id
                 ),
                 output_filename=f"{c['id']}.png",
+                front_output_filename=f"{c['id']}_front.png",
             )
             for c in all_characters
         ]

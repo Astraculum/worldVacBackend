@@ -11,8 +11,8 @@ from uuid import uuid4
 import jwt
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.requests import Request
 from fastapi.responses import FileResponse
+from starlette.requests import Request
 
 from AgentMatrix.model import (CharacterModel, CommitIdentifier,
                                CreateWorldModel, DeleteWorldCommitModel,
@@ -452,6 +452,7 @@ async def background_world_initialization(
                     CHARACTER_IMAGES_PATH, user_id, world_id, commit_id
                 ),
                 output_filename=f"{c['id']}.png",
+                front_output_filename=f"{c['id']}_front.png",
             )
             for c in all_characters
         ]
@@ -1430,24 +1431,24 @@ async def get_character_portrait(
     world_id: str,
     commit_id: str,
     character_id: str,
-    current_user: str = Depends(get_current_user)
+    current_user: str = Depends(get_current_user),
 ):
     # Check if user has access to the world
     if not await world_permission_manager.can_access(commit_id, current_user):
         raise HTTPException(status_code=403, detail="无权限访问该世界")
-    
+
     # Construct the image path
-    image_path = os.path.join(CHARACTER_IMAGES_PATH, user_id, world_id, commit_id, f"{character_id}.png")
-    
+    image_path = os.path.join(
+        CHARACTER_IMAGES_PATH, user_id, world_id, commit_id, f"{character_id}_front.png"
+    )
+
     # Check if image exists
     if not os.path.exists(image_path):
         raise HTTPException(status_code=404, detail="Character portrait not found")
-    
+
     # Return the image file
     return FileResponse(
-        image_path,
-        media_type="image/png",
-        filename=f"{character_id}.png"
+        image_path, media_type="image/png", filename=f"{character_id}.png"
     )
 
 
