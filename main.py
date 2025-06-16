@@ -79,6 +79,7 @@ GLOBAL_FAST_CHAT_LLM_CONFIG = LLMConfig(
 WORLD_JSON_PATH = "worlds-json"
 COMMIT_TREE_JSON_PATH = "commit-trees-json"
 CHARACTER_IMAGES_PATH = "character-images"
+WORLD_PERMISSION_MANAGER_PATH = "world-permission-manager.json"
 os.makedirs(WORLD_JSON_PATH, exist_ok=True)
 os.makedirs(COMMIT_TREE_JSON_PATH, exist_ok=True)
 os.makedirs(CHARACTER_IMAGES_PATH, exist_ok=True)
@@ -112,7 +113,26 @@ class PermissionCommitMetadata:
         self.owner_id = owner_id
         self.visibility = visibility
         self.shared_with: list[str] = []
+        
+    def to_json(self):
+        return {
+            "world_id": self.world_id,
+            "commit_id": self.commit_id,
+            "owner_id": self.owner_id,
+            "visibility": self.visibility,
+            "shared_with": self.shared_with,
+        }
 
+    @staticmethod
+    def from_json(json_data: dict):
+        entity = PermissionCommitMetadata(
+            world_id=json_data["world_id"],
+            commit_id=json_data["commit_id"],
+            owner_id=json_data["owner_id"],
+            visibility=json_data["visibility"],
+        )
+        entity.shared_with = json_data["shared_with"]
+        return entity
 
 class WorldPermissionManager:
     def __init__(self):
@@ -155,6 +175,18 @@ class WorldPermissionManager:
             if user_id not in self.commit_metadata[commit_id].shared_with:
                 self.commit_metadata[commit_id].shared_with.append(user_id)
 
+    def to_json(self):
+        return {
+            "commit_metadata": {
+                k: v.to_json() for k, v in self.commit_metadata.items()
+            }
+        }
+
+    def from_json(self, json_data: dict):
+        self.commit_metadata = {
+            k: PermissionCommitMetadata.from_json(v) for k, v in json_data["commit_metadata"].items()
+        }
+
 
 # Initialize the permission manager
 world_permission_manager = WorldPermissionManager()
@@ -167,7 +199,19 @@ user_dict: dict[str, User] = {}  # user_id -> User
 user_lock = asyncio.Lock()
 commit_trees_dict: dict[CommitIdentifier, CommitTree] = {}
 commit_tree_lock = asyncio.Lock()
+world_permission_manager_lock = asyncio.Lock()
 
+async def load_world_permission_manager():
+    if os.path.exists(WORLD_PERMISSION_MANAGER_PATH):
+        async with world_permission_manager_lock:
+            with open(WORLD_PERMISSION_MANAGER_PATH, "r") as f:
+                json_data = json.load(f)
+                world_permission_manager.from_json(json_data)
+            
+async def save_world_permission_manager():
+    async with world_permission_manager_lock:
+        with open(WORLD_PERMISSION_MANAGER_PATH, "w") as f:
+            json.dump(world_permission_manager.to_json(), f)
 
 async def load_commit_trees():
     async with commit_tree_lock:
@@ -590,6 +634,7 @@ async def seed_prompt_to_world(
         owner_id=user_id,
         visibility=WorldVisibility.PRIVATE,
     )
+    await save_world_permission_manager()
 
     # Start background initialization
     background_task = asyncio.create_task(
@@ -646,7 +691,7 @@ async def create_world(request: Request, user_id: str = Depends(get_current_user
         owner_id=user_id,
         visibility=WorldVisibility.PRIVATE,
     )
-
+    await save_world_permission_manager()
     # Start background initialization
     background_task = asyncio.create_task(
         background_world_initialization(
@@ -1289,6 +1334,7 @@ async def background_commit_creation(
                 owner_id=user_id,
                 visibility=WorldVisibility.PRIVATE,
             )
+        await save_world_permission_manager()
 
         task = await commit_task_manager.get_task(user_id, world_id, commit_id)
         if task:
@@ -1318,7 +1364,7 @@ async def public_world(request: Request, current_user: str = Depends(get_current
     await world_permission_manager.add_commit(
         data.world_id, data.commit_id, data.user_id, WorldVisibility.PUBLIC
     )
-
+    await save_world_permission_manager()
     # Create fork task
     task = await fork_task_manager.create_task(
         user_id=data.user_id,  # Use original user as owner
@@ -1509,6 +1555,7 @@ if __name__ == "__main__":
     asyncio.run(load_commit_trees())
     asyncio.run(load_graph())
     asyncio.run(load_user_dict())
+    asyncio.run(load_world_permission_manager())
 
     # support for https
     if args.ssl_keyfile != "" and args.ssl_certfile != "":
