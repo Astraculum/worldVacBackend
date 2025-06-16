@@ -1,4 +1,5 @@
 import asyncio
+import os
 import traceback
 from typing import Literal, Optional
 
@@ -6,7 +7,8 @@ from AgentMatrix.model import CommitIdentifier, WorldIdentifier
 from AgentMatrix.src.graph import ForkRelationEntity, Graph
 from AgentMatrix.src.llm import LLMClient
 from AgentMatrix.src.memory import SentenceEmbedding
-from AgentMatrix.src.spritesheet_generator import AnnotationParams
+from AgentMatrix.src.spritesheet_generator import (AnnotationParams,
+                                                   CharacterImageDownloader)
 from logger import get_logger as get_logger_backend
 
 from .commit_tree import CommitTree
@@ -25,6 +27,8 @@ async def background_fork_world(
     new_user_id: str,
     new_world_id: str,
     llm_client: LLMClient,
+    character_image_downloader: CharacterImageDownloader,
+    character_images_path: str,
     embeddings: Optional[SentenceEmbedding] = None,
     annotation_params: Optional[AnnotationParams] = None,   
     fork_seed_prompt: Optional[str] = None,
@@ -42,6 +46,23 @@ async def background_fork_world(
             annotation_params=annotation_params,
         )
         new_commit_id = await new_graph.generate_world_status_uuid()
+        
+        # 标注角色sprite sheet 如果已经标注过则跳过
+        await new_graph.annotate_all_characters_sprite_sheet()
+
+        # 下载角色图片 已下载的会跳过
+        all_characters = await new_graph.get_all_characters()
+        download_tasks = [
+            character_image_downloader.download_character_image(
+                params=c["sprite_sheet_annotation_string"],
+                output_dir=os.path.join(
+                    character_images_path, new_user_id, new_world_id, new_commit_id
+                ),
+                output_filename=f"{c['id']}.png",
+            )
+            for c in all_characters
+        ]
+        await asyncio.gather(*download_tasks)
 
         # add `fork from` to new graph
         async with new_graph.fork_from_lock:

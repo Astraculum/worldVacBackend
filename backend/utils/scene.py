@@ -5,6 +5,8 @@ from AgentMatrix.model import MissionModel, SceneModel, message_to_event_model
 from AgentMatrix.src.character import CharacterType
 from AgentMatrix.src.graph import Graph, GroupChatStatus, HostLayer
 from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
+from AgentMatrix.src.spritesheet_generator import (AnnotationParams,
+                                                   CharacterImageDownloader)
 from logger import get_logger
 
 ASNYC_SLEEP_TIME = 0.3
@@ -12,6 +14,9 @@ ASNYC_SLEEP_TIME = 0.3
 
 async def start_scene_from_graph(
     G: Graph,
+    character_image_downloader: CharacterImageDownloader,
+    character_image_output_path: str,
+    annotation_params: Optional[AnnotationParams] = None,
     is_first_scene: bool = False,
     fast_chat_llm_client: Optional[LLMClient] = None,
 ) -> SceneModel:
@@ -39,6 +44,9 @@ async def start_scene_from_graph(
             fast_chat_llm_client=fast_chat_llm_client,
             is_first_scene=is_first_scene,
             terms=G.terms,
+            character_image_downloader=character_image_downloader,
+            character_image_output_path=character_image_output_path,
+            annotation_params=annotation_params,
         )
     )
     await context.set_groupchat_status(GroupChatStatus.STARTED)

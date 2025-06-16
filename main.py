@@ -30,9 +30,9 @@ from AgentMatrix.src.graph import (ForkRelationEntity, Graph, GroupChatStatus,
 from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
 from AgentMatrix.src.memory import SentenceEmbedding
 from AgentMatrix.src.spritesheet_generator import AnnotationParams
-from AgentMatrix.src.world import seed_prompt_to_universe_metadata
-from backend.spritesheet_generator.auto_download import \
+from AgentMatrix.src.spritesheet_generator.auto_download import \
     CharacterImageDownloader
+from AgentMatrix.src.world import seed_prompt_to_universe_metadata
 from backend.utils import start_scene_from_graph
 from backend.utils.commit_task import commit_task_manager
 from backend.utils.commit_tree import CommitTree
@@ -439,7 +439,10 @@ async def background_world_initialization(
         if task:
             task.set_completed()
 
-        # 下载角色图片
+        # 标注角色sprite sheet 如果已经标注过则跳过
+        await G.annotate_all_characters_sprite_sheet()
+
+        # 下载角色图片 已下载的会跳过
         all_characters = await G.get_all_characters()
         download_tasks = [
             character_image_downloader.download_character_image(
@@ -492,6 +495,11 @@ async def background_scene_initialization(
         )
         current_scene = await start_scene_from_graph(
             G=G,
+            character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
+            character_image_output_path=os.path.join(
+                CHARACTER_IMAGES_PATH, user_id, world_id, commit_id
+            ),
+            annotation_params=GLOBAL_ANNOTATION_PARAMS,
             is_first_scene=is_first_scene,
             fast_chat_llm_client=scene_task_manager.fast_chat_llm_client,
         )
@@ -1326,6 +1334,8 @@ async def public_world(request: Request, current_user: str = Depends(get_current
             new_user_id=data.user_id,  # Use original user as owner
             new_world_id=new_world_id,
             llm_client=Graph.llm_client,
+            character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
+            character_images_path=CHARACTER_IMAGES_PATH,
             embeddings=GLOBAL_EMBEDDINGS,
             annotation_params=GLOBAL_ANNOTATION_PARAMS,
             fork_seed_prompt=None,
@@ -1382,6 +1392,8 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
             new_user_id=current_user,
             new_world_id=new_world_id,
             llm_client=Graph.llm_client,
+            character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
+            character_images_path=CHARACTER_IMAGES_PATH,
             embeddings=GLOBAL_EMBEDDINGS,
             annotation_params=GLOBAL_ANNOTATION_PARAMS,
             fork_seed_prompt=data.fork_seed_prompt,
