@@ -31,6 +31,8 @@ from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
 from AgentMatrix.src.memory import SentenceEmbedding
 from AgentMatrix.src.spritesheet_generator import AnnotationParams
 from AgentMatrix.src.world import seed_prompt_to_universe_metadata
+from backend.spritesheet_generator.auto_download import \
+    CharacterImageDownloader
 from backend.utils import start_scene_from_graph
 from backend.utils.commit_task import commit_task_manager
 from backend.utils.commit_tree import CommitTree
@@ -75,8 +77,10 @@ GLOBAL_FAST_CHAT_LLM_CONFIG = LLMConfig(
 
 WORLD_JSON_PATH = "worlds-json"
 COMMIT_TREE_JSON_PATH = "commit-trees-json"
+CHARACTER_IMAGES_PATH = "character-images"
 os.makedirs(WORLD_JSON_PATH, exist_ok=True)
 os.makedirs(COMMIT_TREE_JSON_PATH, exist_ok=True)
+os.makedirs(CHARACTER_IMAGES_PATH, exist_ok=True)
 CHOOSER_TO_AVAILABLE_OPTIONS_PATH = (
     "backend/spritesheet_generator/chooser_to_available_options.json"
 )
@@ -84,6 +88,7 @@ GLOBAL_EMBEDDINGS = SentenceEmbedding()
 GLOBAL_ANNOTATION_PARAMS = AnnotationParams(
     chooser_to_available_options=json.load(open(CHOOSER_TO_AVAILABLE_OPTIONS_PATH, "r"))
 )
+GLOBAL_CHARACTER_IMAGE_DOWNLOADER = CharacterImageDownloader()
 
 
 class WorldVisibility(Enum):
@@ -422,13 +427,31 @@ async def user_home(user_id: str):
 
 
 async def background_world_initialization(
-    G: Graph, user_id: str, world_id: str, commit_id: str
+    G: Graph,
+    user_id: str,
+    world_id: str,
+    commit_id: str,
+    character_image_downloader: CharacterImageDownloader,
 ):
     try:
         await G.init_world()
         task = await world_task_manager.get_task(user_id, world_id, commit_id)
         if task:
             task.set_completed()
+
+        # 下载角色图片
+        all_characters = await G.get_all_characters()
+        download_tasks = [
+            character_image_downloader.download_character_image(
+                params=c["sprite_sheet_annotation_string"],
+                output_dir=os.path.join(
+                    CHARACTER_IMAGES_PATH, user_id, world_id, commit_id
+                ),
+                output_filename=f"{c['id']}.png",
+            )
+            for c in all_characters
+        ]
+        await asyncio.gather(*download_tasks)
 
         # 检查场景状态并自动开始场景
         context = G.org_tree.layer_manager.group_chat_context
@@ -555,7 +578,9 @@ async def seed_prompt_to_world(
 
     # Start background initialization
     background_task = asyncio.create_task(
-        background_world_initialization(G, user_id, world_id, commit_id)
+        background_world_initialization(
+            G, user_id, world_id, commit_id, GLOBAL_CHARACTER_IMAGE_DOWNLOADER
+        )
     )
     task.set_task(background_task)
 
@@ -609,7 +634,9 @@ async def create_world(request: Request, user_id: str = Depends(get_current_user
 
     # Start background initialization
     background_task = asyncio.create_task(
-        background_world_initialization(G, user_id, world_id, commit_id)
+        background_world_initialization(
+            G, user_id, world_id, commit_id, GLOBAL_CHARACTER_IMAGE_DOWNLOADER
+        )
     )
     task.set_task(background_task)
 

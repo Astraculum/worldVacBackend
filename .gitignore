@@ -12,6 +12,7 @@ ignore/
 worlds-json/
 user_dict.json
 commit-trees-json/
+character-images/
 *.ipynb
 cache/
 nohup.out
