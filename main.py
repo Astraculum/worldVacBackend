@@ -90,6 +90,7 @@ GLOBAL_ANNOTATION_PARAMS = AnnotationParams(
     chooser_to_available_options=json.load(open(CHOOSER_TO_AVAILABLE_OPTIONS_PATH, "r"))
 )
 GLOBAL_CHARACTER_IMAGE_DOWNLOADER = CharacterImageDownloader()
+GLOBAL_CHARACTER_IMAGE_DOWNLOADER.start_character_generation_server()
 
 
 class WorldVisibility(Enum):
