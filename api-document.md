@@ -592,6 +592,16 @@ The token is obtained through the `/auth/register` or `/auth/login` endpoints an
   - `403 Forbidden`: If user_id doesn't match the authenticated user
   - `404 Not Found`: If the world or commit doesn't exist
 
+#### Get Character Portrait
+
+- **URL**: `/character/{user_id}/{world_id}/{commit_id}/{character_id}/portrait`
+- **Method**: `GET`
+- **Description**: Get a character's portrait image
+- **Response**: PNG image file
+- **Error Responses**:
+  - `403 Forbidden`: If user doesn't have access to the world
+  - `404 Not Found`: If character portrait not found
+
 ## Error Responses
 
 The API uses standard HTTP status codes:
