@@ -1,3 +1,6 @@
 [submodule "AgentMatrix"]
 	path = AgentMatrix
 	url = git@github.com:Astraculum/AgentMatrix.git
+[submodule "Universal-LPC-Spritesheet-Character-Generator"]
+	path = Universal-LPC-Spritesheet-Character-Generator
+	url = git@github.com:Astraculum/Universal-LPC-Spritesheet-Character-Generator.git
