@@ -28,6 +28,7 @@ dependencies = [
     "starlette>=0.46.1",
     "uvicorn>=0.34.0",
     "pillow>=11.2.1",
+    "playwright>=1.52.0",
 ]
 
 [dependency-groups]
