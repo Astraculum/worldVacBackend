@@ -490,7 +490,11 @@ async def background_world_initialization(
 
 
 async def background_scene_initialization(
-    G: Graph, user_id: str, world_id: str, commit_id: str, is_first_scene: bool
+    G: Graph,
+    user_id: str,
+    world_id: str,
+    commit_id: str,
+    is_first_scene: bool,
 ):
     try:
         get_logger_backend().debug(
@@ -498,10 +502,10 @@ async def background_scene_initialization(
         )
         current_scene = await start_scene_from_graph(
             G=G,
-            character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
             character_image_output_path=os.path.join(
                 CHARACTER_IMAGES_PATH, user_id, world_id, commit_id
             ),
+            character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
             annotation_params=GLOBAL_ANNOTATION_PARAMS,
             is_first_scene=is_first_scene,
             fast_chat_llm_client=scene_task_manager.fast_chat_llm_client,

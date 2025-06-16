@@ -1,5 +1,6 @@
 import asyncio
 from typing import Optional
+import os
 
 from AgentMatrix.model import MissionModel, SceneModel, message_to_event_model
 from AgentMatrix.src.character import CharacterType
@@ -20,6 +21,21 @@ async def start_scene_from_graph(
     is_first_scene: bool = False,
     fast_chat_llm_client: Optional[LLMClient] = None,
 ) -> SceneModel:
+    # 标注角色sprite sheet 如果已经标注过则跳过
+    await G.annotate_all_characters_sprite_sheet()
+
+    # 下载角色图片 已下载的会跳过
+    all_characters = await G.get_all_characters()
+    download_tasks = [
+        character_image_downloader.download_character_image(
+            params=c["sprite_sheet_annotation_string"],
+            output_dir=character_image_output_path,
+            output_filename=f"{c['id']}.png",
+            front_output_filename=f"{c['id']}_front.png",
+        )
+        for c in all_characters
+    ]
+    await asyncio.gather(*download_tasks)
     # start scene
     player_layer: HostLayer = None  # type: ignore
     universe_metadata = G.universe_metadata
