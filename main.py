@@ -86,9 +86,11 @@ os.makedirs(CHARACTER_IMAGES_PATH, exist_ok=True)
 CHOOSER_TO_AVAILABLE_OPTIONS_PATH = (
     "backend/spritesheet_generator/chooser_to_available_options.json"
 )
+DICT_CHOOSER_PARAMS_PATH = "backend/spritesheet_generator/chooser_params.json"
 GLOBAL_EMBEDDINGS = SentenceEmbedding()
 GLOBAL_ANNOTATION_PARAMS = AnnotationParams(
-    chooser_to_available_options=json.load(open(CHOOSER_TO_AVAILABLE_OPTIONS_PATH, "r"))
+    chooser_to_available_options=json.load(open(CHOOSER_TO_AVAILABLE_OPTIONS_PATH, "r")),
+    dict_chooser_params=json.load(open(DICT_CHOOSER_PARAMS_PATH, "r")),
 )
 GLOBAL_CHARACTER_IMAGE_DOWNLOADER = CharacterImageDownloader()
 GLOBAL_CHARACTER_IMAGE_DOWNLOADER.start_character_generation_server()
