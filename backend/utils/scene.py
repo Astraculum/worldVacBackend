@@ -17,6 +17,7 @@ async def start_scene_from_graph(
     G: Graph,
     character_image_downloader: CharacterImageDownloader,
     character_image_output_path: str,
+    generated_character_image_output_path: str = "",
     annotation_params: Optional[AnnotationParams] = None,
     is_first_scene: bool = False,
     fast_chat_llm_client: Optional[LLMClient] = None,
@@ -32,6 +33,9 @@ async def start_scene_from_graph(
             output_dir=character_image_output_path,
             output_filename=f"{c['id']}.png",
             front_output_filename=f"{c['id']}_front.png",
+            generated_image_path=os.path.join(
+                generated_character_image_output_path, f"{c['id']}.png"
+            ),
         )
         for c in all_characters
     ]

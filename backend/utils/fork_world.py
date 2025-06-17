@@ -60,6 +60,9 @@ async def background_fork_world(
                 ),
                 output_filename=f"{c['id']}.png",
                 front_output_filename=f"{c['id']}_front.png",
+                generated_image_path=os.path.join(
+                    character_images_path, user_id, world_id, commit_id, f"{c['id']}.png"
+                ), # if exists, use the generated image
             )
             for c in all_characters
         ]

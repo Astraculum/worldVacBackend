@@ -113,7 +113,7 @@ class PermissionCommitMetadata:
         self.owner_id = owner_id
         self.visibility = visibility
         self.shared_with: list[str] = []
-        
+
     def to_json(self):
         return {
             "world_id": self.world_id,
@@ -133,6 +133,7 @@ class PermissionCommitMetadata:
         )
         entity.shared_with = json_data["shared_with"]
         return entity
+
 
 class WorldPermissionManager:
     def __init__(self):
@@ -177,14 +178,13 @@ class WorldPermissionManager:
 
     def to_json(self):
         return {
-            "commit_metadata": {
-                k: v.to_json() for k, v in self.commit_metadata.items()
-            }
+            "commit_metadata": {k: v.to_json() for k, v in self.commit_metadata.items()}
         }
 
     def from_json(self, json_data: dict):
         self.commit_metadata = {
-            k: PermissionCommitMetadata.from_json(v) for k, v in json_data["commit_metadata"].items()
+            k: PermissionCommitMetadata.from_json(v)
+            for k, v in json_data["commit_metadata"].items()
         }
 
 
@@ -201,17 +201,20 @@ commit_trees_dict: dict[CommitIdentifier, CommitTree] = {}
 commit_tree_lock = asyncio.Lock()
 world_permission_manager_lock = asyncio.Lock()
 
+
 async def load_world_permission_manager():
     if os.path.exists(WORLD_PERMISSION_MANAGER_PATH):
         async with world_permission_manager_lock:
             with open(WORLD_PERMISSION_MANAGER_PATH, "r") as f:
                 json_data = json.load(f)
                 world_permission_manager.from_json(json_data)
-            
+
+
 async def save_world_permission_manager():
     async with world_permission_manager_lock:
         with open(WORLD_PERMISSION_MANAGER_PATH, "w") as f:
             json.dump(world_permission_manager.to_json(), f)
+
 
 async def load_commit_trees():
     async with commit_tree_lock:
@@ -303,9 +306,8 @@ async def load_graph():
                 # Check if this is the first commit
                 commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
                 async with commit_tree_lock:
-                    is_first_scene = (
-                        commit_trees_dict[commit_identifier].root_id == commit_id
-                    )
+                    previous_commit_id = commit_trees_dict[commit_identifier].root_id
+                    is_first_scene = previous_commit_id == commit_id
                 # 创建场景任务
                 scene_task = await scene_task_manager.create_task(
                     user_id, world_id, commit_id
@@ -313,7 +315,12 @@ async def load_graph():
                 # 启动场景初始化
                 background_task = asyncio.create_task(
                     background_scene_initialization(
-                        G, user_id, world_id, commit_id, is_first_scene
+                        G,
+                        user_id,
+                        world_id,
+                        commit_id,
+                        is_first_scene,
+                        previous_commit_id,
                     )
                 )
                 scene_task.set_task(background_task)
@@ -513,6 +520,7 @@ async def background_world_initialization(
                 is_first_scene = (
                     commit_trees_dict[commit_identifier].root_id == commit_id
                 )
+                previous_commit_id = commit_trees_dict[commit_identifier].root_id
             # 创建场景任务
             scene_task = await scene_task_manager.create_task(
                 user_id, world_id, commit_id
@@ -520,7 +528,7 @@ async def background_world_initialization(
             # 启动场景初始化
             background_task = asyncio.create_task(
                 background_scene_initialization(
-                    G, user_id, world_id, commit_id, is_first_scene
+                    G, user_id, world_id, commit_id, is_first_scene, previous_commit_id
                 )
             )
             scene_task.set_task(background_task)
@@ -539,6 +547,7 @@ async def background_scene_initialization(
     world_id: str,
     commit_id: str,
     is_first_scene: bool,
+    previous_commit_id: Optional[str] = None,
 ):
     try:
         get_logger_backend().debug(
@@ -548,6 +557,13 @@ async def background_scene_initialization(
             G=G,
             character_image_output_path=os.path.join(
                 CHARACTER_IMAGES_PATH, user_id, world_id, commit_id
+            ),
+            generated_character_image_output_path=(
+                os.path.join(
+                    CHARACTER_IMAGES_PATH, user_id, world_id, previous_commit_id
+                )
+                if previous_commit_id is not None
+                else ""
             ),
             character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
             annotation_params=GLOBAL_ANNOTATION_PARAMS,
@@ -779,10 +795,11 @@ async def get_events(
         # 根据commit tree判断当前commit是否是第一个commit
         commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
         async with commit_tree_lock:
-            is_first_scene = commit_trees_dict[commit_identifier].root_id == commit_id
+            previous_commit_id = commit_trees_dict[commit_identifier].root_id
+            is_first_scene = previous_commit_id == commit_id
         background_task = asyncio.create_task(
             background_scene_initialization(
-                G, user_id, world_id, commit_id, is_first_scene
+                G, user_id, world_id, commit_id, is_first_scene, previous_commit_id
             )
         )
         task.set_task(background_task)
@@ -889,10 +906,11 @@ async def is_event_generated(
         # 根据commit tree判断当前commit是否是第一个commit
         commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
         async with commit_tree_lock:
-            is_first_scene = commit_trees_dict[commit_identifier].root_id == commit_id
+            previous_commit_id = commit_trees_dict[commit_identifier].root_id
+            is_first_scene = previous_commit_id == commit_id
         background_task = asyncio.create_task(
             background_scene_initialization(
-                G, user_id, world_id, commit_id, is_first_scene
+                G, user_id, world_id, commit_id, is_first_scene, previous_commit_id
             )
         )
         task.set_task(background_task)
@@ -1109,13 +1127,17 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
                 # 根据commit tree判断当前commit是否是第一个commit
                 commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
                 async with commit_tree_lock:
-                    is_first_scene = (
-                        commit_trees_dict[commit_identifier].root_id == commit_id
-                    )
+                    previous_commit_id = commit_trees_dict[commit_identifier].root_id
+                    is_first_scene = previous_commit_id == commit_id
                 # 重新启动场景初始化
                 background_task = asyncio.create_task(
                     background_scene_initialization(
-                        G, user_id, world_id, commit_id, is_first_scene
+                        G,
+                        user_id,
+                        world_id,
+                        commit_id,
+                        is_first_scene,
+                        previous_commit_id,
                     )
                 )
                 scene_task.set_task(background_task)
@@ -1134,10 +1156,11 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
         # 根据commit tree判断当前commit是否是第一个commit
         commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
         async with commit_tree_lock:
-            is_first_scene = commit_trees_dict[commit_identifier].root_id == commit_id
+            previous_commit_id = commit_trees_dict[commit_identifier].root_id
+            is_first_scene = previous_commit_id == commit_id
         background_task = asyncio.create_task(
             background_scene_initialization(
-                G, user_id, world_id, commit_id, is_first_scene
+                G, user_id, world_id, commit_id, is_first_scene, previous_commit_id
             )
         )
         task.set_task(background_task)
