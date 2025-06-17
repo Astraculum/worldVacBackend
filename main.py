@@ -1191,9 +1191,9 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
 
     # response: all characters
     all_characters_list = await G.get_all_characters()
-    get_logger_backend().debug(f"All characters: {all_characters_list}")
+    # get_logger_backend().debug(f"All characters: {all_characters_list}")
     all_characters = [character_info_to_model(c) for c in all_characters_list]
-    get_logger_backend().debug(f"All characters models: {all_characters}")
+    # get_logger_backend().debug(f"All characters models: {all_characters}")
     # world meta
     world_meta = G.universe_metadata
     response = WorldModel(
@@ -1241,7 +1241,7 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
             for f in G.fork_to
         ],
     )
-    get_logger_backend().debug(f"World model: {response}")
+    # get_logger_backend().debug(f"World model: {response}")
     return response
 
 
