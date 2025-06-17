@@ -21,12 +21,6 @@
         "Body_color_pale": [
             "Body_color_pale_green"
         ],
-        "Body_color_bright": [
-            "Body_color_bright_green"
-        ],
-        "Body_color_dark": [
-            "Body_color_dark_green"
-        ],
         "Body_color_fur": [
             "Body_color_fur_black",
             "Body_color_fur_brown",
@@ -105,10 +99,6 @@
         "Wolf_Tail_light": [
             "Wolf_Tail_light_brown"
         ],
-        "Wolf_Tail_dark": [
-            "Wolf_Tail_dark_brown",
-            "Wolf_Tail_dark_gray"
-        ],
         "Wolf_Tail_fur": [
             "Wolf_Tail_fur_black",
             "Wolf_Tail_fur_brown",
@@ -145,10 +135,6 @@
         ],
         "Fluffy_Wolf_Tail_light": [
             "Fluffy_Wolf_Tail_light_brown"
-        ],
-        "Fluffy_Wolf_Tail_dark": [
-            "Fluffy_Wolf_Tail_dark_brown",
-            "Fluffy_Wolf_Tail_dark_gray"
         ],
         "Fluffy_Wolf_Tail_fur": [
             "Fluffy_Wolf_Tail_fur_black",
@@ -187,10 +173,6 @@
         "Cat_Tail_light": [
             "Cat_Tail_light_brown"
         ],
-        "Cat_Tail_dark": [
-            "Cat_Tail_dark_brown",
-            "Cat_Tail_dark_gray"
-        ],
         "Cat_Tail_fur": [
             "Cat_Tail_fur_black",
             "Cat_Tail_fur_brown",
@@ -228,10 +210,6 @@
         "Lizard_Tail_(Alt_Colors)_light": [
             "Lizard_Tail_(Alt_Colors)_light_brown"
         ],
-        "Lizard_Tail_(Alt_Colors)_dark": [
-            "Lizard_Tail_(Alt_Colors)_dark_brown",
-            "Lizard_Tail_(Alt_Colors)_dark_gray"
-        ],
         "Lizard_Tail_(Alt_Colors)_fur": [
             "Lizard_Tail_(Alt_Colors)_fur_black",
             "Lizard_Tail_(Alt_Colors)_fur_brown",
@@ -258,12 +236,6 @@
         ],
         "Lizard_tail_pale": [
             "Lizard_tail_pale_green"
-        ],
-        "Lizard_tail_bright": [
-            "Lizard_tail_bright_green"
-        ],
-        "Lizard_tail_dark": [
-            "Lizard_tail_dark_green"
         ],
         "Lizard_tail_fur": [
             "Lizard_tail_fur_black",
@@ -303,10 +275,6 @@
         ],
         "Feathered_Wings_light": [
             "Feathered_Wings_light_brown"
-        ],
-        "Feathered_Wings_dark": [
-            "Feathered_Wings_dark_brown",
-            "Feathered_Wings_dark_gray"
         ],
         "Feathered_Wings_fur": [
             "Feathered_Wings_fur_black",
@@ -352,19 +320,11 @@
         "Bat_Wings_light": [
             "Bat_Wings_light_brown"
         ],
-        "Bat_Wings_dark": [
-            "Bat_Wings_dark_brown",
-            "Bat_Wings_dark_gray",
-            "Bat_Wings_dark_green"
-        ],
         "Bat_Wings_zombie": [
             "Bat_Wings_zombie_green"
         ],
         "Bat_Wings_pale": [
             "Bat_Wings_pale_green"
-        ],
-        "Bat_Wings_bright": [
-            "Bat_Wings_bright_green"
         ],
         "Bat_Wings_fur": [
             "Bat_Wings_fur_black",
@@ -403,10 +363,6 @@
         "Lizard_Wings_(Alt_Colors)_light": [
             "Lizard_Wings_(Alt_Colors)_light_brown"
         ],
-        "Lizard_Wings_(Alt_Colors)_dark": [
-            "Lizard_Wings_(Alt_Colors)_dark_brown",
-            "Lizard_Wings_(Alt_Colors)_dark_gray"
-        ],
         "Lizard_Wings_(Alt_Colors)_fur": [
             "Lizard_Wings_(Alt_Colors)_fur_black",
             "Lizard_Wings_(Alt_Colors)_fur_brown",
@@ -444,9 +400,6 @@
             "Monarch_Wings_white",
             "Monarch_Wings_yellow"
         ],
-        "Monarch_Wings_bright": [
-            "Monarch_Wings_bright_green"
-        ],
         "Monarch_Wings_pale": [
             "Monarch_Wings_pale_green"
         ],
@@ -480,9 +433,6 @@
             "Pixie_Wings_teal",
             "Pixie_Wings_white",
             "Pixie_Wings_yellow"
-        ],
-        "Pixie_Wings_bright": [
-            "Pixie_Wings_bright_green"
         ],
         "Pixie_Wings_pale": [
             "Pixie_Wings_pale_green"
@@ -518,9 +468,6 @@
             "Transparent_Pixie_Wings_white",
             "Transparent_Pixie_Wings_yellow"
         ],
-        "Transparent_Pixie_Wings_bright": [
-            "Transparent_Pixie_Wings_bright_green"
-        ],
         "Transparent_Pixie_Wings_pale": [
             "Transparent_Pixie_Wings_pale_green"
         ],
@@ -554,9 +501,6 @@
             "Lunar_Wings_teal",
             "Lunar_Wings_white",
             "Lunar_Wings_yellow"
-        ],
-        "Lunar_Wings_bright": [
-            "Lunar_Wings_bright_green"
         ],
         "Lunar_Wings_pale": [
             "Lunar_Wings_pale_green"
@@ -592,9 +536,6 @@
             "Dragonfly_Wings_white",
             "Dragonfly_Wings_yellow"
         ],
-        "Dragonfly_Wings_bright": [
-            "Dragonfly_Wings_bright_green"
-        ],
         "Dragonfly_Wings_pale": [
             "Dragonfly_Wings_pale_green"
         ],
@@ -629,9 +570,6 @@
             "Transparent_Dragonfly_Wings_white",
             "Transparent_Dragonfly_Wings_yellow"
         ],
-        "Transparent_Dragonfly_Wings_bright": [
-            "Transparent_Dragonfly_Wings_bright_green"
-        ],
         "Transparent_Dragonfly_Wings_pale": [
             "Transparent_Dragonfly_Wings_pale_green"
         ],
@@ -655,12 +593,6 @@
         ],
         "Lizard_Wings_pale": [
             "Lizard_Wings_pale_green"
-        ],
-        "Lizard_Wings_bright": [
-            "Lizard_Wings_bright_green"
-        ],
-        "Lizard_Wings_dark": [
-            "Lizard_Wings_dark_green"
         ],
         "Lizard_Wings_fur": [
             "Lizard_Wings_fur_black",
@@ -688,12 +620,6 @@
         ],
         "Batlike_Lizard_Wings_pale": [
             "Batlike_Lizard_Wings_pale_green"
-        ],
-        "Batlike_Lizard_Wings_bright": [
-            "Batlike_Lizard_Wings_bright_green"
-        ],
-        "Batlike_Lizard_Wings_dark": [
-            "Batlike_Lizard_Wings_dark_green"
         ],
         "Batlike_Lizard_Wings_fur": [
             "Batlike_Lizard_Wings_fur_black",
@@ -733,9 +659,6 @@
             "Monarch_Wings_Edge_white",
             "Monarch_Wings_Edge_yellow"
         ],
-        "Monarch_Wings_Edge_bright": [
-            "Monarch_Wings_Edge_bright_green"
-        ],
         "Monarch_Wings_Edge_pale": [
             "Monarch_Wings_Edge_pale_green"
         ],
@@ -771,9 +694,6 @@
             "Monarch_Wings_Dots_white",
             "Monarch_Wings_Dots_yellow"
         ],
-        "Monarch_Wings_Dots_bright": [
-            "Monarch_Wings_Dots_bright_green"
-        ],
         "Monarch_Wings_Dots_pale": [
             "Monarch_Wings_Dots_pale_green"
         ],
@@ -800,12 +720,6 @@
         ],
         "Human_child_pale": [
             "Human_child_pale_green"
-        ],
-        "Human_child_bright": [
-            "Human_child_bright_green"
-        ],
-        "Human_child_dark": [
-            "Human_child_dark_green"
         ],
         "Human_child_fur": [
             "Human_child_fur_black",
@@ -835,12 +749,6 @@
         "Human_female_pale": [
             "Human_female_pale_green"
         ],
-        "Human_female_bright": [
-            "Human_female_bright_green"
-        ],
-        "Human_female_dark": [
-            "Human_female_dark_green"
-        ],
         "Human_female_fur": [
             "Human_female_fur_black",
             "Human_female_fur_brown",
@@ -868,12 +776,6 @@
         ],
         "Human_male_pale": [
             "Human_male_pale_green"
-        ],
-        "Human_male_bright": [
-            "Human_male_bright_green"
-        ],
-        "Human_male_dark": [
-            "Human_male_dark_green"
         ],
         "Human_male_fur": [
             "Human_male_fur_black",
@@ -903,12 +805,6 @@
         "Human_female_elderly_pale": [
             "Human_female_elderly_pale_green"
         ],
-        "Human_female_elderly_bright": [
-            "Human_female_elderly_bright_green"
-        ],
-        "Human_female_elderly_dark": [
-            "Human_female_elderly_dark_green"
-        ],
         "Human_female_elderly_fur": [
             "Human_female_elderly_fur_black",
             "Human_female_elderly_fur_brown",
@@ -936,12 +832,6 @@
         ],
         "Human_male_elderly_pale": [
             "Human_male_elderly_pale_green"
-        ],
-        "Human_male_elderly_bright": [
-            "Human_male_elderly_bright_green"
-        ],
-        "Human_male_elderly_dark": [
-            "Human_male_elderly_dark_green"
         ],
         "Human_male_elderly_fur": [
             "Human_male_elderly_fur_black",
@@ -971,12 +861,6 @@
         "Human_male_plump_pale": [
             "Human_male_plump_pale_green"
         ],
-        "Human_male_plump_bright": [
-            "Human_male_plump_bright_green"
-        ],
-        "Human_male_plump_dark": [
-            "Human_male_plump_dark_green"
-        ],
         "Human_male_plump_fur": [
             "Human_male_plump_fur_black",
             "Human_male_plump_fur_brown",
@@ -1004,12 +888,6 @@
         ],
         "Human_male_gaunt_pale": [
             "Human_male_gaunt_pale_green"
-        ],
-        "Human_male_gaunt_bright": [
-            "Human_male_gaunt_bright_green"
-        ],
-        "Human_male_gaunt_dark": [
-            "Human_male_gaunt_dark_green"
         ],
         "Human_male_gaunt_fur": [
             "Human_male_gaunt_fur_black",
@@ -1039,12 +917,6 @@
         "Human_male_small_pale": [
             "Human_male_small_pale_green"
         ],
-        "Human_male_small_bright": [
-            "Human_male_small_bright_green"
-        ],
-        "Human_male_small_dark": [
-            "Human_male_small_dark_green"
-        ],
         "Human_male_small_fur": [
             "Human_male_small_fur_black",
             "Human_male_small_fur_brown",
@@ -1073,12 +945,6 @@
         "Human_female_small_pale": [
             "Human_female_small_pale_green"
         ],
-        "Human_female_small_bright": [
-            "Human_female_small_bright_green"
-        ],
-        "Human_female_small_dark": [
-            "Human_female_small_dark_green"
-        ],
         "Human_female_small_fur": [
             "Human_female_small_fur_black",
             "Human_female_small_fur_brown",
@@ -1106,12 +972,6 @@
         ],
         "Human_elderly_small_pale": [
             "Human_elderly_small_pale_green"
-        ],
-        "Human_elderly_small_bright": [
-            "Human_elderly_small_bright_green"
-        ],
-        "Human_elderly_small_dark": [
-            "Human_elderly_small_dark_green"
         ],
         "Human_elderly_small_fur": [
             "Human_elderly_small_fur_black",
@@ -1150,12 +1010,6 @@
         "Boarman_pale": [
             "Boarman_pale_green"
         ],
-        "Boarman_bright": [
-            "Boarman_bright_green"
-        ],
-        "Boarman_dark": [
-            "Boarman_dark_green"
-        ],
         "Boarman_child_fur": [
             "Boarman_child_fur_black",
             "Boarman_child_fur_brown",
@@ -1184,12 +1038,6 @@
         "Boarman_child_pale": [
             "Boarman_child_pale_green"
         ],
-        "Boarman_child_bright": [
-            "Boarman_child_bright_green"
-        ],
-        "Boarman_child_dark": [
-            "Boarman_child_dark_green"
-        ],
         "Pig": [
             "Pig_light",
             "Pig_amber",
@@ -1208,12 +1056,6 @@
         ],
         "Pig_pale": [
             "Pig_pale_green"
-        ],
-        "Pig_bright": [
-            "Pig_bright_green"
-        ],
-        "Pig_dark": [
-            "Pig_dark_green"
         ],
         "Pig_fur": [
             "Pig_fur_black",
@@ -1242,12 +1084,6 @@
         ],
         "Pig_child_pale": [
             "Pig_child_pale_green"
-        ],
-        "Pig_child_bright": [
-            "Pig_child_bright_green"
-        ],
-        "Pig_child_dark": [
-            "Pig_child_dark_green"
         ],
         "Pig_child_fur": [
             "Pig_child_fur_black",
@@ -1286,12 +1122,6 @@
         "Sheep_pale": [
             "Sheep_pale_green"
         ],
-        "Sheep_bright": [
-            "Sheep_bright_green"
-        ],
-        "Sheep_dark": [
-            "Sheep_dark_green"
-        ],
         "Sheep_child_fur": [
             "Sheep_child_fur_black",
             "Sheep_child_fur_brown",
@@ -1319,12 +1149,6 @@
         ],
         "Sheep_child_pale": [
             "Sheep_child_pale_green"
-        ],
-        "Sheep_child_bright": [
-            "Sheep_child_bright_green"
-        ],
-        "Sheep_child_dark": [
-            "Sheep_child_dark_green"
         ],
         "Minotaur_fur": [
             "Minotaur_fur_black",
@@ -1354,12 +1178,6 @@
         "Minotaur_pale": [
             "Minotaur_pale_green"
         ],
-        "Minotaur_bright": [
-            "Minotaur_bright_green"
-        ],
-        "Minotaur_dark": [
-            "Minotaur_dark_green"
-        ],
         "Minotaur_female_fur": [
             "Minotaur_female_fur_black",
             "Minotaur_female_fur_brown",
@@ -1387,12 +1205,6 @@
         ],
         "Minotaur_female_pale": [
             "Minotaur_female_pale_green"
-        ],
-        "Minotaur_female_bright": [
-            "Minotaur_female_bright_green"
-        ],
-        "Minotaur_female_dark": [
-            "Minotaur_female_dark_green"
         ],
         "Minotaur_child_fur": [
             "Minotaur_child_fur_black",
@@ -1422,12 +1234,6 @@
         "Minotaur_child_pale": [
             "Minotaur_child_pale_green"
         ],
-        "Minotaur_child_bright": [
-            "Minotaur_child_bright_green"
-        ],
-        "Minotaur_child_dark": [
-            "Minotaur_child_dark_green"
-        ],
         "Wartotaur_fur": [
             "Wartotaur_fur_black",
             "Wartotaur_fur_brown",
@@ -1455,12 +1261,6 @@
         ],
         "Wartotaur_pale": [
             "Wartotaur_pale_green"
-        ],
-        "Wartotaur_bright": [
-            "Wartotaur_bright_green"
-        ],
-        "Wartotaur_dark": [
-            "Wartotaur_dark_green"
         ],
         "Wolf_child_fur": [
             "Wolf_child_fur_black",
@@ -1490,12 +1290,6 @@
         "Wolf_child_pale": [
             "Wolf_child_pale_green"
         ],
-        "Wolf_child_bright": [
-            "Wolf_child_bright_green"
-        ],
-        "Wolf_child_dark": [
-            "Wolf_child_dark_green"
-        ],
         "Wolf_female_fur": [
             "Wolf_female_fur_black",
             "Wolf_female_fur_brown",
@@ -1523,12 +1317,6 @@
         ],
         "Wolf_female_pale": [
             "Wolf_female_pale_green"
-        ],
-        "Wolf_female_bright": [
-            "Wolf_female_bright_green"
-        ],
-        "Wolf_female_dark": [
-            "Wolf_female_dark_green"
         ],
         "Wolf_male_fur": [
             "Wolf_male_fur_black",
@@ -1558,12 +1346,6 @@
         "Wolf_male_pale": [
             "Wolf_male_pale_green"
         ],
-        "Wolf_male_bright": [
-            "Wolf_male_bright_green"
-        ],
-        "Wolf_male_dark": [
-            "Wolf_male_dark_green"
-        ],
         "Rabbit_fur": [
             "Rabbit_fur_black",
             "Rabbit_fur_brown",
@@ -1591,12 +1373,6 @@
         ],
         "Rabbit_pale": [
             "Rabbit_pale_green"
-        ],
-        "Rabbit_bright": [
-            "Rabbit_bright_green"
-        ],
-        "Rabbit_dark": [
-            "Rabbit_dark_green"
         ],
         "Rabbit_child_fur": [
             "Rabbit_child_fur_black",
@@ -1626,12 +1402,6 @@
         "Rabbit_child_pale": [
             "Rabbit_child_pale_green"
         ],
-        "Rabbit_child_bright": [
-            "Rabbit_child_bright_green"
-        ],
-        "Rabbit_child_dark": [
-            "Rabbit_child_dark_green"
-        ],
         "Rat_fur": [
             "Rat_fur_black",
             "Rat_fur_brown",
@@ -1659,12 +1429,6 @@
         ],
         "Rat_pale": [
             "Rat_pale_green"
-        ],
-        "Rat_bright": [
-            "Rat_bright_green"
-        ],
-        "Rat_dark": [
-            "Rat_dark_green"
         ],
         "Rat_child_fur": [
             "Rat_child_fur_black",
@@ -1694,12 +1458,6 @@
         "Rat_child_pale": [
             "Rat_child_pale_green"
         ],
-        "Rat_child_bright": [
-            "Rat_child_bright_green"
-        ],
-        "Rat_child_dark": [
-            "Rat_child_dark_green"
-        ],
         "Mouse_fur": [
             "Mouse_fur_black",
             "Mouse_fur_brown",
@@ -1726,12 +1484,6 @@
         ],
         "Mouse_pale": [
             "Mouse_pale_green"
-        ],
-        "Mouse_bright": [
-            "Mouse_bright_green"
-        ],
-        "Mouse_dark": [
-            "Mouse_dark_green"
         ],
         "Mouse_child_fur": [
             "Mouse_child_fur_black",
@@ -1761,12 +1513,6 @@
         "Mouse_child_pale": [
             "Mouse_child_pale_green"
         ],
-        "Mouse_child_bright": [
-            "Mouse_child_bright_green"
-        ],
-        "Mouse_child_dark": [
-            "Mouse_child_dark_green"
-        ],
         "Lizard_child": [
             "Lizard_child_light",
             "Lizard_child_amber",
@@ -1784,12 +1530,6 @@
         ],
         "Lizard_child_pale": [
             "Lizard_child_pale_green"
-        ],
-        "Lizard_child_bright": [
-            "Lizard_child_bright_green"
-        ],
-        "Lizard_child_dark": [
-            "Lizard_child_dark_green"
         ],
         "Lizard_female": [
             "Lizard_female_light",
@@ -1809,12 +1549,6 @@
         "Lizard_female_pale": [
             "Lizard_female_pale_green"
         ],
-        "Lizard_female_bright": [
-            "Lizard_female_bright_green"
-        ],
-        "Lizard_female_dark": [
-            "Lizard_female_dark_green"
-        ],
         "Lizard_male": [
             "Lizard_male_light",
             "Lizard_male_amber",
@@ -1832,12 +1566,6 @@
         ],
         "Lizard_male_pale": [
             "Lizard_male_pale_green"
-        ],
-        "Lizard_male_bright": [
-            "Lizard_male_bright_green"
-        ],
-        "Lizard_male_dark": [
-            "Lizard_male_dark_green"
         ],
         "Orc_child": [
             "Orc_child_light",
@@ -1857,12 +1585,6 @@
         ],
         "Orc_child_pale": [
             "Orc_child_pale_green"
-        ],
-        "Orc_child_bright": [
-            "Orc_child_bright_green"
-        ],
-        "Orc_child_dark": [
-            "Orc_child_dark_green"
         ],
         "Orc_child_fur": [
             "Orc_child_fur_black",
@@ -1891,12 +1613,6 @@
         "Orc_female_pale": [
             "Orc_female_pale_green"
         ],
-        "Orc_female_bright": [
-            "Orc_female_bright_green"
-        ],
-        "Orc_female_dark": [
-            "Orc_female_dark_green"
-        ],
         "Orc_male": [
             "Orc_male_light",
             "Orc_male_amber",
@@ -1915,12 +1631,6 @@
         ],
         "Orc_male_pale": [
             "Orc_male_pale_green"
-        ],
-        "Orc_male_bright": [
-            "Orc_male_bright_green"
-        ],
-        "Orc_male_dark": [
-            "Orc_male_dark_green"
         ],
         "Orc_male_fur": [
             "Orc_male_fur_black",
@@ -1950,12 +1660,6 @@
         "Goblin_pale": [
             "Goblin_pale_green"
         ],
-        "Goblin_bright": [
-            "Goblin_bright_green"
-        ],
-        "Goblin_dark": [
-            "Goblin_dark_green"
-        ],
         "Goblin_fur": [
             "Goblin_fur_black",
             "Goblin_fur_brown",
@@ -1984,12 +1688,6 @@
         "Goblin_child_pale": [
             "Goblin_child_pale_green"
         ],
-        "Goblin_child_bright": [
-            "Goblin_child_bright_green"
-        ],
-        "Goblin_child_dark": [
-            "Goblin_child_dark_green"
-        ],
         "Goblin_child_fur": [
             "Goblin_child_fur_black",
             "Goblin_child_fur_brown",
@@ -2016,12 +1714,6 @@
         ],
         "Alien_pale": [
             "Alien_pale_green"
-        ],
-        "Alien_bright": [
-            "Alien_bright_green"
-        ],
-        "Alien_dark": [
-            "Alien_dark_green"
         ],
         "Alien_fur": [
             "Alien_fur_black",
@@ -2051,12 +1743,6 @@
         "Troll_pale": [
             "Troll_pale_green"
         ],
-        "Troll_bright": [
-            "Troll_bright_green"
-        ],
-        "Troll_dark": [
-            "Troll_dark_green"
-        ],
         "Troll_fur": [
             "Troll_fur_black",
             "Troll_fur_brown",
@@ -2084,12 +1770,6 @@
         ],
         "Troll_child_pale": [
             "Troll_child_pale_green"
-        ],
-        "Troll_child_bright": [
-            "Troll_child_bright_green"
-        ],
-        "Troll_child_dark": [
-            "Troll_child_dark_green"
         ],
         "Troll_child_fur": [
             "Troll_child_fur_black",
@@ -2122,12 +1802,6 @@
         "Zombie_pale": [
             "Zombie_pale_green"
         ],
-        "Zombie_bright": [
-            "Zombie_bright_green"
-        ],
-        "Zombie_dark": [
-            "Zombie_dark_green"
-        ],
         "Zombie_fur": [
             "Zombie_fur_black",
             "Zombie_fur_brown",
@@ -2159,12 +1833,6 @@
         "Vampire_pale": [
             "Vampire_pale_green"
         ],
-        "Vampire_bright": [
-            "Vampire_bright_green"
-        ],
-        "Vampire_dark": [
-            "Vampire_dark_green"
-        ],
         "Vampire_fur": [
             "Vampire_fur_black",
             "Vampire_fur_brown",
@@ -2192,12 +1860,6 @@
         ],
         "Frankenstein_pale": [
             "Frankenstein_pale_green"
-        ],
-        "Frankenstein_bright": [
-            "Frankenstein_bright_green"
-        ],
-        "Frankenstein_dark": [
-            "Frankenstein_dark_green"
         ],
         "Frankenstein_fur": [
             "Frankenstein_fur_black",
@@ -2229,12 +1891,6 @@
         "Neutral_pale": [
             "Neutral_pale_green"
         ],
-        "Neutral_bright": [
-            "Neutral_bright_green"
-        ],
-        "Neutral_dark": [
-            "Neutral_dark_green"
-        ],
         "Neutral_fur": [
             "Neutral_fur_black",
             "Neutral_fur_brown",
@@ -2262,12 +1918,6 @@
         ],
         "Closing_Eyes_pale": [
             "Closing_Eyes_pale_green"
-        ],
-        "Closing_Eyes_bright": [
-            "Closing_Eyes_bright_green"
-        ],
-        "Closing_Eyes_dark": [
-            "Closing_Eyes_dark_green"
         ],
         "Closing_Eyes_fur": [
             "Closing_Eyes_fur_black",
@@ -2297,12 +1947,6 @@
         "Closed_Eyes_pale": [
             "Closed_Eyes_pale_green"
         ],
-        "Closed_Eyes_bright": [
-            "Closed_Eyes_bright_green"
-        ],
-        "Closed_Eyes_dark": [
-            "Closed_Eyes_dark_green"
-        ],
         "Closed_Eyes_fur": [
             "Closed_Eyes_fur_black",
             "Closed_Eyes_fur_brown",
@@ -2330,12 +1974,6 @@
         ],
         "Looking_Right_pale": [
             "Looking_Right_pale_green"
-        ],
-        "Looking_Right_bright": [
-            "Looking_Right_bright_green"
-        ],
-        "Looking_Right_dark": [
-            "Looking_Right_dark_green"
         ],
         "Looking_Right_fur": [
             "Looking_Right_fur_black",
@@ -2365,12 +2003,6 @@
         "Looking_Left_pale": [
             "Looking_Left_pale_green"
         ],
-        "Looking_Left_bright": [
-            "Looking_Left_bright_green"
-        ],
-        "Looking_Left_dark": [
-            "Looking_Left_dark_green"
-        ],
         "Looking_Left_fur": [
             "Looking_Left_fur_black",
             "Looking_Left_fur_brown",
@@ -2398,12 +2030,6 @@
         ],
         "Rolling_Eyes_pale": [
             "Rolling_Eyes_pale_green"
-        ],
-        "Rolling_Eyes_bright": [
-            "Rolling_Eyes_bright_green"
-        ],
-        "Rolling_Eyes_dark": [
-            "Rolling_Eyes_dark_green"
         ],
         "Rolling_Eyes_fur": [
             "Rolling_Eyes_fur_black",
@@ -2433,12 +2059,6 @@
         "Shock_pale": [
             "Shock_pale_green"
         ],
-        "Shock_bright": [
-            "Shock_bright_green"
-        ],
-        "Shock_dark": [
-            "Shock_dark_green"
-        ],
         "Shock_fur": [
             "Shock_fur_black",
             "Shock_fur_brown",
@@ -2466,12 +2086,6 @@
         ],
         "Angry_pale": [
             "Angry_pale_green"
-        ],
-        "Angry_bright": [
-            "Angry_bright_green"
-        ],
-        "Angry_dark": [
-            "Angry_dark_green"
         ],
         "Angry_fur": [
             "Angry_fur_black",
@@ -2501,12 +2115,6 @@
         "Angry_Alt_pale": [
             "Angry_Alt_pale_green"
         ],
-        "Angry_Alt_bright": [
-            "Angry_Alt_bright_green"
-        ],
-        "Angry_Alt_dark": [
-            "Angry_Alt_dark_green"
-        ],
         "Angry_Alt_fur": [
             "Angry_Alt_fur_black",
             "Angry_Alt_fur_brown",
@@ -2534,12 +2142,6 @@
         ],
         "Sad_pale": [
             "Sad_pale_green"
-        ],
-        "Sad_bright": [
-            "Sad_bright_green"
-        ],
-        "Sad_dark": [
-            "Sad_dark_green"
         ],
         "Sad_fur": [
             "Sad_fur_black",
@@ -2569,12 +2171,6 @@
         "Sad_Alt_pale": [
             "Sad_Alt_pale_green"
         ],
-        "Sad_Alt_bright": [
-            "Sad_Alt_bright_green"
-        ],
-        "Sad_Alt_dark": [
-            "Sad_Alt_dark_green"
-        ],
         "Sad_Alt_fur": [
             "Sad_Alt_fur_black",
             "Sad_Alt_fur_brown",
@@ -2602,12 +2198,6 @@
         ],
         "Happy_pale": [
             "Happy_pale_green"
-        ],
-        "Happy_bright": [
-            "Happy_bright_green"
-        ],
-        "Happy_dark": [
-            "Happy_dark_green"
         ],
         "Happy_fur": [
             "Happy_fur_black",
@@ -2637,12 +2227,6 @@
         "Happy_Alt_pale": [
             "Happy_Alt_pale_green"
         ],
-        "Happy_Alt_bright": [
-            "Happy_Alt_bright_green"
-        ],
-        "Happy_Alt_dark": [
-            "Happy_Alt_dark_green"
-        ],
         "Happy_Alt_fur": [
             "Happy_Alt_fur_black",
             "Happy_Alt_fur_brown",
@@ -2671,12 +2255,6 @@
         "Blush_pale": [
             "Blush_pale_green"
         ],
-        "Blush_bright": [
-            "Blush_bright_green"
-        ],
-        "Blush_dark": [
-            "Blush_dark_green"
-        ],
         "Blush_fur": [
             "Blush_fur_black",
             "Blush_fur_brown",
@@ -2704,12 +2282,6 @@
         ],
         "Shame_pale": [
             "Shame_pale_green"
-        ],
-        "Shame_bright": [
-            "Shame_bright_green"
-        ],
-        "Shame_dark": [
-            "Shame_dark_green"
         ],
         "Shame_fur": [
             "Shame_fur_black",
@@ -2779,12 +2351,6 @@
         "Big_ears_pale": [
             "Big_ears_pale_green"
         ],
-        "Big_ears_bright": [
-            "Big_ears_bright_green"
-        ],
-        "Big_ears_dark": [
-            "Big_ears_dark_green"
-        ],
         "Big_ears_fur": [
             "Big_ears_fur_black",
             "Big_ears_fur_brown",
@@ -2812,12 +2378,6 @@
         ],
         "Elven_ears_pale": [
             "Elven_ears_pale_green"
-        ],
-        "Elven_ears_bright": [
-            "Elven_ears_bright_green"
-        ],
-        "Elven_ears_dark": [
-            "Elven_ears_dark_green"
         ],
         "Elven_ears_fur": [
             "Elven_ears_fur_black",
@@ -2847,12 +2407,6 @@
         "Long_ears_pale": [
             "Long_ears_pale_green"
         ],
-        "Long_ears_bright": [
-            "Long_ears_bright_green"
-        ],
-        "Long_ears_dark": [
-            "Long_ears_dark_green"
-        ],
         "Long_ears_fur": [
             "Long_ears_fur_black",
             "Long_ears_fur_brown",
@@ -2880,12 +2434,6 @@
         ],
         "Medium_Elven_Ears_pale": [
             "Medium_Elven_Ears_pale_green"
-        ],
-        "Medium_Elven_Ears_bright": [
-            "Medium_Elven_Ears_bright_green"
-        ],
-        "Medium_Elven_Ears_dark": [
-            "Medium_Elven_Ears_dark_green"
         ],
         "Medium_Elven_Ears_fur": [
             "Medium_Elven_Ears_fur_black",
@@ -2915,12 +2463,6 @@
         "Hanging_Elven_Ears_pale": [
             "Hanging_Elven_Ears_pale_green"
         ],
-        "Hanging_Elven_Ears_bright": [
-            "Hanging_Elven_Ears_bright_green"
-        ],
-        "Hanging_Elven_Ears_dark": [
-            "Hanging_Elven_Ears_dark_green"
-        ],
         "Hanging_Elven_Ears_fur": [
             "Hanging_Elven_Ears_fur_black",
             "Hanging_Elven_Ears_fur_brown",
@@ -2949,12 +2491,6 @@
         "Downward_Elven_Ears_pale": [
             "Downward_Elven_Ears_pale_green"
         ],
-        "Downward_Elven_Ears_bright": [
-            "Downward_Elven_Ears_bright_green"
-        ],
-        "Downward_Elven_Ears_dark": [
-            "Downward_Elven_Ears_dark_green"
-        ],
         "Downward_Elven_Ears_fur": [
             "Downward_Elven_Ears_fur_black",
             "Downward_Elven_Ears_fur_brown",
@@ -2982,12 +2518,6 @@
         ],
         "Dragon_Ears_pale": [
             "Dragon_Ears_pale_green"
-        ],
-        "Dragon_Ears_bright": [
-            "Dragon_Ears_bright_green"
-        ],
-        "Dragon_Ears_dark": [
-            "Dragon_Ears_dark_green"
         ],
         "Dragon_Ears_fur": [
             "Dragon_Ears_fur_black",
@@ -3026,10 +2556,6 @@
         "Side_Wolf_Ears_light": [
             "Side_Wolf_Ears_light_brown"
         ],
-        "Side_Wolf_Ears_dark": [
-            "Side_Wolf_Ears_dark_brown",
-            "Side_Wolf_Ears_dark_gray"
-        ],
         "Side_Wolf_Ears_fur": [
             "Side_Wolf_Ears_fur_black",
             "Side_Wolf_Ears_fur_brown",
@@ -3067,10 +2593,6 @@
         "Side_Cat_Ears_light": [
             "Side_Cat_Ears_light_brown"
         ],
-        "Side_Cat_Ears_dark": [
-            "Side_Cat_Ears_dark_brown",
-            "Side_Cat_Ears_dark_gray"
-        ],
         "Side_Cat_Ears_fur": [
             "Side_Cat_Ears_fur_black",
             "Side_Cat_Ears_fur_brown",
@@ -3107,10 +2629,6 @@
         ],
         "Feather_Ears_light": [
             "Feather_Ears_light_brown"
-        ],
-        "Feather_Ears_dark": [
-            "Feather_Ears_dark_brown",
-            "Feather_Ears_dark_gray"
         ],
         "Feather_Ears_fur": [
             "Feather_Ears_fur_black",
@@ -3151,10 +2669,6 @@
         "Cat_Ears_light": [
             "Cat_Ears_light_brown"
         ],
-        "Cat_Ears_dark": [
-            "Cat_Ears_dark_brown",
-            "Cat_Ears_dark_gray"
-        ],
         "Cat_Ears_fur": [
             "Cat_Ears_fur_black",
             "Cat_Ears_fur_brown",
@@ -3192,10 +2706,6 @@
         "Wolf_Ears_light": [
             "Wolf_Ears_light_brown"
         ],
-        "Wolf_Ears_dark": [
-            "Wolf_Ears_dark_brown",
-            "Wolf_Ears_dark_gray"
-        ],
         "Wolf_Ears_fur": [
             "Wolf_Ears_fur_black",
             "Wolf_Ears_fur_brown",
@@ -3226,12 +2736,6 @@
         "Cat_Ears_Skintone_pale": [
             "Cat_Ears_Skintone_pale_green"
         ],
-        "Cat_Ears_Skintone_bright": [
-            "Cat_Ears_Skintone_bright_green"
-        ],
-        "Cat_Ears_Skintone_dark": [
-            "Cat_Ears_Skintone_dark_green"
-        ],
         "Cat_Ears_Skintone_fur": [
             "Cat_Ears_Skintone_fur_black",
             "Cat_Ears_Skintone_fur_brown",
@@ -3259,12 +2763,6 @@
         ],
         "Wolf_Ears_Skintone_pale": [
             "Wolf_Ears_Skintone_pale_green"
-        ],
-        "Wolf_Ears_Skintone_bright": [
-            "Wolf_Ears_Skintone_bright_green"
-        ],
-        "Wolf_Ears_Skintone_dark": [
-            "Wolf_Ears_Skintone_dark_green"
         ],
         "Wolf_Ears_Skintone_fur": [
             "Wolf_Ears_Skintone_fur_black",
@@ -3296,12 +2794,6 @@
         "Side_Wolf_Ears_Skintone_pale": [
             "Side_Wolf_Ears_Skintone_pale_green"
         ],
-        "Side_Wolf_Ears_Skintone_bright": [
-            "Side_Wolf_Ears_Skintone_bright_green"
-        ],
-        "Side_Wolf_Ears_Skintone_dark": [
-            "Side_Wolf_Ears_Skintone_dark_green"
-        ],
         "Side_Wolf_Ears_Skintone_fur": [
             "Side_Wolf_Ears_Skintone_fur_black",
             "Side_Wolf_Ears_Skintone_fur_brown",
@@ -3330,12 +2822,6 @@
         "Side_Cat_Ears_Skintone_pale": [
             "Side_Cat_Ears_Skintone_pale_green"
         ],
-        "Side_Cat_Ears_Skintone_bright": [
-            "Side_Cat_Ears_Skintone_bright_green"
-        ],
-        "Side_Cat_Ears_Skintone_dark": [
-            "Side_Cat_Ears_Skintone_dark_green"
-        ],
         "Side_Cat_Ears_Skintone_fur": [
             "Side_Cat_Ears_Skintone_fur_black",
             "Side_Cat_Ears_Skintone_fur_brown",
@@ -3363,12 +2849,6 @@
         ],
         "Feather_Ears_Skintone_pale": [
             "Feather_Ears_Skintone_pale_green"
-        ],
-        "Feather_Ears_Skintone_bright": [
-            "Feather_Ears_Skintone_bright_green"
-        ],
-        "Feather_Ears_Skintone_dark": [
-            "Feather_Ears_Skintone_dark_green"
         ],
         "Feather_Ears_Skintone_fur": [
             "Feather_Ears_Skintone_fur_black",
@@ -3400,12 +2880,6 @@
         "Big_nose_pale": [
             "Big_nose_pale_green"
         ],
-        "Big_nose_bright": [
-            "Big_nose_bright_green"
-        ],
-        "Big_nose_dark": [
-            "Big_nose_dark_green"
-        ],
         "Big_nose_fur": [
             "Big_nose_fur_black",
             "Big_nose_fur_brown",
@@ -3433,12 +2907,6 @@
         ],
         "Button_nose_pale": [
             "Button_nose_pale_green"
-        ],
-        "Button_nose_bright": [
-            "Button_nose_bright_green"
-        ],
-        "Button_nose_dark": [
-            "Button_nose_dark_green"
         ],
         "Button_nose_fur": [
             "Button_nose_fur_black",
@@ -3468,12 +2936,6 @@
         "Straight_nose_pale": [
             "Straight_nose_pale_green"
         ],
-        "Straight_nose_bright": [
-            "Straight_nose_bright_green"
-        ],
-        "Straight_nose_dark": [
-            "Straight_nose_dark_green"
-        ],
         "Straight_nose_fur": [
             "Straight_nose_fur_black",
             "Straight_nose_fur_brown",
@@ -3502,12 +2964,6 @@
         "Elderly_nose_pale": [
             "Elderly_nose_pale_green"
         ],
-        "Elderly_nose_bright": [
-            "Elderly_nose_bright_green"
-        ],
-        "Elderly_nose_dark": [
-            "Elderly_nose_dark_green"
-        ],
         "Elderly_nose_fur": [
             "Elderly_nose_fur_black",
             "Elderly_nose_fur_brown",
@@ -3535,12 +2991,6 @@
         ],
         "Large_nose_pale": [
             "Large_nose_pale_green"
-        ],
-        "Large_nose_bright": [
-            "Large_nose_bright_green"
-        ],
-        "Large_nose_dark": [
-            "Large_nose_dark_green"
         ],
         "Large_nose_fur": [
             "Large_nose_fur_black",
@@ -3581,10 +3031,6 @@
         "Thick_Eyebrows_light": [
             "Thick_Eyebrows_light_brown"
         ],
-        "Thick_Eyebrows_dark": [
-            "Thick_Eyebrows_dark_brown",
-            "Thick_Eyebrows_dark_gray"
-        ],
         "Thin_Eyebrows": [
             "Thin_Eyebrows_blonde",
             "Thin_Eyebrows_ash",
@@ -3612,10 +3058,6 @@
         ],
         "Thin_Eyebrows_light": [
             "Thin_Eyebrows_light_brown"
-        ],
-        "Thin_Eyebrows_dark": [
-            "Thin_Eyebrows_dark_brown",
-            "Thin_Eyebrows_dark_gray"
         ]
     },
     "wrinkes": {
@@ -3637,12 +3079,6 @@
         ],
         "Wrinkles_pale": [
             "Wrinkles_pale_green"
-        ],
-        "Wrinkles_bright": [
-            "Wrinkles_bright_green"
-        ],
-        "Wrinkles_dark": [
-            "Wrinkles_dark_green"
         ],
         "Wrinkles_fur": [
             "Wrinkles_fur_black",
@@ -3683,10 +3119,6 @@
         "Basic_Beard_light": [
             "Basic_Beard_light_brown"
         ],
-        "Basic_Beard_dark": [
-            "Basic_Beard_dark_brown",
-            "Basic_Beard_dark_gray"
-        ],
         "Winter_Beard": [
             "Winter_Beard_blonde",
             "Winter_Beard_ash",
@@ -3714,10 +3146,6 @@
         ],
         "Winter_Beard_light": [
             "Winter_Beard_light_brown"
-        ],
-        "Winter_Beard_dark": [
-            "Winter_Beard_dark_brown",
-            "Winter_Beard_dark_gray"
         ],
         "5_O'clock_Shadow": [
             "5_O'clock_Shadow_blonde",
@@ -3747,10 +3175,6 @@
         "5_O'clock_Shadow_light": [
             "5_O'clock_Shadow_light_brown"
         ],
-        "5_O'clock_Shadow_dark": [
-            "5_O'clock_Shadow_dark_brown",
-            "5_O'clock_Shadow_dark_gray"
-        ],
         "Trimmed_Beard": [
             "Trimmed_Beard_blonde",
             "Trimmed_Beard_ash",
@@ -3779,10 +3203,6 @@
         "Trimmed_Beard_light": [
             "Trimmed_Beard_light_brown"
         ],
-        "Trimmed_Beard_dark": [
-            "Trimmed_Beard_dark_brown",
-            "Trimmed_Beard_dark_gray"
-        ],
         "Medium_Beard": [
             "Medium_Beard_blonde",
             "Medium_Beard_ash",
@@ -3810,10 +3230,6 @@
         ],
         "Medium_Beard_light": [
             "Medium_Beard_light_brown"
-        ],
-        "Medium_Beard_dark": [
-            "Medium_Beard_dark_brown",
-            "Medium_Beard_dark_gray"
         ]
     },
     "mustache": {
@@ -3845,10 +3261,6 @@
         "Big_Mustache_light": [
             "Big_Mustache_light_brown"
         ],
-        "Big_Mustache_dark": [
-            "Big_Mustache_dark_brown",
-            "Big_Mustache_dark_gray"
-        ],
         "Mustache": [
             "Mustache_blonde",
             "Mustache_ash",
@@ -3876,10 +3288,6 @@
         ],
         "Mustache_light": [
             "Mustache_light_brown"
-        ],
-        "Mustache_dark": [
-            "Mustache_dark_brown",
-            "Mustache_dark_gray"
         ],
         "French_Mustache": [
             "French_Mustache_blonde",
@@ -3909,10 +3317,6 @@
         "French_Mustache_light": [
             "French_Mustache_light_brown"
         ],
-        "French_Mustache_dark": [
-            "French_Mustache_dark_brown",
-            "French_Mustache_dark_gray"
-        ],
         "Walrus_Mustache": [
             "Walrus_Mustache_blonde",
             "Walrus_Mustache_ash",
@@ -3940,10 +3344,6 @@
         ],
         "Walrus_Mustache_light": [
             "Walrus_Mustache_light_brown"
-        ],
-        "Walrus_Mustache_dark": [
-            "Walrus_Mustache_dark_brown",
-            "Walrus_Mustache_dark_gray"
         ],
         "Chevron_Mustache": [
             "Chevron_Mustache_blonde",
@@ -3973,10 +3373,6 @@
         "Chevron_Mustache_light": [
             "Chevron_Mustache_light_brown"
         ],
-        "Chevron_Mustache_dark": [
-            "Chevron_Mustache_dark_brown",
-            "Chevron_Mustache_dark_gray"
-        ],
         "Handlebar_Mustache": [
             "Handlebar_Mustache_blonde",
             "Handlebar_Mustache_ash",
@@ -4004,10 +3400,6 @@
         ],
         "Handlebar_Mustache_light": [
             "Handlebar_Mustache_light_brown"
-        ],
-        "Handlebar_Mustache_dark": [
-            "Handlebar_Mustache_dark_brown",
-            "Handlebar_Mustache_dark_gray"
         ],
         "Lampshade_Mustache": [
             "Lampshade_Mustache_blonde",
@@ -4037,10 +3429,6 @@
         "Lampshade_Mustache_light": [
             "Lampshade_Mustache_light_brown"
         ],
-        "Lampshade_Mustache_dark": [
-            "Lampshade_Mustache_dark_brown",
-            "Lampshade_Mustache_dark_gray"
-        ],
         "Horseshoe_Mustache": [
             "Horseshoe_Mustache_blonde",
             "Horseshoe_Mustache_ash",
@@ -4068,10 +3456,6 @@
         ],
         "Horseshoe_Mustache_light": [
             "Horseshoe_Mustache_light_brown"
-        ],
-        "Horseshoe_Mustache_dark": [
-            "Horseshoe_Mustache_dark_brown",
-            "Horseshoe_Mustache_dark_gray"
         ]
     },
     "hairextl": {
@@ -4103,10 +3487,6 @@
         "Left_Braid_light": [
             "Left_Braid_light_brown"
         ],
-        "Left_Braid_dark": [
-            "Left_Braid_dark_brown",
-            "Left_Braid_dark_gray"
-        ],
         "Left_XLong_Bang": [
             "Left_XLong_Bang_blonde",
             "Left_XLong_Bang_ash",
@@ -4134,10 +3514,6 @@
         ],
         "Left_XLong_Bang_light": [
             "Left_XLong_Bang_light_brown"
-        ],
-        "Left_XLong_Bang_dark": [
-            "Left_XLong_Bang_dark_brown",
-            "Left_XLong_Bang_dark_gray"
         ],
         "Left_XLong_Braid": [
             "Left_XLong_Braid_blonde",
@@ -4167,10 +3543,6 @@
         "Left_XLong_Braid_light": [
             "Left_XLong_Braid_light_brown"
         ],
-        "Left_XLong_Braid_dark": [
-            "Left_XLong_Braid_dark_brown",
-            "Left_XLong_Braid_dark_gray"
-        ],
         "Left_Long_Straight": [
             "Left_Long_Straight_blonde",
             "Left_Long_Straight_ash",
@@ -4198,10 +3570,6 @@
         ],
         "Left_Long_Straight_light": [
             "Left_Long_Straight_light_brown"
-        ],
-        "Left_Long_Straight_dark": [
-            "Left_Long_Straight_dark_brown",
-            "Left_Long_Straight_dark_gray"
         ],
         "Left_Long_Wavy": [
             "Left_Long_Wavy_blonde",
@@ -4231,10 +3599,6 @@
         "Left_Long_Wavy_light": [
             "Left_Long_Wavy_light_brown"
         ],
-        "Left_Long_Wavy_dark": [
-            "Left_Long_Wavy_dark_brown",
-            "Left_Long_Wavy_dark_gray"
-        ],
         "Left_XLong_Wavy": [
             "Left_XLong_Wavy_blonde",
             "Left_XLong_Wavy_ash",
@@ -4263,10 +3627,6 @@
         "Left_XLong_Wavy_light": [
             "Left_XLong_Wavy_light_brown"
         ],
-        "Left_XLong_Wavy_dark": [
-            "Left_XLong_Wavy_dark_brown",
-            "Left_XLong_Wavy_dark_gray"
-        ],
         "Left_XLong_Curly": [
             "Left_XLong_Curly_blonde",
             "Left_XLong_Curly_ash",
@@ -4294,10 +3654,6 @@
         ],
         "Left_XLong_Curly_light": [
             "Left_XLong_Curly_light_brown"
-        ],
-        "Left_XLong_Curly_dark": [
-            "Left_XLong_Curly_dark_brown",
-            "Left_XLong_Curly_dark_gray"
         ]
     },
     "hairextr": {
@@ -4329,10 +3685,6 @@
         "Right_Braid_light": [
             "Right_Braid_light_brown"
         ],
-        "Right_Braid_dark": [
-            "Right_Braid_dark_brown",
-            "Right_Braid_dark_gray"
-        ],
         "Right_XLong_Bang": [
             "Right_XLong_Bang_blonde",
             "Right_XLong_Bang_ash",
@@ -4360,10 +3712,6 @@
         ],
         "Right_XLong_Bang_light": [
             "Right_XLong_Bang_light_brown"
-        ],
-        "Right_XLong_Bang_dark": [
-            "Right_XLong_Bang_dark_brown",
-            "Right_XLong_Bang_dark_gray"
         ],
         "Right_XLong_Braid": [
             "Right_XLong_Braid_blonde",
@@ -4393,10 +3741,6 @@
         "Right_XLong_Braid_light": [
             "Right_XLong_Braid_light_brown"
         ],
-        "Right_XLong_Braid_dark": [
-            "Right_XLong_Braid_dark_brown",
-            "Right_XLong_Braid_dark_gray"
-        ],
         "Right_Long_Straight": [
             "Right_Long_Straight_blonde",
             "Right_Long_Straight_ash",
@@ -4424,10 +3768,6 @@
         ],
         "Right_Long_Straight_light": [
             "Right_Long_Straight_light_brown"
-        ],
-        "Right_Long_Straight_dark": [
-            "Right_Long_Straight_dark_brown",
-            "Right_Long_Straight_dark_gray"
         ],
         "Right_Long_Wavy": [
             "Right_Long_Wavy_blonde",
@@ -4457,10 +3797,6 @@
         "Right_Long_Wavy_light": [
             "Right_Long_Wavy_light_brown"
         ],
-        "Right_Long_Wavy_dark": [
-            "Right_Long_Wavy_dark_brown",
-            "Right_Long_Wavy_dark_gray"
-        ],
         "Right_XLong_Wavy": [
             "Right_XLong_Wavy_blonde",
             "Right_XLong_Wavy_ash",
@@ -4489,10 +3825,6 @@
         "Right_XLong_Wavy_light": [
             "Right_XLong_Wavy_light_brown"
         ],
-        "Right_XLong_Wavy_dark": [
-            "Right_XLong_Wavy_dark_brown",
-            "Right_XLong_Wavy_dark_gray"
-        ],
         "Right_XLong_Curly": [
             "Right_XLong_Curly_blonde",
             "Right_XLong_Curly_ash",
@@ -4520,10 +3852,6 @@
         ],
         "Right_XLong_Curly_light": [
             "Right_XLong_Curly_light_brown"
-        ],
-        "Right_XLong_Curly_dark": [
-            "Right_XLong_Curly_dark_brown",
-            "Right_XLong_Curly_dark_gray"
         ]
     },
     "ponytail": {
@@ -4555,10 +3883,6 @@
         "Short_Topknot_light": [
             "Short_Topknot_light_brown"
         ],
-        "Short_Topknot_dark": [
-            "Short_Topknot_dark_brown",
-            "Short_Topknot_dark_gray"
-        ],
         "Long_Topknot": [
             "Long_Topknot_blonde",
             "Long_Topknot_ash",
@@ -4587,10 +3911,6 @@
         "Long_Topknot_light": [
             "Long_Topknot_light_brown"
         ],
-        "Long_Topknot_dark": [
-            "Long_Topknot_dark_brown",
-            "Long_Topknot_dark_gray"
-        ],
         "Relm_Topknot": [
             "Relm_Topknot_blonde",
             "Relm_Topknot_ash",
@@ -4618,10 +3938,6 @@
         ],
         "Relm_Topknot_light": [
             "Relm_Topknot_light_brown"
-        ],
-        "Relm_Topknot_dark": [
-            "Relm_Topknot_dark_brown",
-            "Relm_Topknot_dark_gray"
         ]
     },
     "updo": {
@@ -4652,10 +3968,6 @@
         ],
         "High_Bun_light": [
             "High_Bun_light_brown"
-        ],
-        "High_Bun_dark": [
-            "High_Bun_dark_brown",
-            "High_Bun_dark_gray"
         ]
     },
     "hair": {
@@ -4687,10 +3999,6 @@
         "Afro_light": [
             "Afro_light_brown"
         ],
-        "Afro_dark": [
-            "Afro_dark_brown",
-            "Afro_dark_gray"
-        ],
         "Natural": [
             "Natural_blonde",
             "Natural_ash",
@@ -4718,10 +4026,6 @@
         ],
         "Natural_light": [
             "Natural_light_brown"
-        ],
-        "Natural_dark": [
-            "Natural_dark_brown",
-            "Natural_dark_gray"
         ],
         "Dreadlocks_short": [
             "Dreadlocks_short_blonde",
@@ -4751,10 +4055,6 @@
         "Dreadlocks_short_light": [
             "Dreadlocks_short_light_brown"
         ],
-        "Dreadlocks_short_dark": [
-            "Dreadlocks_short_dark_brown",
-            "Dreadlocks_short_dark_gray"
-        ],
         "Twists_fade": [
             "Twists_fade_blonde",
             "Twists_fade_ash",
@@ -4782,10 +4082,6 @@
         ],
         "Twists_fade_light": [
             "Twists_fade_light_brown"
-        ],
-        "Twists_fade_dark": [
-            "Twists_fade_dark_brown",
-            "Twists_fade_dark_gray"
         ],
         "Twists_straight": [
             "Twists_straight_blonde",
@@ -4815,10 +4111,6 @@
         "Twists_straight_light": [
             "Twists_straight_light_brown"
         ],
-        "Twists_straight_dark": [
-            "Twists_straight_dark_brown",
-            "Twists_straight_dark_gray"
-        ],
         "Dreadlocks_long": [
             "Dreadlocks_long_blonde",
             "Dreadlocks_long_ash",
@@ -4846,10 +4138,6 @@
         ],
         "Dreadlocks_long_light": [
             "Dreadlocks_long_light_brown"
-        ],
-        "Dreadlocks_long_dark": [
-            "Dreadlocks_long_dark_brown",
-            "Dreadlocks_long_dark_gray"
         ],
         "Flat_top_straight": [
             "Flat_top_straight_blonde",
@@ -4879,10 +4167,6 @@
         "Flat_top_straight_light": [
             "Flat_top_straight_light_brown"
         ],
-        "Flat_top_straight_dark": [
-            "Flat_top_straight_dark_brown",
-            "Flat_top_straight_dark_gray"
-        ],
         "Flat_top_fade": [
             "Flat_top_fade_blonde",
             "Flat_top_fade_ash",
@@ -4910,10 +4194,6 @@
         ],
         "Flat_top_fade_light": [
             "Flat_top_fade_light_brown"
-        ],
-        "Flat_top_fade_dark": [
-            "Flat_top_fade_dark_brown",
-            "Flat_top_fade_dark_gray"
         ],
         "Cornrows": [
             "Cornrows_blonde",
@@ -4943,10 +4223,6 @@
         "Cornrows_light": [
             "Cornrows_light_brown"
         ],
-        "Cornrows_dark": [
-            "Cornrows_dark_brown",
-            "Cornrows_dark_gray"
-        ],
         "Jewfro": [
             "Jewfro_blonde",
             "Jewfro_ash",
@@ -4974,10 +4250,6 @@
         ],
         "Jewfro_light": [
             "Jewfro_light_brown"
-        ],
-        "Jewfro_dark": [
-            "Jewfro_dark_brown",
-            "Jewfro_dark_gray"
         ],
         "Curly_short": [
             "Curly_short_blonde",
@@ -5007,10 +4279,6 @@
         "Curly_short_light": [
             "Curly_short_light_brown"
         ],
-        "Curly_short_dark": [
-            "Curly_short_dark_brown",
-            "Curly_short_dark_gray"
-        ],
         "Curly_long": [
             "Curly_long_blonde",
             "Curly_long_ash",
@@ -5038,10 +4306,6 @@
         ],
         "Curly_long_light": [
             "Curly_long_light_brown"
-        ],
-        "Curly_long_dark": [
-            "Curly_long_dark_brown",
-            "Curly_long_dark_gray"
         ],
         "Large_Curls": [
             "Large_Curls_blonde",
@@ -5071,10 +4335,6 @@
         "Large_Curls_light": [
             "Large_Curls_light_brown"
         ],
-        "Large_Curls_dark": [
-            "Large_Curls_dark_brown",
-            "Large_Curls_dark_gray"
-        ],
         "Large_Curls_XLong": [
             "Large_Curls_XLong_blonde",
             "Large_Curls_XLong_ash",
@@ -5102,10 +4362,6 @@
         ],
         "Large_Curls_XLong_light": [
             "Large_Curls_XLong_light_brown"
-        ],
-        "Large_Curls_XLong_dark": [
-            "Large_Curls_XLong_dark_brown",
-            "Large_Curls_XLong_dark_gray"
         ],
         "Balding": [
             "Balding_blonde",
@@ -5135,10 +4391,6 @@
         "Balding_light": [
             "Balding_light_brown"
         ],
-        "Balding_dark": [
-            "Balding_dark_brown",
-            "Balding_dark_gray"
-        ],
         "Longhawk": [
             "Longhawk_blonde",
             "Longhawk_ash",
@@ -5166,10 +4418,6 @@
         ],
         "Longhawk_light": [
             "Longhawk_light_brown"
-        ],
-        "Longhawk_dark": [
-            "Longhawk_dark_brown",
-            "Longhawk_dark_gray"
         ],
         "Shorthawk": [
             "Shorthawk_blonde",
@@ -5199,10 +4447,6 @@
         "Shorthawk_light": [
             "Shorthawk_light_brown"
         ],
-        "Shorthawk_dark": [
-            "Shorthawk_dark_brown",
-            "Shorthawk_dark_gray"
-        ],
         "High_and_tight": [
             "High_and_tight_blonde",
             "High_and_tight_ash",
@@ -5230,10 +4474,6 @@
         ],
         "High_and_tight_light": [
             "High_and_tight_light_brown"
-        ],
-        "High_and_tight_dark": [
-            "High_and_tight_dark_brown",
-            "High_and_tight_dark_gray"
         ],
         "Buzzcut": [
             "Buzzcut_blonde",
@@ -5263,10 +4503,6 @@
         "Buzzcut_light": [
             "Buzzcut_light_brown"
         ],
-        "Buzzcut_dark": [
-            "Buzzcut_dark_brown",
-            "Buzzcut_dark_gray"
-        ],
         "Plain": [
             "Plain_blonde",
             "Plain_ash",
@@ -5294,10 +4530,6 @@
         ],
         "Plain_light": [
             "Plain_light_brown"
-        ],
-        "Plain_dark": [
-            "Plain_dark_brown",
-            "Plain_dark_gray"
         ],
         "Pixie": [
             "Pixie_blonde",
@@ -5327,10 +4559,6 @@
         "Pixie_light": [
             "Pixie_light_brown"
         ],
-        "Pixie_dark": [
-            "Pixie_dark_brown",
-            "Pixie_dark_gray"
-        ],
         "Page": [
             "Page_blonde",
             "Page_ash",
@@ -5358,10 +4586,6 @@
         ],
         "Page_light": [
             "Page_light_brown"
-        ],
-        "Page_dark": [
-            "Page_dark_brown",
-            "Page_dark_gray"
         ],
         "Page2": [
             "Page2_blonde",
@@ -5391,10 +4615,6 @@
         "Page2_light": [
             "Page2_light_brown"
         ],
-        "Page2_dark": [
-            "Page2_dark_brown",
-            "Page2_dark_gray"
-        ],
         "Idol": [
             "Idol_blonde",
             "Idol_ash",
@@ -5422,10 +4642,6 @@
         ],
         "Idol_light": [
             "Idol_light_brown"
-        ],
-        "Idol_dark": [
-            "Idol_dark_brown",
-            "Idol_dark_gray"
         ],
         "Mop": [
             "Mop_blonde",
@@ -5455,10 +4671,6 @@
         "Mop_light": [
             "Mop_light_brown"
         ],
-        "Mop_dark": [
-            "Mop_dark_brown",
-            "Mop_dark_gray"
-        ],
         "Parted": [
             "Parted_blonde",
             "Parted_ash",
@@ -5486,10 +4698,6 @@
         ],
         "Parted_light": [
             "Parted_light_brown"
-        ],
-        "Parted_dark": [
-            "Parted_dark_brown",
-            "Parted_dark_gray"
         ],
         "Parted_2": [
             "Parted_2_blonde",
@@ -5519,10 +4727,6 @@
         "Parted_2_light": [
             "Parted_2_light_brown"
         ],
-        "Parted_2_dark": [
-            "Parted_2_dark_brown",
-            "Parted_2_dark_gray"
-        ],
         "Parted_3": [
             "Parted_3_blonde",
             "Parted_3_ash",
@@ -5550,10 +4754,6 @@
         ],
         "Parted_3_light": [
             "Parted_3_light_brown"
-        ],
-        "Parted_3_dark": [
-            "Parted_3_dark_brown",
-            "Parted_3_dark_gray"
         ],
         "Side_Parted_w/Bangs": [
             "Side_Parted_w/Bangs_blonde",
@@ -5583,10 +4783,6 @@
         "Side_Parted_w/Bangs_light": [
             "Side_Parted_w/Bangs_light_brown"
         ],
-        "Side_Parted_w/Bangs_dark": [
-            "Side_Parted_w/Bangs_dark_brown",
-            "Side_Parted_w/Bangs_dark_gray"
-        ],
         "Side_Parted_w/Bangs_2": [
             "Side_Parted_w/Bangs_2_blonde",
             "Side_Parted_w/Bangs_2_ash",
@@ -5614,10 +4810,6 @@
         ],
         "Side_Parted_w/Bangs_2_light": [
             "Side_Parted_w/Bangs_2_light_brown"
-        ],
-        "Side_Parted_w/Bangs_2_dark": [
-            "Side_Parted_w/Bangs_2_dark_brown",
-            "Side_Parted_w/Bangs_2_dark_gray"
         ],
         "Messy1": [
             "Messy1_blonde",
@@ -5647,10 +4839,6 @@
         "Messy1_light": [
             "Messy1_light_brown"
         ],
-        "Messy1_dark": [
-            "Messy1_dark_brown",
-            "Messy1_dark_gray"
-        ],
         "Messy2": [
             "Messy2_blonde",
             "Messy2_ash",
@@ -5678,10 +4866,6 @@
         ],
         "Messy2_light": [
             "Messy2_light_brown"
-        ],
-        "Messy2_dark": [
-            "Messy2_dark_brown",
-            "Messy2_dark_gray"
         ],
         "Messy3": [
             "Messy3_blonde",
@@ -5711,10 +4895,6 @@
         "Messy3_light": [
             "Messy3_light_brown"
         ],
-        "Messy3_dark": [
-            "Messy3_dark_brown",
-            "Messy3_dark_gray"
-        ],
         "Bedhead": [
             "Bedhead_blonde",
             "Bedhead_ash",
@@ -5742,10 +4922,6 @@
         ],
         "Bedhead_light": [
             "Bedhead_light_brown"
-        ],
-        "Bedhead_dark": [
-            "Bedhead_dark_brown",
-            "Bedhead_dark_gray"
         ],
         "Unkempt": [
             "Unkempt_blonde",
@@ -5775,10 +4951,6 @@
         "Unkempt_light": [
             "Unkempt_light_brown"
         ],
-        "Unkempt_dark": [
-            "Unkempt_dark_brown",
-            "Unkempt_dark_gray"
-        ],
         "Bangs": [
             "Bangs_blonde",
             "Bangs_ash",
@@ -5806,10 +4978,6 @@
         ],
         "Bangs_light": [
             "Bangs_light_brown"
-        ],
-        "Bangs_dark": [
-            "Bangs_dark_brown",
-            "Bangs_dark_gray"
         ],
         "Bangsshort": [
             "Bangsshort_blonde",
@@ -5839,10 +5007,6 @@
         "Bangsshort_light": [
             "Bangsshort_light_brown"
         ],
-        "Bangsshort_dark": [
-            "Bangsshort_dark_brown",
-            "Bangsshort_dark_gray"
-        ],
         "Swoop": [
             "Swoop_blonde",
             "Swoop_ash",
@@ -5870,10 +5034,6 @@
         ],
         "Swoop_light": [
             "Swoop_light_brown"
-        ],
-        "Swoop_dark": [
-            "Swoop_dark_brown",
-            "Swoop_dark_gray"
         ],
         "Side_Swoop": [
             "Side_Swoop_blonde",
@@ -5903,10 +5063,6 @@
         "Side_Swoop_light": [
             "Side_Swoop_light_brown"
         ],
-        "Side_Swoop_dark": [
-            "Side_Swoop_dark_brown",
-            "Side_Swoop_dark_gray"
-        ],
         "Curtains": [
             "Curtains_blonde",
             "Curtains_ash",
@@ -5934,10 +5090,6 @@
         ],
         "Curtains_light": [
             "Curtains_light_brown"
-        ],
-        "Curtains_dark": [
-            "Curtains_dark_brown",
-            "Curtains_dark_gray"
         ],
         "Single": [
             "Single_blonde",
@@ -5967,10 +5119,6 @@
         "Single_light": [
             "Single_light_brown"
         ],
-        "Single_dark": [
-            "Single_dark_brown",
-            "Single_dark_gray"
-        ],
         "Cowlick": [
             "Cowlick_blonde",
             "Cowlick_ash",
@@ -5998,10 +5146,6 @@
         ],
         "Cowlick_light": [
             "Cowlick_light_brown"
-        ],
-        "Cowlick_dark": [
-            "Cowlick_dark_brown",
-            "Cowlick_dark_gray"
         ],
         "Cowlick_tall": [
             "Cowlick_tall_blonde",
@@ -6031,10 +5175,6 @@
         "Cowlick_tall_light": [
             "Cowlick_tall_light_brown"
         ],
-        "Cowlick_tall_dark": [
-            "Cowlick_tall_dark_brown",
-            "Cowlick_tall_dark_gray"
-        ],
         "Spiked_porcupine": [
             "Spiked_porcupine_blonde",
             "Spiked_porcupine_ash",
@@ -6062,10 +5202,6 @@
         ],
         "Spiked_porcupine_light": [
             "Spiked_porcupine_light_brown"
-        ],
-        "Spiked_porcupine_dark": [
-            "Spiked_porcupine_dark_brown",
-            "Spiked_porcupine_dark_gray"
         ],
         "Spiked_liberty2": [
             "Spiked_liberty2_blonde",
@@ -6095,10 +5231,6 @@
         "Spiked_liberty2_light": [
             "Spiked_liberty2_light_brown"
         ],
-        "Spiked_liberty2_dark": [
-            "Spiked_liberty2_dark_brown",
-            "Spiked_liberty2_dark_gray"
-        ],
         "Spiked_liberty": [
             "Spiked_liberty_blonde",
             "Spiked_liberty_ash",
@@ -6126,10 +5258,6 @@
         ],
         "Spiked_liberty_light": [
             "Spiked_liberty_light_brown"
-        ],
-        "Spiked_liberty_dark": [
-            "Spiked_liberty_dark_brown",
-            "Spiked_liberty_dark_gray"
         ],
         "Spiked_beehive": [
             "Spiked_beehive_blonde",
@@ -6159,10 +5287,6 @@
         "Spiked_beehive_light": [
             "Spiked_beehive_light_brown"
         ],
-        "Spiked_beehive_dark": [
-            "Spiked_beehive_dark_brown",
-            "Spiked_beehive_dark_gray"
-        ],
         "Spiked": [
             "Spiked_blonde",
             "Spiked_ash",
@@ -6190,10 +5314,6 @@
         ],
         "Spiked_light": [
             "Spiked_light_brown"
-        ],
-        "Spiked_dark": [
-            "Spiked_dark_brown",
-            "Spiked_dark_gray"
         ],
         "Spiked2": [
             "Spiked2_blonde",
@@ -6223,10 +5343,6 @@
         "Spiked2_light": [
             "Spiked2_light_brown"
         ],
-        "Spiked2_dark": [
-            "Spiked2_dark_brown",
-            "Spiked2_dark_gray"
-        ],
         "Halfmessy": [
             "Halfmessy_blonde",
             "Halfmessy_ash",
@@ -6254,10 +5370,6 @@
         ],
         "Halfmessy_light": [
             "Halfmessy_light_brown"
-        ],
-        "Halfmessy_dark": [
-            "Halfmessy_dark_brown",
-            "Halfmessy_dark_gray"
         ],
         "Bunches": [
             "Bunches_blonde",
@@ -6287,10 +5399,6 @@
         "Bunches_light": [
             "Bunches_light_brown"
         ],
-        "Bunches_dark": [
-            "Bunches_dark_brown",
-            "Bunches_dark_gray"
-        ],
         "Pigtails": [
             "Pigtails_blonde",
             "Pigtails_ash",
@@ -6318,10 +5426,6 @@
         ],
         "Pigtails_light": [
             "Pigtails_light_brown"
-        ],
-        "Pigtails_dark": [
-            "Pigtails_dark_brown",
-            "Pigtails_dark_gray"
         ],
         "Pigtails_bangs": [
             "Pigtails_bangs_blonde",
@@ -6351,10 +5455,6 @@
         "Pigtails_bangs_light": [
             "Pigtails_bangs_light_brown"
         ],
-        "Pigtails_bangs_dark": [
-            "Pigtails_bangs_dark_brown",
-            "Pigtails_bangs_dark_gray"
-        ],
         "Bob": [
             "Bob_blonde",
             "Bob_ash",
@@ -6382,10 +5482,6 @@
         ],
         "Bob_light": [
             "Bob_light_brown"
-        ],
-        "Bob_dark": [
-            "Bob_dark_brown",
-            "Bob_dark_gray"
         ],
         "Lob": [
             "Lob_blonde",
@@ -6415,10 +5511,6 @@
         "Lob_light": [
             "Lob_light_brown"
         ],
-        "Lob_dark": [
-            "Lob_dark_brown",
-            "Lob_dark_gray"
-        ],
         "Bob_side_part": [
             "Bob_side_part_blonde",
             "Bob_side_part_ash",
@@ -6446,10 +5538,6 @@
         ],
         "Bob_side_part_light": [
             "Bob_side_part_light_brown"
-        ],
-        "Bob_side_part_dark": [
-            "Bob_side_part_dark_brown",
-            "Bob_side_part_dark_gray"
         ],
         "Relm_Short": [
             "Relm_Short_blonde",
@@ -6479,10 +5567,6 @@
         "Relm_Short_light": [
             "Relm_Short_light_brown"
         ],
-        "Relm_Short_dark": [
-            "Relm_Short_dark_brown",
-            "Relm_Short_dark_gray"
-        ],
         "Half_up": [
             "Half_up_blonde",
             "Half_up_ash",
@@ -6510,10 +5594,6 @@
         ],
         "Half_up_light": [
             "Half_up_light_brown"
-        ],
-        "Half_up_dark": [
-            "Half_up_dark_brown",
-            "Half_up_dark_gray"
         ],
         "Bangs_bun": [
             "Bangs_bun_blonde",
@@ -6543,10 +5623,6 @@
         "Bangs_bun_light": [
             "Bangs_bun_light_brown"
         ],
-        "Bangs_bun_dark": [
-            "Bangs_bun_dark_brown",
-            "Bangs_bun_dark_gray"
-        ],
         "Short_Topknot": [
             "Short_Topknot_blonde",
             "Short_Topknot_ash",
@@ -6574,10 +5650,6 @@
         ],
         "Short_Topknot_light": [
             "Short_Topknot_light_brown"
-        ],
-        "Short_Topknot_dark": [
-            "Short_Topknot_dark_brown",
-            "Short_Topknot_dark_gray"
         ],
         "Short_Topknot_2": [
             "Short_Topknot_2_blonde",
@@ -6607,10 +5679,6 @@
         "Short_Topknot_2_light": [
             "Short_Topknot_2_light_brown"
         ],
-        "Short_Topknot_2_dark": [
-            "Short_Topknot_2_dark_brown",
-            "Short_Topknot_2_dark_gray"
-        ],
         "Long_Topknot": [
             "Long_Topknot_blonde",
             "Long_Topknot_ash",
@@ -6638,10 +5706,6 @@
         ],
         "Long_Topknot_light": [
             "Long_Topknot_light_brown"
-        ],
-        "Long_Topknot_dark": [
-            "Long_Topknot_dark_brown",
-            "Long_Topknot_dark_gray"
         ],
         "Long_Topknot_2": [
             "Long_Topknot_2_blonde",
@@ -6671,10 +5735,6 @@
         "Long_Topknot_2_light": [
             "Long_Topknot_2_light_brown"
         ],
-        "Long_Topknot_2_dark": [
-            "Long_Topknot_2_dark_brown",
-            "Long_Topknot_2_dark_gray"
-        ],
         "Ponytail": [
             "Ponytail_blonde",
             "Ponytail_ash",
@@ -6702,10 +5762,6 @@
         ],
         "Ponytail_light": [
             "Ponytail_light_brown"
-        ],
-        "Ponytail_dark": [
-            "Ponytail_dark_brown",
-            "Ponytail_dark_gray"
         ],
         "Ponytail2": [
             "Ponytail2_blonde",
@@ -6735,10 +5791,6 @@
         "Ponytail2_light": [
             "Ponytail2_light_brown"
         ],
-        "Ponytail2_dark": [
-            "Ponytail2_dark_brown",
-            "Ponytail2_dark_gray"
-        ],
         "High_ponytail": [
             "High_ponytail_blonde",
             "High_ponytail_ash",
@@ -6766,10 +5818,6 @@
         ],
         "High_ponytail_light": [
             "High_ponytail_light_brown"
-        ],
-        "High_ponytail_dark": [
-            "High_ponytail_dark_brown",
-            "High_ponytail_dark_gray"
         ],
         "Braid": [
             "Braid_blonde",
@@ -6799,10 +5847,6 @@
         "Braid_light": [
             "Braid_light_brown"
         ],
-        "Braid_dark": [
-            "Braid_dark_brown",
-            "Braid_dark_gray"
-        ],
         "Braid2": [
             "Braid2_blonde",
             "Braid2_ash",
@@ -6830,10 +5874,6 @@
         ],
         "Braid2_light": [
             "Braid2_light_brown"
-        ],
-        "Braid2_dark": [
-            "Braid2_dark_brown",
-            "Braid2_dark_gray"
         ],
         "Shoulderl": [
             "Shoulderl_blonde",
@@ -6863,10 +5903,6 @@
         "Shoulderl_light": [
             "Shoulderl_light_brown"
         ],
-        "Shoulderl_dark": [
-            "Shoulderl_dark_brown",
-            "Shoulderl_dark_gray"
-        ],
         "Shoulderr": [
             "Shoulderr_blonde",
             "Shoulderr_ash",
@@ -6894,10 +5930,6 @@
         ],
         "Shoulderr_light": [
             "Shoulderr_light_brown"
-        ],
-        "Shoulderr_dark": [
-            "Shoulderr_dark_brown",
-            "Shoulderr_dark_gray"
         ],
         "Long_tied": [
             "Long_tied_blonde",
@@ -6927,10 +5959,6 @@
         "Long_tied_light": [
             "Long_tied_light_brown"
         ],
-        "Long_tied_dark": [
-            "Long_tied_dark_brown",
-            "Long_tied_dark_gray"
-        ],
         "Relm_w/Ponytail": [
             "Relm_w/Ponytail_blonde",
             "Relm_w/Ponytail_ash",
@@ -6958,10 +5986,6 @@
         ],
         "Relm_w/Ponytail_light": [
             "Relm_w/Ponytail_light_brown"
-        ],
-        "Relm_w/Ponytail_dark": [
-            "Relm_w/Ponytail_dark_brown",
-            "Relm_w/Ponytail_dark_gray"
         ],
         "Loose": [
             "Loose_blonde",
@@ -6991,10 +6015,6 @@
         "Loose_light": [
             "Loose_light_brown"
         ],
-        "Loose_dark": [
-            "Loose_dark_brown",
-            "Loose_dark_gray"
-        ],
         "Bangslong": [
             "Bangslong_blonde",
             "Bangslong_ash",
@@ -7022,10 +6042,6 @@
         ],
         "Bangslong_light": [
             "Bangslong_light_brown"
-        ],
-        "Bangslong_dark": [
-            "Bangslong_dark_brown",
-            "Bangslong_dark_gray"
         ],
         "Bangslong2": [
             "Bangslong2_blonde",
@@ -7055,10 +6071,6 @@
         "Bangslong2_light": [
             "Bangslong2_light_brown"
         ],
-        "Bangslong2_dark": [
-            "Bangslong2_dark_brown",
-            "Bangslong2_dark_gray"
-        ],
         "Long": [
             "Long_blonde",
             "Long_ash",
@@ -7086,10 +6098,6 @@
         ],
         "Long_light": [
             "Long_light_brown"
-        ],
-        "Long_dark": [
-            "Long_dark_brown",
-            "Long_dark_gray"
         ],
         "Long_messy": [
             "Long_messy_blonde",
@@ -7119,10 +6127,6 @@
         "Long_messy_light": [
             "Long_messy_light_brown"
         ],
-        "Long_messy_dark": [
-            "Long_messy_dark_brown",
-            "Long_messy_dark_gray"
-        ],
         "Long_messy2": [
             "Long_messy2_blonde",
             "Long_messy2_ash",
@@ -7150,10 +6154,6 @@
         ],
         "Long_messy2_light": [
             "Long_messy2_light_brown"
-        ],
-        "Long_messy2_dark": [
-            "Long_messy2_dark_brown",
-            "Long_messy2_dark_gray"
         ],
         "Curtains_long": [
             "Curtains_long_blonde",
@@ -7183,10 +6183,6 @@
         "Curtains_long_light": [
             "Curtains_long_light_brown"
         ],
-        "Curtains_long_dark": [
-            "Curtains_long_dark_brown",
-            "Curtains_long_dark_gray"
-        ],
         "Wavy": [
             "Wavy_blonde",
             "Wavy_ash",
@@ -7214,10 +6210,6 @@
         ],
         "Wavy_light": [
             "Wavy_light_brown"
-        ],
-        "Wavy_dark": [
-            "Wavy_dark_brown",
-            "Wavy_dark_gray"
         ],
         "Child_Wavy": [
             "Child_Wavy_blonde",
@@ -7247,10 +6239,6 @@
         "Child_Wavy_light": [
             "Child_Wavy_light_brown"
         ],
-        "Child_Wavy_dark": [
-            "Child_Wavy_dark_brown",
-            "Child_Wavy_dark_gray"
-        ],
         "Long_center_part": [
             "Long_center_part_blonde",
             "Long_center_part_ash",
@@ -7278,10 +6266,6 @@
         ],
         "Long_center_part_light": [
             "Long_center_part_light_brown"
-        ],
-        "Long_center_part_dark": [
-            "Long_center_part_dark_brown",
-            "Long_center_part_dark_gray"
         ],
         "Long_straight": [
             "Long_straight_blonde",
@@ -7311,10 +6295,6 @@
         "Long_straight_light": [
             "Long_straight_light_brown"
         ],
-        "Long_straight_dark": [
-            "Long_straight_dark_brown",
-            "Long_straight_dark_gray"
-        ],
         "Princess": [
             "Princess_blonde",
             "Princess_ash",
@@ -7342,10 +6322,6 @@
         ],
         "Princess_light": [
             "Princess_light_brown"
-        ],
-        "Princess_dark": [
-            "Princess_dark_brown",
-            "Princess_dark_gray"
         ],
         "Sara": [
             "Sara_blonde",
@@ -7375,10 +6351,6 @@
         "Sara_light": [
             "Sara_light_brown"
         ],
-        "Sara_dark": [
-            "Sara_dark_brown",
-            "Sara_dark_gray"
-        ],
         "Long_band": [
             "Long_band_blonde",
             "Long_band_ash",
@@ -7406,10 +6378,6 @@
         ],
         "Long_band_light": [
             "Long_band_light_brown"
-        ],
-        "Long_band_dark": [
-            "Long_band_dark_brown",
-            "Long_band_dark_gray"
         ],
         "Xlong": [
             "Xlong_blonde",
@@ -7439,10 +6407,6 @@
         "Xlong_light": [
             "Xlong_light_brown"
         ],
-        "Xlong_dark": [
-            "Xlong_dark_brown",
-            "Xlong_dark_gray"
-        ],
         "XLong_Wavy": [
             "XLong_Wavy_blonde",
             "XLong_Wavy_ash",
@@ -7471,10 +6435,6 @@
         "XLong_Wavy_light": [
             "XLong_Wavy_light_brown"
         ],
-        "XLong_Wavy_dark": [
-            "XLong_Wavy_dark_brown",
-            "XLong_Wavy_dark_gray"
-        ],
         "Relm_XLong": [
             "Relm_XLong_blonde",
             "Relm_XLong_ash",
@@ -7502,10 +6462,6 @@
         ],
         "Relm_XLong_light": [
             "Relm_XLong_light_brown"
-        ],
-        "Relm_XLong_dark": [
-            "Relm_XLong_dark_brown",
-            "Relm_XLong_dark_gray"
         ]
     },
     "horns": {
@@ -7546,11 +6502,6 @@
         "Backwards_Horns_light": [
             "Backwards_Horns_light_brown"
         ],
-        "Backwards_Horns_dark": [
-            "Backwards_Horns_dark_brown",
-            "Backwards_Horns_dark_gray",
-            "Backwards_Horns_dark_green"
-        ],
         "Backwards_Horns_skin": [
             "Backwards_Horns_skin_black",
             "Backwards_Horns_skin_blue",
@@ -7561,9 +6512,6 @@
         ],
         "Backwards_Horns_pale": [
             "Backwards_Horns_pale_green"
-        ],
-        "Backwards_Horns_bright": [
-            "Backwards_Horns_bright_green"
         ],
         "Backwards_Horns_fur": [
             "Backwards_Horns_fur_black",
@@ -7621,11 +6569,6 @@
         "Curled_Horns_light": [
             "Curled_Horns_light_brown"
         ],
-        "Curled_Horns_dark": [
-            "Curled_Horns_dark_brown",
-            "Curled_Horns_dark_gray",
-            "Curled_Horns_dark_green"
-        ],
         "Curled_Horns_skin": [
             "Curled_Horns_skin_black",
             "Curled_Horns_skin_blue",
@@ -7636,9 +6579,6 @@
         ],
         "Curled_Horns_pale": [
             "Curled_Horns_pale_green"
-        ],
-        "Curled_Horns_bright": [
-            "Curled_Horns_bright_green"
         ],
         "Curled_Horns_fur": [
             "Curled_Horns_fur_black",
@@ -7679,12 +6619,6 @@
         "Fin_pale": [
             "Fin_pale_green"
         ],
-        "Fin_bright": [
-            "Fin_bright_green"
-        ],
-        "Fin_dark": [
-            "Fin_dark_green"
-        ],
         "Fin_fur": [
             "Fin_fur_black",
             "Fin_fur_brown",
@@ -7711,12 +6645,6 @@
         ],
         "Short_fin_pale": [
             "Short_fin_pale_green"
-        ],
-        "Short_fin_bright": [
-            "Short_fin_bright_green"
-        ],
-        "Short_fin_dark": [
-            "Short_fin_dark_green"
         ],
         "Short_fin_fur": [
             "Short_fin_fur_black",
@@ -12394,10 +11322,6 @@
             "Robe_red",
             "Robe_white"
         ],
-        "Robe_dark": [
-            "Robe_dark_brown",
-            "Robe_dark_gray"
-        ],
         "Robe_forest": [
             "Robe_forest_green"
         ],
@@ -12603,9 +11527,6 @@
         ],
         "Iverness_cloak": [
             "Iverness_cloak_black"
-        ],
-        "Trench_coat_dark": [
-            "Trench_coat_dark_gray"
         ],
         "Trench_coat": [
             "Trench_coat_gray"
@@ -14104,12 +13025,6 @@
         ],
         "Hoofs_pale": [
             "Hoofs_pale_green"
-        ],
-        "Hoofs_bright": [
-            "Hoofs_bright_green"
-        ],
-        "Hoofs_dark": [
-            "Hoofs_dark_green"
         ],
         "Hoofs_fur": [
             "Hoofs_fur_black",
