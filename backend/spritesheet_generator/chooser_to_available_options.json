@@ -15,6 +15,18 @@
             "Body_color_blue",
             "Body_color_green"
         ],
+        "Body_color_zombie": [
+            "Body_color_zombie_green"
+        ],
+        "Body_color_pale": [
+            "Body_color_pale_green"
+        ],
+        "Body_color_bright": [
+            "Body_color_bright_green"
+        ],
+        "Body_color_dark": [
+            "Body_color_dark_green"
+        ],
         "Body_color_fur": [
             "Body_color_fur_black",
             "Body_color_fur_brown",
@@ -23,6 +35,12 @@
             "Body_color_fur_gold",
             "Body_color_fur_grey",
             "Body_color_fur_white"
+        ],
+        "Zombie": [
+            "Zombie_zombie"
+        ],
+        "Skeleton": [
+            "Skeleton_skeleton"
         ]
     },
     "wound_arm": [
@@ -764,6 +782,40 @@
         ]
     },
     "head": {
+        "Human_child": [
+            "Human_child_light",
+            "Human_child_amber",
+            "Human_child_olive",
+            "Human_child_taupe",
+            "Human_child_bronze",
+            "Human_child_brown",
+            "Human_child_black",
+            "Human_child_lavender",
+            "Human_child_blue",
+            "Human_child_green",
+            "Human_child_zombie"
+        ],
+        "Human_child_zombie": [
+            "Human_child_zombie_green"
+        ],
+        "Human_child_pale": [
+            "Human_child_pale_green"
+        ],
+        "Human_child_bright": [
+            "Human_child_bright_green"
+        ],
+        "Human_child_dark": [
+            "Human_child_dark_green"
+        ],
+        "Human_child_fur": [
+            "Human_child_fur_black",
+            "Human_child_fur_brown",
+            "Human_child_fur_tan",
+            "Human_child_fur_copper",
+            "Human_child_fur_gold",
+            "Human_child_fur_grey",
+            "Human_child_fur_white"
+        ],
         "Human_female": [
             "Human_female_light",
             "Human_female_amber",
@@ -776,6 +828,18 @@
             "Human_female_blue",
             "Human_female_green",
             "Human_female_zombie"
+        ],
+        "Human_female_zombie": [
+            "Human_female_zombie_green"
+        ],
+        "Human_female_pale": [
+            "Human_female_pale_green"
+        ],
+        "Human_female_bright": [
+            "Human_female_bright_green"
+        ],
+        "Human_female_dark": [
+            "Human_female_dark_green"
         ],
         "Human_female_fur": [
             "Human_female_fur_black",
@@ -799,6 +863,18 @@
             "Human_male_green",
             "Human_male_zombie"
         ],
+        "Human_male_zombie": [
+            "Human_male_zombie_green"
+        ],
+        "Human_male_pale": [
+            "Human_male_pale_green"
+        ],
+        "Human_male_bright": [
+            "Human_male_bright_green"
+        ],
+        "Human_male_dark": [
+            "Human_male_dark_green"
+        ],
         "Human_male_fur": [
             "Human_male_fur_black",
             "Human_male_fur_brown",
@@ -820,6 +896,18 @@
             "Human_female_elderly_blue",
             "Human_female_elderly_green",
             "Human_female_elderly_zombie"
+        ],
+        "Human_female_elderly_zombie": [
+            "Human_female_elderly_zombie_green"
+        ],
+        "Human_female_elderly_pale": [
+            "Human_female_elderly_pale_green"
+        ],
+        "Human_female_elderly_bright": [
+            "Human_female_elderly_bright_green"
+        ],
+        "Human_female_elderly_dark": [
+            "Human_female_elderly_dark_green"
         ],
         "Human_female_elderly_fur": [
             "Human_female_elderly_fur_black",
@@ -843,6 +931,18 @@
             "Human_male_elderly_green",
             "Human_male_elderly_zombie"
         ],
+        "Human_male_elderly_zombie": [
+            "Human_male_elderly_zombie_green"
+        ],
+        "Human_male_elderly_pale": [
+            "Human_male_elderly_pale_green"
+        ],
+        "Human_male_elderly_bright": [
+            "Human_male_elderly_bright_green"
+        ],
+        "Human_male_elderly_dark": [
+            "Human_male_elderly_dark_green"
+        ],
         "Human_male_elderly_fur": [
             "Human_male_elderly_fur_black",
             "Human_male_elderly_fur_brown",
@@ -864,6 +964,18 @@
             "Human_male_plump_blue",
             "Human_male_plump_green",
             "Human_male_plump_zombie"
+        ],
+        "Human_male_plump_zombie": [
+            "Human_male_plump_zombie_green"
+        ],
+        "Human_male_plump_pale": [
+            "Human_male_plump_pale_green"
+        ],
+        "Human_male_plump_bright": [
+            "Human_male_plump_bright_green"
+        ],
+        "Human_male_plump_dark": [
+            "Human_male_plump_dark_green"
         ],
         "Human_male_plump_fur": [
             "Human_male_plump_fur_black",
@@ -887,6 +999,18 @@
             "Human_male_gaunt_green",
             "Human_male_gaunt_zombie"
         ],
+        "Human_male_gaunt_zombie": [
+            "Human_male_gaunt_zombie_green"
+        ],
+        "Human_male_gaunt_pale": [
+            "Human_male_gaunt_pale_green"
+        ],
+        "Human_male_gaunt_bright": [
+            "Human_male_gaunt_bright_green"
+        ],
+        "Human_male_gaunt_dark": [
+            "Human_male_gaunt_dark_green"
+        ],
         "Human_male_gaunt_fur": [
             "Human_male_gaunt_fur_black",
             "Human_male_gaunt_fur_brown",
@@ -908,6 +1032,18 @@
             "Human_male_small_blue",
             "Human_male_small_green",
             "Human_male_small_zombie"
+        ],
+        "Human_male_small_zombie": [
+            "Human_male_small_zombie_green"
+        ],
+        "Human_male_small_pale": [
+            "Human_male_small_pale_green"
+        ],
+        "Human_male_small_bright": [
+            "Human_male_small_bright_green"
+        ],
+        "Human_male_small_dark": [
+            "Human_male_small_dark_green"
         ],
         "Human_male_small_fur": [
             "Human_male_small_fur_black",
@@ -931,6 +1067,18 @@
             "Human_female_small_green",
             "Human_female_small_zombie"
         ],
+        "Human_female_small_zombie": [
+            "Human_female_small_zombie_green"
+        ],
+        "Human_female_small_pale": [
+            "Human_female_small_pale_green"
+        ],
+        "Human_female_small_bright": [
+            "Human_female_small_bright_green"
+        ],
+        "Human_female_small_dark": [
+            "Human_female_small_dark_green"
+        ],
         "Human_female_small_fur": [
             "Human_female_small_fur_black",
             "Human_female_small_fur_brown",
@@ -952,6 +1100,18 @@
             "Human_elderly_small_blue",
             "Human_elderly_small_green",
             "Human_elderly_small_zombie"
+        ],
+        "Human_elderly_small_zombie": [
+            "Human_elderly_small_zombie_green"
+        ],
+        "Human_elderly_small_pale": [
+            "Human_elderly_small_pale_green"
+        ],
+        "Human_elderly_small_bright": [
+            "Human_elderly_small_bright_green"
+        ],
+        "Human_elderly_small_dark": [
+            "Human_elderly_small_dark_green"
         ],
         "Human_elderly_small_fur": [
             "Human_elderly_small_fur_black",
@@ -984,6 +1144,52 @@
             "Boarman_green",
             "Boarman_zombie"
         ],
+        "Boarman_zombie": [
+            "Boarman_zombie_green"
+        ],
+        "Boarman_pale": [
+            "Boarman_pale_green"
+        ],
+        "Boarman_bright": [
+            "Boarman_bright_green"
+        ],
+        "Boarman_dark": [
+            "Boarman_dark_green"
+        ],
+        "Boarman_child_fur": [
+            "Boarman_child_fur_black",
+            "Boarman_child_fur_brown",
+            "Boarman_child_fur_tan",
+            "Boarman_child_fur_copper",
+            "Boarman_child_fur_gold",
+            "Boarman_child_fur_grey",
+            "Boarman_child_fur_white"
+        ],
+        "Boarman_child": [
+            "Boarman_child_light",
+            "Boarman_child_amber",
+            "Boarman_child_olive",
+            "Boarman_child_taupe",
+            "Boarman_child_bronze",
+            "Boarman_child_brown",
+            "Boarman_child_black",
+            "Boarman_child_lavender",
+            "Boarman_child_blue",
+            "Boarman_child_green",
+            "Boarman_child_zombie"
+        ],
+        "Boarman_child_zombie": [
+            "Boarman_child_zombie_green"
+        ],
+        "Boarman_child_pale": [
+            "Boarman_child_pale_green"
+        ],
+        "Boarman_child_bright": [
+            "Boarman_child_bright_green"
+        ],
+        "Boarman_child_dark": [
+            "Boarman_child_dark_green"
+        ],
         "Pig": [
             "Pig_light",
             "Pig_amber",
@@ -997,6 +1203,18 @@
             "Pig_green",
             "Pig_zombie"
         ],
+        "Pig_zombie": [
+            "Pig_zombie_green"
+        ],
+        "Pig_pale": [
+            "Pig_pale_green"
+        ],
+        "Pig_bright": [
+            "Pig_bright_green"
+        ],
+        "Pig_dark": [
+            "Pig_dark_green"
+        ],
         "Pig_fur": [
             "Pig_fur_black",
             "Pig_fur_brown",
@@ -1005,6 +1223,40 @@
             "Pig_fur_gold",
             "Pig_fur_grey",
             "Pig_fur_white"
+        ],
+        "Pig_child": [
+            "Pig_child_light",
+            "Pig_child_amber",
+            "Pig_child_olive",
+            "Pig_child_taupe",
+            "Pig_child_bronze",
+            "Pig_child_brown",
+            "Pig_child_black",
+            "Pig_child_lavender",
+            "Pig_child_blue",
+            "Pig_child_green",
+            "Pig_child_zombie"
+        ],
+        "Pig_child_zombie": [
+            "Pig_child_zombie_green"
+        ],
+        "Pig_child_pale": [
+            "Pig_child_pale_green"
+        ],
+        "Pig_child_bright": [
+            "Pig_child_bright_green"
+        ],
+        "Pig_child_dark": [
+            "Pig_child_dark_green"
+        ],
+        "Pig_child_fur": [
+            "Pig_child_fur_black",
+            "Pig_child_fur_brown",
+            "Pig_child_fur_tan",
+            "Pig_child_fur_copper",
+            "Pig_child_fur_gold",
+            "Pig_child_fur_grey",
+            "Pig_child_fur_white"
         ],
         "Sheep_fur": [
             "Sheep_fur_black",
@@ -1037,6 +1289,43 @@
         "Sheep_bright": [
             "Sheep_bright_green"
         ],
+        "Sheep_dark": [
+            "Sheep_dark_green"
+        ],
+        "Sheep_child_fur": [
+            "Sheep_child_fur_black",
+            "Sheep_child_fur_brown",
+            "Sheep_child_fur_tan",
+            "Sheep_child_fur_copper",
+            "Sheep_child_fur_gold",
+            "Sheep_child_fur_grey",
+            "Sheep_child_fur_white"
+        ],
+        "Sheep_child": [
+            "Sheep_child_light",
+            "Sheep_child_amber",
+            "Sheep_child_olive",
+            "Sheep_child_taupe",
+            "Sheep_child_bronze",
+            "Sheep_child_brown",
+            "Sheep_child_black",
+            "Sheep_child_lavender",
+            "Sheep_child_blue",
+            "Sheep_child_green",
+            "Sheep_child_zombie"
+        ],
+        "Sheep_child_zombie": [
+            "Sheep_child_zombie_green"
+        ],
+        "Sheep_child_pale": [
+            "Sheep_child_pale_green"
+        ],
+        "Sheep_child_bright": [
+            "Sheep_child_bright_green"
+        ],
+        "Sheep_child_dark": [
+            "Sheep_child_dark_green"
+        ],
         "Minotaur_fur": [
             "Minotaur_fur_black",
             "Minotaur_fur_brown",
@@ -1058,6 +1347,18 @@
             "Minotaur_blue",
             "Minotaur_green",
             "Minotaur_zombie"
+        ],
+        "Minotaur_zombie": [
+            "Minotaur_zombie_green"
+        ],
+        "Minotaur_pale": [
+            "Minotaur_pale_green"
+        ],
+        "Minotaur_bright": [
+            "Minotaur_bright_green"
+        ],
+        "Minotaur_dark": [
+            "Minotaur_dark_green"
         ],
         "Minotaur_female_fur": [
             "Minotaur_female_fur_black",
@@ -1081,6 +1382,52 @@
             "Minotaur_female_green",
             "Minotaur_female_zombie"
         ],
+        "Minotaur_female_zombie": [
+            "Minotaur_female_zombie_green"
+        ],
+        "Minotaur_female_pale": [
+            "Minotaur_female_pale_green"
+        ],
+        "Minotaur_female_bright": [
+            "Minotaur_female_bright_green"
+        ],
+        "Minotaur_female_dark": [
+            "Minotaur_female_dark_green"
+        ],
+        "Minotaur_child_fur": [
+            "Minotaur_child_fur_black",
+            "Minotaur_child_fur_brown",
+            "Minotaur_child_fur_tan",
+            "Minotaur_child_fur_copper",
+            "Minotaur_child_fur_gold",
+            "Minotaur_child_fur_grey",
+            "Minotaur_child_fur_white"
+        ],
+        "Minotaur_child": [
+            "Minotaur_child_light",
+            "Minotaur_child_amber",
+            "Minotaur_child_olive",
+            "Minotaur_child_taupe",
+            "Minotaur_child_bronze",
+            "Minotaur_child_brown",
+            "Minotaur_child_black",
+            "Minotaur_child_lavender",
+            "Minotaur_child_blue",
+            "Minotaur_child_green",
+            "Minotaur_child_zombie"
+        ],
+        "Minotaur_child_zombie": [
+            "Minotaur_child_zombie_green"
+        ],
+        "Minotaur_child_pale": [
+            "Minotaur_child_pale_green"
+        ],
+        "Minotaur_child_bright": [
+            "Minotaur_child_bright_green"
+        ],
+        "Minotaur_child_dark": [
+            "Minotaur_child_dark_green"
+        ],
         "Wartotaur_fur": [
             "Wartotaur_fur_black",
             "Wartotaur_fur_brown",
@@ -1102,6 +1449,52 @@
             "Wartotaur_blue",
             "Wartotaur_green",
             "Wartotaur_zombie"
+        ],
+        "Wartotaur_zombie": [
+            "Wartotaur_zombie_green"
+        ],
+        "Wartotaur_pale": [
+            "Wartotaur_pale_green"
+        ],
+        "Wartotaur_bright": [
+            "Wartotaur_bright_green"
+        ],
+        "Wartotaur_dark": [
+            "Wartotaur_dark_green"
+        ],
+        "Wolf_child_fur": [
+            "Wolf_child_fur_black",
+            "Wolf_child_fur_brown",
+            "Wolf_child_fur_tan",
+            "Wolf_child_fur_copper",
+            "Wolf_child_fur_gold",
+            "Wolf_child_fur_grey",
+            "Wolf_child_fur_white"
+        ],
+        "Wolf_child": [
+            "Wolf_child_light",
+            "Wolf_child_amber",
+            "Wolf_child_olive",
+            "Wolf_child_taupe",
+            "Wolf_child_bronze",
+            "Wolf_child_brown",
+            "Wolf_child_black",
+            "Wolf_child_lavender",
+            "Wolf_child_blue",
+            "Wolf_child_green",
+            "Wolf_child_zombie"
+        ],
+        "Wolf_child_zombie": [
+            "Wolf_child_zombie_green"
+        ],
+        "Wolf_child_pale": [
+            "Wolf_child_pale_green"
+        ],
+        "Wolf_child_bright": [
+            "Wolf_child_bright_green"
+        ],
+        "Wolf_child_dark": [
+            "Wolf_child_dark_green"
         ],
         "Wolf_female_fur": [
             "Wolf_female_fur_black",
@@ -1128,6 +1521,15 @@
         "Wolf_female_zombie": [
             "Wolf_female_zombie_green"
         ],
+        "Wolf_female_pale": [
+            "Wolf_female_pale_green"
+        ],
+        "Wolf_female_bright": [
+            "Wolf_female_bright_green"
+        ],
+        "Wolf_female_dark": [
+            "Wolf_female_dark_green"
+        ],
         "Wolf_male_fur": [
             "Wolf_male_fur_black",
             "Wolf_male_fur_brown",
@@ -1136,6 +1538,675 @@
             "Wolf_male_fur_gold",
             "Wolf_male_fur_grey",
             "Wolf_male_fur_white"
+        ],
+        "Wolf_male": [
+            "Wolf_male_light",
+            "Wolf_male_amber",
+            "Wolf_male_olive",
+            "Wolf_male_taupe",
+            "Wolf_male_bronze",
+            "Wolf_male_brown",
+            "Wolf_male_black",
+            "Wolf_male_lavender",
+            "Wolf_male_blue",
+            "Wolf_male_green",
+            "Wolf_male_zombie"
+        ],
+        "Wolf_male_zombie": [
+            "Wolf_male_zombie_green"
+        ],
+        "Wolf_male_pale": [
+            "Wolf_male_pale_green"
+        ],
+        "Wolf_male_bright": [
+            "Wolf_male_bright_green"
+        ],
+        "Wolf_male_dark": [
+            "Wolf_male_dark_green"
+        ],
+        "Rabbit_fur": [
+            "Rabbit_fur_black",
+            "Rabbit_fur_brown",
+            "Rabbit_fur_tan",
+            "Rabbit_fur_copper",
+            "Rabbit_fur_gold",
+            "Rabbit_fur_grey",
+            "Rabbit_fur_white"
+        ],
+        "Rabbit": [
+            "Rabbit_light",
+            "Rabbit_amber",
+            "Rabbit_olive",
+            "Rabbit_taupe",
+            "Rabbit_bronze",
+            "Rabbit_brown",
+            "Rabbit_black",
+            "Rabbit_lavender",
+            "Rabbit_blue",
+            "Rabbit_green",
+            "Rabbit_zombie"
+        ],
+        "Rabbit_zombie": [
+            "Rabbit_zombie_green"
+        ],
+        "Rabbit_pale": [
+            "Rabbit_pale_green"
+        ],
+        "Rabbit_bright": [
+            "Rabbit_bright_green"
+        ],
+        "Rabbit_dark": [
+            "Rabbit_dark_green"
+        ],
+        "Rabbit_child_fur": [
+            "Rabbit_child_fur_black",
+            "Rabbit_child_fur_brown",
+            "Rabbit_child_fur_tan",
+            "Rabbit_child_fur_copper",
+            "Rabbit_child_fur_gold",
+            "Rabbit_child_fur_grey",
+            "Rabbit_child_fur_white"
+        ],
+        "Rabbit_child": [
+            "Rabbit_child_light",
+            "Rabbit_child_amber",
+            "Rabbit_child_olive",
+            "Rabbit_child_taupe",
+            "Rabbit_child_bronze",
+            "Rabbit_child_brown",
+            "Rabbit_child_black",
+            "Rabbit_child_lavender",
+            "Rabbit_child_blue",
+            "Rabbit_child_green",
+            "Rabbit_child_zombie"
+        ],
+        "Rabbit_child_zombie": [
+            "Rabbit_child_zombie_green"
+        ],
+        "Rabbit_child_pale": [
+            "Rabbit_child_pale_green"
+        ],
+        "Rabbit_child_bright": [
+            "Rabbit_child_bright_green"
+        ],
+        "Rabbit_child_dark": [
+            "Rabbit_child_dark_green"
+        ],
+        "Rat_fur": [
+            "Rat_fur_black",
+            "Rat_fur_brown",
+            "Rat_fur_tan",
+            "Rat_fur_copper",
+            "Rat_fur_gold",
+            "Rat_fur_grey",
+            "Rat_fur_white"
+        ],
+        "Rat": [
+            "Rat_light",
+            "Rat_amber",
+            "Rat_olive",
+            "Rat_taupe",
+            "Rat_bronze",
+            "Rat_brown",
+            "Rat_black",
+            "Rat_lavender",
+            "Rat_blue",
+            "Rat_green",
+            "Rat_zombie"
+        ],
+        "Rat_zombie": [
+            "Rat_zombie_green"
+        ],
+        "Rat_pale": [
+            "Rat_pale_green"
+        ],
+        "Rat_bright": [
+            "Rat_bright_green"
+        ],
+        "Rat_dark": [
+            "Rat_dark_green"
+        ],
+        "Rat_child_fur": [
+            "Rat_child_fur_black",
+            "Rat_child_fur_brown",
+            "Rat_child_fur_tan",
+            "Rat_child_fur_copper",
+            "Rat_child_fur_gold",
+            "Rat_child_fur_grey",
+            "Rat_child_fur_white"
+        ],
+        "Rat_child": [
+            "Rat_child_light",
+            "Rat_child_amber",
+            "Rat_child_olive",
+            "Rat_child_taupe",
+            "Rat_child_bronze",
+            "Rat_child_brown",
+            "Rat_child_black",
+            "Rat_child_lavender",
+            "Rat_child_blue",
+            "Rat_child_green",
+            "Rat_child_zombie"
+        ],
+        "Rat_child_zombie": [
+            "Rat_child_zombie_green"
+        ],
+        "Rat_child_pale": [
+            "Rat_child_pale_green"
+        ],
+        "Rat_child_bright": [
+            "Rat_child_bright_green"
+        ],
+        "Rat_child_dark": [
+            "Rat_child_dark_green"
+        ],
+        "Mouse_fur": [
+            "Mouse_fur_black",
+            "Mouse_fur_brown",
+            "Mouse_fur_tan",
+            "Mouse_fur_copper",
+            "Mouse_fur_gold",
+            "Mouse_fur_grey",
+            "Mouse_fur_white"
+        ],
+        "Mouse": [
+            "Mouse_light",
+            "Mouse_amber",
+            "Mouse_olive",
+            "Mouse_taupe",
+            "Mouse_bronze",
+            "Mouse_brown",
+            "Mouse_black",
+            "Mouse_lavender",
+            "Mouse_blue",
+            "Mouse_green"
+        ],
+        "Mouse_zombie": [
+            "Mouse_zombie_green"
+        ],
+        "Mouse_pale": [
+            "Mouse_pale_green"
+        ],
+        "Mouse_bright": [
+            "Mouse_bright_green"
+        ],
+        "Mouse_dark": [
+            "Mouse_dark_green"
+        ],
+        "Mouse_child_fur": [
+            "Mouse_child_fur_black",
+            "Mouse_child_fur_brown",
+            "Mouse_child_fur_tan",
+            "Mouse_child_fur_copper",
+            "Mouse_child_fur_gold",
+            "Mouse_child_fur_grey",
+            "Mouse_child_fur_white"
+        ],
+        "Mouse_child": [
+            "Mouse_child_light",
+            "Mouse_child_amber",
+            "Mouse_child_olive",
+            "Mouse_child_taupe",
+            "Mouse_child_bronze",
+            "Mouse_child_brown",
+            "Mouse_child_black",
+            "Mouse_child_lavender",
+            "Mouse_child_blue",
+            "Mouse_child_green",
+            "Mouse_child_zombie"
+        ],
+        "Mouse_child_zombie": [
+            "Mouse_child_zombie_green"
+        ],
+        "Mouse_child_pale": [
+            "Mouse_child_pale_green"
+        ],
+        "Mouse_child_bright": [
+            "Mouse_child_bright_green"
+        ],
+        "Mouse_child_dark": [
+            "Mouse_child_dark_green"
+        ],
+        "Lizard_child": [
+            "Lizard_child_light",
+            "Lizard_child_amber",
+            "Lizard_child_olive",
+            "Lizard_child_taupe",
+            "Lizard_child_bronze",
+            "Lizard_child_brown",
+            "Lizard_child_black",
+            "Lizard_child_lavender",
+            "Lizard_child_blue",
+            "Lizard_child_green"
+        ],
+        "Lizard_child_zombie": [
+            "Lizard_child_zombie_green"
+        ],
+        "Lizard_child_pale": [
+            "Lizard_child_pale_green"
+        ],
+        "Lizard_child_bright": [
+            "Lizard_child_bright_green"
+        ],
+        "Lizard_child_dark": [
+            "Lizard_child_dark_green"
+        ],
+        "Lizard_female": [
+            "Lizard_female_light",
+            "Lizard_female_amber",
+            "Lizard_female_olive",
+            "Lizard_female_taupe",
+            "Lizard_female_bronze",
+            "Lizard_female_brown",
+            "Lizard_female_black",
+            "Lizard_female_lavender",
+            "Lizard_female_blue",
+            "Lizard_female_green"
+        ],
+        "Lizard_female_zombie": [
+            "Lizard_female_zombie_green"
+        ],
+        "Lizard_female_pale": [
+            "Lizard_female_pale_green"
+        ],
+        "Lizard_female_bright": [
+            "Lizard_female_bright_green"
+        ],
+        "Lizard_female_dark": [
+            "Lizard_female_dark_green"
+        ],
+        "Lizard_male": [
+            "Lizard_male_light",
+            "Lizard_male_amber",
+            "Lizard_male_olive",
+            "Lizard_male_taupe",
+            "Lizard_male_bronze",
+            "Lizard_male_brown",
+            "Lizard_male_black",
+            "Lizard_male_lavender",
+            "Lizard_male_blue",
+            "Lizard_male_green"
+        ],
+        "Lizard_male_zombie": [
+            "Lizard_male_zombie_green"
+        ],
+        "Lizard_male_pale": [
+            "Lizard_male_pale_green"
+        ],
+        "Lizard_male_bright": [
+            "Lizard_male_bright_green"
+        ],
+        "Lizard_male_dark": [
+            "Lizard_male_dark_green"
+        ],
+        "Orc_child": [
+            "Orc_child_light",
+            "Orc_child_amber",
+            "Orc_child_olive",
+            "Orc_child_taupe",
+            "Orc_child_bronze",
+            "Orc_child_brown",
+            "Orc_child_black",
+            "Orc_child_lavender",
+            "Orc_child_blue",
+            "Orc_child_green",
+            "Orc_child_zombie"
+        ],
+        "Orc_child_zombie": [
+            "Orc_child_zombie_green"
+        ],
+        "Orc_child_pale": [
+            "Orc_child_pale_green"
+        ],
+        "Orc_child_bright": [
+            "Orc_child_bright_green"
+        ],
+        "Orc_child_dark": [
+            "Orc_child_dark_green"
+        ],
+        "Orc_child_fur": [
+            "Orc_child_fur_black",
+            "Orc_child_fur_brown",
+            "Orc_child_fur_tan",
+            "Orc_child_fur_copper",
+            "Orc_child_fur_gold",
+            "Orc_child_fur_grey",
+            "Orc_child_fur_white"
+        ],
+        "Orc_female": [
+            "Orc_female_light",
+            "Orc_female_amber",
+            "Orc_female_olive",
+            "Orc_female_taupe",
+            "Orc_female_bronze",
+            "Orc_female_brown",
+            "Orc_female_black",
+            "Orc_female_lavender",
+            "Orc_female_blue",
+            "Orc_female_green"
+        ],
+        "Orc_female_zombie": [
+            "Orc_female_zombie_green"
+        ],
+        "Orc_female_pale": [
+            "Orc_female_pale_green"
+        ],
+        "Orc_female_bright": [
+            "Orc_female_bright_green"
+        ],
+        "Orc_female_dark": [
+            "Orc_female_dark_green"
+        ],
+        "Orc_male": [
+            "Orc_male_light",
+            "Orc_male_amber",
+            "Orc_male_olive",
+            "Orc_male_taupe",
+            "Orc_male_bronze",
+            "Orc_male_brown",
+            "Orc_male_black",
+            "Orc_male_lavender",
+            "Orc_male_blue",
+            "Orc_male_green",
+            "Orc_male_zombie"
+        ],
+        "Orc_male_zombie": [
+            "Orc_male_zombie_green"
+        ],
+        "Orc_male_pale": [
+            "Orc_male_pale_green"
+        ],
+        "Orc_male_bright": [
+            "Orc_male_bright_green"
+        ],
+        "Orc_male_dark": [
+            "Orc_male_dark_green"
+        ],
+        "Orc_male_fur": [
+            "Orc_male_fur_black",
+            "Orc_male_fur_brown",
+            "Orc_male_fur_tan",
+            "Orc_male_fur_copper",
+            "Orc_male_fur_gold",
+            "Orc_male_fur_grey",
+            "Orc_male_fur_white"
+        ],
+        "Goblin": [
+            "Goblin_light",
+            "Goblin_amber",
+            "Goblin_olive",
+            "Goblin_taupe",
+            "Goblin_bronze",
+            "Goblin_brown",
+            "Goblin_black",
+            "Goblin_lavender",
+            "Goblin_blue",
+            "Goblin_green",
+            "Goblin_zombie"
+        ],
+        "Goblin_zombie": [
+            "Goblin_zombie_green"
+        ],
+        "Goblin_pale": [
+            "Goblin_pale_green"
+        ],
+        "Goblin_bright": [
+            "Goblin_bright_green"
+        ],
+        "Goblin_dark": [
+            "Goblin_dark_green"
+        ],
+        "Goblin_fur": [
+            "Goblin_fur_black",
+            "Goblin_fur_brown",
+            "Goblin_fur_tan",
+            "Goblin_fur_copper",
+            "Goblin_fur_gold",
+            "Goblin_fur_grey",
+            "Goblin_fur_white"
+        ],
+        "Goblin_child": [
+            "Goblin_child_light",
+            "Goblin_child_amber",
+            "Goblin_child_olive",
+            "Goblin_child_taupe",
+            "Goblin_child_bronze",
+            "Goblin_child_brown",
+            "Goblin_child_black",
+            "Goblin_child_lavender",
+            "Goblin_child_blue",
+            "Goblin_child_green",
+            "Goblin_child_zombie"
+        ],
+        "Goblin_child_zombie": [
+            "Goblin_child_zombie_green"
+        ],
+        "Goblin_child_pale": [
+            "Goblin_child_pale_green"
+        ],
+        "Goblin_child_bright": [
+            "Goblin_child_bright_green"
+        ],
+        "Goblin_child_dark": [
+            "Goblin_child_dark_green"
+        ],
+        "Goblin_child_fur": [
+            "Goblin_child_fur_black",
+            "Goblin_child_fur_brown",
+            "Goblin_child_fur_tan",
+            "Goblin_child_fur_copper",
+            "Goblin_child_fur_gold",
+            "Goblin_child_fur_grey",
+            "Goblin_child_fur_white"
+        ],
+        "Alien": [
+            "Alien_lavender",
+            "Alien_light",
+            "Alien_amber",
+            "Alien_olive",
+            "Alien_taupe",
+            "Alien_bronze",
+            "Alien_brown",
+            "Alien_black",
+            "Alien_blue",
+            "Alien_green"
+        ],
+        "Alien_zombie": [
+            "Alien_zombie_green"
+        ],
+        "Alien_pale": [
+            "Alien_pale_green"
+        ],
+        "Alien_bright": [
+            "Alien_bright_green"
+        ],
+        "Alien_dark": [
+            "Alien_dark_green"
+        ],
+        "Alien_fur": [
+            "Alien_fur_black",
+            "Alien_fur_brown",
+            "Alien_fur_tan",
+            "Alien_fur_copper",
+            "Alien_fur_gold",
+            "Alien_fur_grey",
+            "Alien_fur_white"
+        ],
+        "Troll": [
+            "Troll_light",
+            "Troll_amber",
+            "Troll_olive",
+            "Troll_taupe",
+            "Troll_bronze",
+            "Troll_brown",
+            "Troll_black",
+            "Troll_lavender",
+            "Troll_blue",
+            "Troll_green",
+            "Troll_zombie"
+        ],
+        "Troll_zombie": [
+            "Troll_zombie_green"
+        ],
+        "Troll_pale": [
+            "Troll_pale_green"
+        ],
+        "Troll_bright": [
+            "Troll_bright_green"
+        ],
+        "Troll_dark": [
+            "Troll_dark_green"
+        ],
+        "Troll_fur": [
+            "Troll_fur_black",
+            "Troll_fur_brown",
+            "Troll_fur_tan",
+            "Troll_fur_copper",
+            "Troll_fur_gold",
+            "Troll_fur_grey",
+            "Troll_fur_white"
+        ],
+        "Troll_child": [
+            "Troll_child_light",
+            "Troll_child_amber",
+            "Troll_child_olive",
+            "Troll_child_taupe",
+            "Troll_child_bronze",
+            "Troll_child_brown",
+            "Troll_child_black",
+            "Troll_child_lavender",
+            "Troll_child_blue",
+            "Troll_child_green",
+            "Troll_child_zombie"
+        ],
+        "Troll_child_zombie": [
+            "Troll_child_zombie_green"
+        ],
+        "Troll_child_pale": [
+            "Troll_child_pale_green"
+        ],
+        "Troll_child_bright": [
+            "Troll_child_bright_green"
+        ],
+        "Troll_child_dark": [
+            "Troll_child_dark_green"
+        ],
+        "Troll_child_fur": [
+            "Troll_child_fur_black",
+            "Troll_child_fur_brown",
+            "Troll_child_fur_tan",
+            "Troll_child_fur_copper",
+            "Troll_child_fur_gold",
+            "Troll_child_fur_grey",
+            "Troll_child_fur_white"
+        ],
+        "Skeleton": [
+            "Skeleton_skeleton"
+        ],
+        "Zombie": [
+            "Zombie_zombie",
+            "Zombie_light",
+            "Zombie_amber",
+            "Zombie_olive",
+            "Zombie_taupe",
+            "Zombie_bronze",
+            "Zombie_brown",
+            "Zombie_black",
+            "Zombie_lavender",
+            "Zombie_blue",
+            "Zombie_green"
+        ],
+        "Zombie_zombie": [
+            "Zombie_zombie_green"
+        ],
+        "Zombie_pale": [
+            "Zombie_pale_green"
+        ],
+        "Zombie_bright": [
+            "Zombie_bright_green"
+        ],
+        "Zombie_dark": [
+            "Zombie_dark_green"
+        ],
+        "Zombie_fur": [
+            "Zombie_fur_black",
+            "Zombie_fur_brown",
+            "Zombie_fur_tan",
+            "Zombie_fur_copper",
+            "Zombie_fur_gold",
+            "Zombie_fur_grey",
+            "Zombie_fur_white"
+        ],
+        "Jack_O_Lantern": [
+            "Jack_O_Lantern_jack"
+        ],
+        "Vampire": [
+            "Vampire_light",
+            "Vampire_amber",
+            "Vampire_olive",
+            "Vampire_taupe",
+            "Vampire_bronze",
+            "Vampire_brown",
+            "Vampire_black",
+            "Vampire_lavender",
+            "Vampire_blue",
+            "Vampire_green",
+            "Vampire_zombie"
+        ],
+        "Vampire_zombie": [
+            "Vampire_zombie_green"
+        ],
+        "Vampire_pale": [
+            "Vampire_pale_green"
+        ],
+        "Vampire_bright": [
+            "Vampire_bright_green"
+        ],
+        "Vampire_dark": [
+            "Vampire_dark_green"
+        ],
+        "Vampire_fur": [
+            "Vampire_fur_black",
+            "Vampire_fur_brown",
+            "Vampire_fur_tan",
+            "Vampire_fur_copper",
+            "Vampire_fur_gold",
+            "Vampire_fur_grey",
+            "Vampire_fur_white"
+        ],
+        "Frankenstein": [
+            "Frankenstein_light",
+            "Frankenstein_amber",
+            "Frankenstein_olive",
+            "Frankenstein_taupe",
+            "Frankenstein_bronze",
+            "Frankenstein_brown",
+            "Frankenstein_black",
+            "Frankenstein_lavender",
+            "Frankenstein_blue",
+            "Frankenstein_green",
+            "Frankenstein_zombie"
+        ],
+        "Frankenstein_zombie": [
+            "Frankenstein_zombie_green"
+        ],
+        "Frankenstein_pale": [
+            "Frankenstein_pale_green"
+        ],
+        "Frankenstein_bright": [
+            "Frankenstein_bright_green"
+        ],
+        "Frankenstein_dark": [
+            "Frankenstein_dark_green"
+        ],
+        "Frankenstein_fur": [
+            "Frankenstein_fur_black",
+            "Frankenstein_fur_brown",
+            "Frankenstein_fur_tan",
+            "Frankenstein_fur_copper",
+            "Frankenstein_fur_gold",
+            "Frankenstein_fur_grey",
+            "Frankenstein_fur_white"
         ]
     },
     "expression": {
@@ -1872,6 +2943,18 @@
             "Downward_Elven_Ears_green",
             "Downward_Elven_Ears_zombie"
         ],
+        "Downward_Elven_Ears_zombie": [
+            "Downward_Elven_Ears_zombie_green"
+        ],
+        "Downward_Elven_Ears_pale": [
+            "Downward_Elven_Ears_pale_green"
+        ],
+        "Downward_Elven_Ears_bright": [
+            "Downward_Elven_Ears_bright_green"
+        ],
+        "Downward_Elven_Ears_dark": [
+            "Downward_Elven_Ears_dark_green"
+        ],
         "Downward_Elven_Ears_fur": [
             "Downward_Elven_Ears_fur_black",
             "Downward_Elven_Ears_fur_brown",
@@ -2455,6 +3538,9 @@
         ],
         "Large_nose_bright": [
             "Large_nose_bright_green"
+        ],
+        "Large_nose_dark": [
+            "Large_nose_dark_green"
         ],
         "Large_nose_fur": [
             "Large_nose_fur_black",
@@ -6587,11 +7673,17 @@
             "Fin_blue",
             "Fin_green"
         ],
+        "Fin_zombie": [
+            "Fin_zombie_green"
+        ],
         "Fin_pale": [
             "Fin_pale_green"
         ],
         "Fin_bright": [
             "Fin_bright_green"
+        ],
+        "Fin_dark": [
+            "Fin_dark_green"
         ],
         "Fin_fur": [
             "Fin_fur_black",
