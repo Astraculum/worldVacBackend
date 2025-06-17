@@ -119,7 +119,7 @@ class PermissionCommitMetadata:
             "world_id": self.world_id,
             "commit_id": self.commit_id,
             "owner_id": self.owner_id,
-            "visibility": self.visibility,
+            "visibility": WorldVisibility(self.visibility).value,
             "shared_with": self.shared_with,
         }
 
@@ -129,7 +129,7 @@ class PermissionCommitMetadata:
             world_id=json_data["world_id"],
             commit_id=json_data["commit_id"],
             owner_id=json_data["owner_id"],
-            visibility=json_data["visibility"],
+            visibility=WorldVisibility(json_data["visibility"]),
         )
         entity.shared_with = json_data["shared_with"]
         return entity
