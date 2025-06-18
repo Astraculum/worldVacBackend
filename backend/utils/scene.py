@@ -1,6 +1,6 @@
 import asyncio
-from typing import Optional
 import os
+from typing import Optional
 
 from AgentMatrix.model import MissionModel, SceneModel, message_to_event_model
 from AgentMatrix.src.character import CharacterType
@@ -36,10 +36,13 @@ async def start_scene_from_graph(
             generated_image_path=os.path.join(
                 generated_character_image_output_path, f"{c['id']}.png"
             ),
+            regenerate=c.get("need_regenerate_sprite_sheet", False),
         )
         for c in all_characters
     ]
     await asyncio.gather(*download_tasks)
+    for c in await G.character_map.get_all_characters():
+        c.need_regenerate_sprite_sheet = False
     # start scene
     player_layer: HostLayer = None  # type: ignore
     universe_metadata = G.universe_metadata

@@ -14,26 +14,42 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from starlette.requests import Request
 
-from AgentMatrix.model import (CharacterModel, CommitIdentifier,
-                               CreateWorldModel, DeleteWorldCommitModel,
-                               ForkRelationModel, ForkWorldModel,
-                               GetAllWorldsModel, GetCharactersModel,
-                               InputActionModel, LoginModel, LoginResponse,
-                               MissionModel, PublicWorldModel, RegisterModel,
-                               RegisterResponse, SceneModel,
-                               SeedPromptToWorldModel, SelectOptionModel, User,
-                               WorldCharacteristicModel, WorldIdentifier,
-                               WorldModel, WorldNewsModel,
-                               character_info_to_model, create_access_token,
-                               get_current_user, hash_password,
-                               message_to_event_model, verify_password)
-from AgentMatrix.src.graph import (ForkRelationEntity, Graph, GroupChatStatus,
-                                   HostLayer)
+from AgentMatrix.model import (
+    CharacterModel,
+    CommitIdentifier,
+    CreateWorldModel,
+    DeleteWorldCommitModel,
+    ForkRelationModel,
+    ForkWorldModel,
+    GetAllWorldsModel,
+    GetCharactersModel,
+    InputActionModel,
+    LoginModel,
+    LoginResponse,
+    MissionModel,
+    PublicWorldModel,
+    RegisterModel,
+    RegisterResponse,
+    SceneModel,
+    SeedPromptToWorldModel,
+    SelectOptionModel,
+    User,
+    WorldCharacteristicModel,
+    WorldIdentifier,
+    WorldModel,
+    WorldNewsModel,
+    character_info_to_model,
+    create_access_token,
+    get_current_user,
+    hash_password,
+    message_to_event_model,
+    verify_password,
+)
+from AgentMatrix.src.graph import ForkRelationEntity, Graph, GroupChatStatus, HostLayer
 from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
 from AgentMatrix.src.memory import SentenceEmbedding
 from AgentMatrix.src.spritesheet_generator import AnnotationParams
-from AgentMatrix.src.spritesheet_generator.auto_download import \
-    CharacterImageDownloader
+from AgentMatrix.src.spritesheet_generator.auto_download import CharacterImageDownloader
 from AgentMatrix.src.world import seed_prompt_to_universe_metadata
 from backend.utils import start_scene_from_graph
 from backend.utils.commit_task import commit_task_manager
@@ -400,9 +416,8 @@ async def login(request: Request):
         user = user_dict[user_name_2_id[data.username]]
 
     # 首先验证密码
-    if (
-        user.password_hash is not None
-        and not verify_password(data.password, user.password_hash)
+    if user.password_hash is not None and not verify_password(
+        data.password, user.password_hash
     ):
         raise HTTPException(status_code=401, detail="密码错误")
 
@@ -526,10 +541,13 @@ async def background_world_initialization(
                 ),
                 output_filename=f"{c['id']}.png",
                 front_output_filename=f"{c['id']}_front.png",
+                regenerate=c.get("need_regenerate_sprite_sheet", False),
             )
             for c in all_characters
         ]
         await asyncio.gather(*download_tasks)
+        for c in await G.character_map.get_all_characters():
+            c.need_regenerate_sprite_sheet = False
 
         # 检查场景状态并自动开始场景
         context = G.org_tree.layer_manager.group_chat_context

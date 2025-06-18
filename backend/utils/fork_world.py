@@ -63,10 +63,13 @@ async def background_fork_world(
                 generated_image_path=os.path.join(
                     character_images_path, user_id, world_id, commit_id, f"{c['id']}.png"
                 ), # if exists, use the generated image
+                regenerate=c.get("need_regenerate_sprite_sheet", False),
             )
             for c in all_characters
         ]
         await asyncio.gather(*download_tasks)
+        for c in await new_graph.character_map.get_all_characters():
+            c.need_regenerate_sprite_sheet = False
 
         # add `fork from` to new graph
         async with new_graph.fork_from_lock:
