@@ -369,7 +369,7 @@ async def register(request: Request):
         raise HTTPException(status_code=400, detail="用户已存在")
     current_user_dict = data.model_dump()
     user_id = str(uuid4())
-    current_user_dict.update({"id": user_id})
+    current_user_dict.update({"user_id": user_id})
     token = create_access_token(current_user_dict)
     async with user_lock:
         user_dict[user_id] = User(
