@@ -25,7 +25,8 @@ from AgentMatrix.model import (CharacterModel, CommitIdentifier,
                                WorldCharacteristicModel, WorldIdentifier,
                                WorldModel, WorldNewsModel,
                                character_info_to_model, create_access_token,
-                               get_current_user, message_to_event_model)
+                               get_current_user, hash_password,
+                               message_to_event_model, verify_password)
 from AgentMatrix.src.graph import (ForkRelationEntity, Graph, GroupChatStatus,
                                    HostLayer)
 from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
@@ -89,7 +90,9 @@ CHOOSER_TO_AVAILABLE_OPTIONS_PATH = (
 DICT_CHOOSER_PARAMS_PATH = "backend/spritesheet_generator/chooser_params.json"
 GLOBAL_EMBEDDINGS = SentenceEmbedding()
 GLOBAL_ANNOTATION_PARAMS = AnnotationParams(
-    chooser_to_available_options=json.load(open(CHOOSER_TO_AVAILABLE_OPTIONS_PATH, "r")),
+    chooser_to_available_options=json.load(
+        open(CHOOSER_TO_AVAILABLE_OPTIONS_PATH, "r")
+    ),
     dict_chooser_params=json.load(open(DICT_CHOOSER_PARAMS_PATH, "r")),
 )
 GLOBAL_CHARACTER_IMAGE_DOWNLOADER = CharacterImageDownloader()
@@ -369,7 +372,12 @@ async def register(request: Request):
     current_user_dict.update({"id": user_id})
     token = create_access_token(current_user_dict)
     async with user_lock:
-        user_dict[user_id] = User(token=token, user_id=user_id, username=data.username)
+        user_dict[user_id] = User(
+            token=token,
+            user_id=user_id,
+            username=data.username,
+            password_hash=hash_password(data.password),  # 存储密码哈希
+        )
     await save_user_dict()
     return RegisterResponse(
         success=True,
@@ -390,19 +398,27 @@ async def login(request: Request):
         raise HTTPException(status_code=400, detail="用户不存在")
     async with user_lock:
         user = user_dict[user_name_2_id[data.username]]
+
+    # 首先验证密码
+    if not verify_password(data.password, f"{user.password_hash}"):
+        raise HTTPException(status_code=401, detail="密码错误")
+
+    # 检查token是否过期
     try:
-        decoded_password = user.decode_token()["password"]
-    except jwt.ExpiredSignatureError as e:
-        # update token
-        user.token = create_access_token(user.model_dump())
+        user.decode_token()  # 尝试解码token
+    except jwt.ExpiredSignatureError:
+        # token过期，重新生成token
+        user.update_token_with_password(data.password)
         async with user_lock:
             user_dict[user.user_id] = user
         await save_user_dict()
-        decoded_password = user.decode_token()["password"]
     except Exception as e:
-        raise HTTPException(status_code=401, detail=f"登录失败: {e}")
-    if decoded_password != data.password:
-        raise HTTPException(status_code=401, detail="密码错误")
+        # 其他token错误，重新生成token
+        user.update_token_with_password(data.password)
+        async with user_lock:
+            user_dict[user.user_id] = user
+        await save_user_dict()
+
     return LoginResponse(
         success=True,
         message="登录成功",
