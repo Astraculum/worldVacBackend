@@ -400,7 +400,10 @@ async def login(request: Request):
         user = user_dict[user_name_2_id[data.username]]
 
     # 首先验证密码
-    if not verify_password(data.password, f"{user.password_hash}"):
+    if (
+        user.password_hash is not None
+        and not verify_password(data.password, user.password_hash)
+    ):
         raise HTTPException(status_code=401, detail="密码错误")
 
     # 检查token是否过期
