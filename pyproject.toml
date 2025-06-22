@@ -42,5 +42,5 @@ build-backend = "hatchling.build"
 packages = ["agentmatrix"]
 
 [[tool.uv.index]]
-url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
+url = "http://mirrors.aliyun.com/pypi/simple/"
 default = true
