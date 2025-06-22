@@ -14,42 +14,26 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from starlette.requests import Request
 
-from AgentMatrix.model import (
-    CharacterModel,
-    CommitIdentifier,
-    CreateWorldModel,
-    DeleteWorldCommitModel,
-    ForkRelationModel,
-    ForkWorldModel,
-    GetAllWorldsModel,
-    GetCharactersModel,
-    InputActionModel,
-    LoginModel,
-    LoginResponse,
-    MissionModel,
-    PublicWorldModel,
-    RegisterModel,
-    RegisterResponse,
-    SceneModel,
-    SeedPromptToWorldModel,
-    SelectOptionModel,
-    User,
-    WorldCharacteristicModel,
-    WorldIdentifier,
-    WorldModel,
-    WorldNewsModel,
-    character_info_to_model,
-    create_access_token,
-    get_current_user,
-    hash_password,
-    message_to_event_model,
-    verify_password,
-)
-from AgentMatrix.src.graph import ForkRelationEntity, Graph, GroupChatStatus, HostLayer
+from AgentMatrix.model import (CharacterModel, CommitIdentifier,
+                               CreateWorldModel, DeleteWorldCommitModel,
+                               ForkRelationModel, ForkWorldModel,
+                               GetAllWorldsModel, GetCharactersModel,
+                               InputActionModel, LoginModel, LoginResponse,
+                               MissionModel, PublicWorldModel, RegisterModel,
+                               RegisterResponse, SceneModel,
+                               SeedPromptToWorldModel, SelectOptionModel, User,
+                               WorldCharacteristicModel, WorldIdentifier,
+                               WorldModel, WorldNewsModel,
+                               character_info_to_model, create_access_token,
+                               get_current_user, hash_password,
+                               message_to_event_model, verify_password)
+from AgentMatrix.src.graph import (ForkRelationEntity, Graph, GroupChatStatus,
+                                   HostLayer)
 from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
 from AgentMatrix.src.memory import SentenceEmbedding
 from AgentMatrix.src.spritesheet_generator import AnnotationParams
-from AgentMatrix.src.spritesheet_generator.auto_download import CharacterImageDownloader
+from AgentMatrix.src.spritesheet_generator.auto_download import \
+    CharacterImageDownloader
 from AgentMatrix.src.world import seed_prompt_to_universe_metadata
 from backend.utils import start_scene_from_graph
 from backend.utils.commit_task import commit_task_manager
@@ -1349,6 +1333,12 @@ async def background_commit_creation(
             embeddings=GLOBAL_EMBEDDINGS,
             annotation_params=GLOBAL_ANNOTATION_PARAMS,
         )
+        layer_manager = new_graph.org_tree.layer_manager
+        if layer_manager.current_scene_topic is not None:
+            layer_manager.previous_scene_topics.append(
+                f"{layer_manager.current_scene_topic}"
+            )
+        layer_manager.current_scene_topic = None
         async with world_lock:
             world_dict[new_world_identifier] = new_graph
         await save_graph(user_id, world_id, new_commit_id, new_graph)
