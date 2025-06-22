@@ -1328,6 +1328,8 @@ async def background_commit_creation(
     G: Graph, user_id: str, world_id: str, commit_id: str, new_commit_id: str
 ):
     try:
+        # save graph (for commit metadata)
+        await save_graph(user_id, world_id, commit_id, G)
         # fork options
         await G.generate_fork_options()
         # create new world identifier
