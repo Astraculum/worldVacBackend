@@ -228,9 +228,15 @@ The token is obtained through the `/auth/register` or `/auth/login` endpoints an
 ```json
 {
   "user_id": "string",
-  "seed_prompt": "string"
+  "seed_prompt": "string",
+  "language_type": "zh"
 }
 ```
+
+**Parameters**:
+- `user_id` (string, required): The user ID
+- `seed_prompt` (string, required): The seed prompt to generate the world from
+- `language_type` (string, optional): The language type for world generation. Valid values: `"zh"` (Chinese), `"en"` (English), `"ja"` (Japanese). Defaults to the system default language.
 
 - **Response**:
 
@@ -261,9 +267,20 @@ The token is obtained through the `/auth/register` or `/auth/login` endpoints an
   "world_state": "string",
   "geography_info": "string",
   "tone": "string",
+  "language_type": "zh",
   "max_rounds": 20
 }
 ```
+
+**Parameters**:
+- `user_id` (string, required): The user ID
+- `protagonist_description` (string, required): Description of the protagonist
+- `strategy` (string, required): World evolution strategy
+- `world_state` (string, required): Description of the world state
+- `geography_info` (string, required): Geographic information
+- `tone` (string, optional): World tone
+- `language_type` (string, optional): The language type for world generation. Valid values: `"zh"` (Chinese), `"en"` (English), `"ja"` (Japanese). Defaults to the system default language.
+- `max_rounds` (integer, optional): Maximum number of conversation rounds. Defaults to 20.
 
 - **Response**:
 

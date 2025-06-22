@@ -629,7 +629,10 @@ async def seed_prompt_to_world(
         raise HTTPException(status_code=403, detail="user_id不匹配")
     try:
         llm_client = LLMClient()
-        llm_client.set_llm_config(GLOBAL_LLM_CONFIG)
+        llm_config = GLOBAL_LLM_CONFIG.copy()
+        if data.language_type is not None:
+            llm_config.language_type = LanguageType(data.language_type)
+        llm_client.set_llm_config(llm_config)
         get_logger_backend().debug(f"Seed prompt: {data.seed_prompt}")
         universe_metadata = await seed_prompt_to_universe_metadata(
             data.seed_prompt, llm_client
@@ -698,12 +701,15 @@ async def create_world(request: Request, user_id: str = Depends(get_current_user
     if data.user_id != user_id:
         raise HTTPException(status_code=403, detail="user_id不匹配")
     get_logger_backend().debug(f"Create world: {data}")
+    llm_config = GLOBAL_LLM_CONFIG.copy()
+    if data.language_type is not None:
+        llm_config.language_type = LanguageType(data.language_type)
     G = Graph(
         protagonist_description=data.protagonist_description,
         world_state=data.world_state,
         strategy=data.strategy,
         tone=data.tone if data.tone is not None else "neutral",
-        llm_config=GLOBAL_LLM_CONFIG,
+        llm_config=llm_config,
         embeddings=GLOBAL_EMBEDDINGS,
         annotation_params=GLOBAL_ANNOTATION_PARAMS,
     )
