@@ -654,10 +654,7 @@
             "Human_female_bronze",
             "Human_female_brown",
             "Human_female_black",
-            "Human_female_lavender",
-            "Human_female_blue",
-            "Human_female_green",
-            "Human_female_zombie"
+            "Human_female_lavender"
         ],
         "Human_female_fur": [
             "Human_female_fur_black",
@@ -676,10 +673,7 @@
             "Human_male_bronze",
             "Human_male_brown",
             "Human_male_black",
-            "Human_male_lavender",
-            "Human_male_blue",
-            "Human_male_green",
-            "Human_male_zombie"
+            "Human_male_lavender"
         ],
         "Human_male_fur": [
             "Human_male_fur_black",
@@ -700,7 +694,6 @@
             "Human_female_elderly_black",
             "Human_female_elderly_lavender",
             "Human_female_elderly_blue",
-            "Human_female_elderly_green",
             "Human_female_elderly_zombie"
         ],
         "Human_female_elderly_fur": [
@@ -722,7 +715,6 @@
             "Human_male_elderly_black",
             "Human_male_elderly_lavender",
             "Human_male_elderly_blue",
-            "Human_male_elderly_green",
             "Human_male_elderly_zombie"
         ],
         "Human_male_elderly_fur": [
@@ -744,7 +736,6 @@
             "Human_male_plump_black",
             "Human_male_plump_lavender",
             "Human_male_plump_blue",
-            "Human_male_plump_green",
             "Human_male_plump_zombie"
         ],
         "Human_male_plump_fur": [
@@ -766,7 +757,6 @@
             "Human_male_gaunt_black",
             "Human_male_gaunt_lavender",
             "Human_male_gaunt_blue",
-            "Human_male_gaunt_green",
             "Human_male_gaunt_zombie"
         ],
         "Human_male_gaunt_fur": [
@@ -777,72 +767,6 @@
             "Human_male_gaunt_fur_gold",
             "Human_male_gaunt_fur_grey",
             "Human_male_gaunt_fur_white"
-        ],
-        "Human_male_small": [
-            "Human_male_small_light",
-            "Human_male_small_amber",
-            "Human_male_small_olive",
-            "Human_male_small_taupe",
-            "Human_male_small_bronze",
-            "Human_male_small_brown",
-            "Human_male_small_black",
-            "Human_male_small_lavender",
-            "Human_male_small_blue",
-            "Human_male_small_green",
-            "Human_male_small_zombie"
-        ],
-        "Human_male_small_fur": [
-            "Human_male_small_fur_black",
-            "Human_male_small_fur_brown",
-            "Human_male_small_fur_tan",
-            "Human_male_small_fur_copper",
-            "Human_male_small_fur_gold",
-            "Human_male_small_fur_grey",
-            "Human_male_small_fur_white"
-        ],
-        "Human_female_small": [
-            "Human_female_small_light",
-            "Human_female_small_amber",
-            "Human_female_small_olive",
-            "Human_female_small_taupe",
-            "Human_female_small_bronze",
-            "Human_female_small_brown",
-            "Human_female_small_black",
-            "Human_female_small_lavender",
-            "Human_female_small_blue",
-            "Human_female_small_green",
-            "Human_female_small_zombie"
-        ],
-        "Human_female_small_fur": [
-            "Human_female_small_fur_black",
-            "Human_female_small_fur_brown",
-            "Human_female_small_fur_tan",
-            "Human_female_small_fur_copper",
-            "Human_female_small_fur_gold",
-            "Human_female_small_fur_grey",
-            "Human_female_small_fur_white"
-        ],
-        "Human_elderly_small": [
-            "Human_elderly_small_light",
-            "Human_elderly_small_amber",
-            "Human_elderly_small_olive",
-            "Human_elderly_small_taupe",
-            "Human_elderly_small_bronze",
-            "Human_elderly_small_brown",
-            "Human_elderly_small_black",
-            "Human_elderly_small_lavender",
-            "Human_elderly_small_blue",
-            "Human_elderly_small_green",
-            "Human_elderly_small_zombie"
-        ],
-        "Human_elderly_small_fur": [
-            "Human_elderly_small_fur_black",
-            "Human_elderly_small_fur_brown",
-            "Human_elderly_small_fur_tan",
-            "Human_elderly_small_fur_copper",
-            "Human_elderly_small_fur_gold",
-            "Human_elderly_small_fur_grey",
-            "Human_elderly_small_fur_white"
         ],
         "Boarman_fur": [
             "Boarman_fur_black",
