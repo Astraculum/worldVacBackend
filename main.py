@@ -653,7 +653,7 @@ async def seed_prompt_to_world(
         tone=(
             universe_metadata.tone if universe_metadata.tone is not None else "neutral"
         ),
-        llm_config=GLOBAL_LLM_CONFIG,
+        llm_config=llm_config,
         embeddings=GLOBAL_EMBEDDINGS,
         annotation_params=GLOBAL_ANNOTATION_PARAMS,
     )
