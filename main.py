@@ -289,7 +289,12 @@ async def load_graph():
                 get_logger_backend().error(
                     f"Commit id mismatch: {json_data['commit_id']} != {commit_id}"
                 )
-            json_data["llm_config"] = GLOBAL_LLM_CONFIG.to_json()
+            llm_config = GLOBAL_LLM_CONFIG.copy()
+            if json_data["llm_config"].get("language_type", None) is not None:
+                llm_config.language_type = LanguageType(
+                    json_data["llm_config"]["language_type"]
+                )
+            json_data["llm_config"] = llm_config.to_json()
             G = await Graph.from_json(
                 data=json_data,
                 embeddings=embeddings,
@@ -332,7 +337,6 @@ async def load_graph():
                 get_logger_backend().debug(
                     f"Started scene initialization for ({user_id}, {world_id}, {commit_id})"
                 )
-
         except Exception as e:
             get_logger_backend().debug(traceback.format_exc())
             get_logger_backend().error(
@@ -633,7 +637,7 @@ async def seed_prompt_to_world(
         if data.language_type is not None:
             llm_config.language_type = LanguageType(data.language_type)
         llm_client.set_llm_config(llm_config)
-        get_logger_backend().debug(f"Seed prompt: {data.seed_prompt}")
+        get_logger_backend().debug(f"Seed prompt request: {data.model_dump()}")
         universe_metadata = await seed_prompt_to_universe_metadata(
             data.seed_prompt, llm_client
         )
@@ -1620,6 +1624,22 @@ if __name__ == "__main__":
     # support for https
     if args.ssl_keyfile != "" and args.ssl_certfile != "":
         uvicorn.run(
+            app,
+            host=args.host,
+            port=args.port,
+            ssl_keyfile=args.ssl_keyfile,
+            ssl_certfile=args.ssl_certfile,
+            log_config=args.log_config,
+        )
+    else:
+        # runs on http
+        get_logger_backend().warning("Runs on http!")
+        uvicorn.run(
+            app,
+            host=args.host,
+            port=args.port,
+            log_config=args.log_config,
+        )
             app,
             host=args.host,
             port=args.port,
