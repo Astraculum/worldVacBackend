@@ -1640,19 +1640,3 @@ if __name__ == "__main__":
             port=args.port,
             log_config=args.log_config,
         )
-            app,
-            host=args.host,
-            port=args.port,
-            ssl_keyfile=args.ssl_keyfile,
-            ssl_certfile=args.ssl_certfile,
-            log_config=args.log_config,
-        )
-    else:
-        # runs on http
-        get_logger_backend().warning("Runs on http!")
-        uvicorn.run(
-            app,
-            host=args.host,
-            port=args.port,
-            log_config=args.log_config,
-        )
