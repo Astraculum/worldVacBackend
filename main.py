@@ -67,13 +67,13 @@ app.add_middleware(
 GLOBAL_LLM_CONFIG = LLMConfig(
     api_key="NULL",
     model="NULL",
-    llm_provider=LLMProvider.SiliconFlow,
+    provider=LLMProvider.SiliconFlow,
     language_type=LanguageType.Chinese,
 )
 GLOBAL_FAST_CHAT_LLM_CONFIG = LLMConfig(
     api_key="NULL",
     model="NULL",
-    llm_provider=LLMProvider.SiliconFlow,
+    provider=LLMProvider.SiliconFlow,
     language_type=LanguageType.Chinese,
 )
 
