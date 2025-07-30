@@ -600,6 +600,13 @@ async def background_scene_initialization(
         get_logger_backend().debug(
             f"Starting scene initialization for ({user_id}, {world_id}, {commit_id})"
         )
+        manager_fast_chat_llm_client = scene_task_manager.fast_chat_llm_client
+        if manager_fast_chat_llm_client is None:
+            fast_chat_llm_client = None
+        else:
+            fast_chat_llm_client = manager_fast_chat_llm_client.copy()
+            # change language type to match G.language_type
+            fast_chat_llm_client.language_type = G.language_type
         current_scene = await start_scene_from_graph(
             G=G,
             character_image_output_path=os.path.join(
@@ -615,7 +622,7 @@ async def background_scene_initialization(
             character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
             annotation_params=GLOBAL_ANNOTATION_PARAMS,
             is_first_scene=is_first_scene,
-            fast_chat_llm_client=scene_task_manager.fast_chat_llm_client,
+            fast_chat_llm_client=fast_chat_llm_client,
         )
         get_logger_backend().debug(
             f"Scene initialization completed for ({user_id}, {world_id}, {commit_id})"
