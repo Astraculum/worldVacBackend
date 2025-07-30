@@ -1636,6 +1636,10 @@ if __name__ == "__main__":
             f"Fast chat LLM config: {GLOBAL_FAST_CHAT_LLM_CONFIG}"
         )
     get_logger_backend().debug(f"LLM config: {GLOBAL_LLM_CONFIG}")
+    asyncio.run(load_commit_trees())
+    asyncio.run(load_user_dict())
+    asyncio.run(load_world_permission_manager())
+    asyncio.run(load_graph())
     # support for https
     if args.ssl_keyfile != "" and args.ssl_certfile != "":
         uvicorn.run(
@@ -1655,7 +1659,3 @@ if __name__ == "__main__":
             port=args.port,
             log_config=args.log_config,
     )
-    asyncio.run(load_commit_trees())
-    asyncio.run(load_user_dict())
-    asyncio.run(load_world_permission_manager())
-    asyncio.run(load_graph())
