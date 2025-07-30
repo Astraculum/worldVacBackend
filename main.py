@@ -11,7 +11,7 @@ from uuid import uuid4
 import jwt
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from starlette.requests import Request
 
 from AgentMatrix.model import (CharacterModel, CommitIdentifier,
@@ -59,8 +59,17 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # 允许所有来源
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # 允许的HTTP方法
-    allow_headers=["*"],  # 允许所有头部
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],  # 添加PATCH
+    allow_headers=[
+        "*",
+        "Authorization",  # 明确允许Authorization头部
+        "Content-Type",
+        "Accept",
+        "Origin",
+        "X-Requested-With",
+    ],
+    expose_headers=["*"],  # 暴露所有响应头部
+    max_age=86400,  # 预检请求缓存时间
 )
 
 # # LLM 配置
@@ -362,7 +371,17 @@ async def root():
 # OPTIONS方法支持
 @app.options("/{full_path:path}")
 async def options_route(full_path: str):
-    return {"status": "ok"}
+    return Response(
+        content="",
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+            "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept, Origin, X-Requested-With",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "86400",
+        },
+    )
 
 
 # 注册(获得token)
@@ -383,13 +402,14 @@ async def register(request: Request):
             password_hash=hash_password(data.password),  # 存储密码哈希
         )
     await save_user_dict()
-    return RegisterResponse(
+    response = RegisterResponse(
         success=True,
         message="注册成功",
         token=token,
         id=user_id,
         user=current_user_dict,
     )
+    return response
 
 
 # 登录
