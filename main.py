@@ -316,7 +316,7 @@ async def load_graph():
                     )
                 ] = G
             get_logger_backend().debug(
-                f"World loaded: ({user_id}, {world_id}, {commit_id}) language type: {G.llm_client.language_type, G.org_tree.layer_manager.llm_client.language_type}"
+                f"World loaded: ({user_id}, {world_id}, {commit_id}) language type: {G.llm_config.language_type}"
             )
             # Check scene status and initialize if needed
             context = G.org_tree.layer_manager.group_chat_context
@@ -490,7 +490,8 @@ async def world_home(user_id: str, world_id: str):
                 ].commit_metadata.event_summary,
                 "parent_id": c.parent_id if c.parent_id is not None else "root",
             }
-            for c in world_commits if c.commit_id in commit_to_worlds
+            for c in world_commits
+            if c.commit_id in commit_to_worlds
         ],
         "latest_commit": {
             "commit_id": latest_commit.commit_id,
@@ -607,11 +608,6 @@ async def background_scene_initialization(
             fast_chat_llm_client = None
         else:
             fast_chat_llm_client = manager_fast_chat_llm_client.copy()
-            # change language type to match G.language_type
-            fast_chat_llm_client.set_language_type(G.llm_client.language_type)
-        get_logger_backend().debug(
-            f"({user_id}, {world_id}, {commit_id}) fast chat llm client language type: {fast_chat_llm_client.language_type if fast_chat_llm_client is not None else None}"
-        )
         current_scene = await start_scene_from_graph(
             G=G,
             character_image_output_path=os.path.join(
@@ -671,7 +667,7 @@ async def seed_prompt_to_world(
         llm_client.set_llm_config(llm_config)
         get_logger_backend().debug(f"Seed prompt request: {data.model_dump()}")
         universe_metadata = await seed_prompt_to_universe_metadata(
-            data.seed_prompt, llm_client
+            data.seed_prompt, llm_client, llm_config
         )
         get_logger_backend().debug(
             f"World metadata from seed prompt: {universe_metadata}"
@@ -1468,7 +1464,8 @@ async def public_world(request: Request, current_user: str = Depends(get_current
         commit_id=data.commit_id,
         new_world_id=new_world_id,
     )
-
+    async with world_lock:
+        G = world_dict[world_identifier]
     # Start background fork process
     background_task = asyncio.create_task(
         background_fork_world(
@@ -1482,7 +1479,8 @@ async def public_world(request: Request, current_user: str = Depends(get_current
             commit_id=data.commit_id,
             new_user_id=data.user_id,  # Use original user as owner
             new_world_id=new_world_id,
-            llm_client=Graph.llm_client,
+            llm_client=G.llm_client,
+            llm_config=G.llm_config,
             character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
             character_images_path=CHARACTER_IMAGES_PATH,
             embeddings=GLOBAL_EMBEDDINGS,
@@ -1526,6 +1524,8 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
         commit_id=data.commit_id,
         new_world_id=new_world_id,
     )
+    async with world_lock:
+        G = world_dict[world_identifier]
 
     # Start background fork process
     background_task = asyncio.create_task(
@@ -1540,7 +1540,8 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
             commit_id=data.commit_id,
             new_user_id=current_user,
             new_world_id=new_world_id,
-            llm_client=Graph.llm_client,
+            llm_client=G.llm_client,
+            llm_config=G.llm_config,
             character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
             character_images_path=CHARACTER_IMAGES_PATH,
             embeddings=GLOBAL_EMBEDDINGS,

@@ -60,6 +60,7 @@ async def start_scene_from_graph(
     assert player_layer is not None, "Player layer not found"
     asyncio.create_task(
         player_layer.group_chat(
+            llm_config=G.llm_config,
             monitor=G.org_tree._monitor,
             world_state=universe_metadata.world_state,
             tone=universe_metadata.tone,

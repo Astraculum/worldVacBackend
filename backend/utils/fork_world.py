@@ -5,7 +5,7 @@ from typing import Literal, Optional
 
 from AgentMatrix.model import CommitIdentifier, WorldIdentifier
 from AgentMatrix.src.graph import ForkRelationEntity, Graph
-from AgentMatrix.src.llm import LLMClient
+from AgentMatrix.src.llm import LLMClient, LLMConfig
 from AgentMatrix.src.memory import SentenceEmbedding
 from AgentMatrix.src.spritesheet_generator import (AnnotationParams,
                                                    CharacterImageDownloader)
@@ -27,10 +27,11 @@ async def background_fork_world(
     new_user_id: str,
     new_world_id: str,
     llm_client: LLMClient,
+    llm_config: LLMConfig,
     character_image_downloader: CharacterImageDownloader,
     character_images_path: str,
     embeddings: Optional[SentenceEmbedding] = None,
-    annotation_params: Optional[AnnotationParams] = None,   
+    annotation_params: Optional[AnnotationParams] = None,
     fork_seed_prompt: Optional[str] = None,
     mode: Literal["full", "remodify"] = "remodify",
 ):
@@ -40,13 +41,14 @@ async def background_fork_world(
             source_graph=source_graph,
             ask_for_forks_user_id=user_id,
             llm_client=llm_client,
+            llm_config=llm_config,
             embeddings=embeddings,
             fork_seed_prompt=fork_seed_prompt,
             mode=mode,
             annotation_params=annotation_params,
         )
         new_commit_id = await new_graph.generate_world_status_uuid()
-        
+
         # 标注角色sprite sheet 如果已经标注过则跳过
         await new_graph.annotate_all_characters_sprite_sheet()
 
@@ -61,8 +63,12 @@ async def background_fork_world(
                 output_filename=f"{c['id']}.png",
                 front_output_filename=f"{c['id']}_front.png",
                 generated_image_path=os.path.join(
-                    character_images_path, user_id, world_id, commit_id, f"{c['id']}.png"
-                ), # if exists, use the generated image
+                    character_images_path,
+                    user_id,
+                    world_id,
+                    commit_id,
+                    f"{c['id']}.png",
+                ),  # if exists, use the generated image
                 regenerate=c.get("need_regenerate_sprite_sheet", False),
             )
             for c in all_characters
