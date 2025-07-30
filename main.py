@@ -477,7 +477,9 @@ async def world_home(user_id: str, world_id: str):
         for c in world_commits
     ]
     commit_to_worlds: dict[str, Graph] = {
-        w_id.commit_id: world_dict[w_id] for w_id in all_world_identifiers
+        w_id.commit_id: world_dict[w_id]
+        for w_id in all_world_identifiers
+        if w_id in world_dict
     }
     return {
         "user_id": user_id,
@@ -491,7 +493,7 @@ async def world_home(user_id: str, world_id: str):
                 ].commit_metadata.event_summary,
                 "parent_id": c.parent_id if c.parent_id is not None else "root",
             }
-            for c in world_commits
+            for c in world_commits if c.commit_id in commit_to_worlds
         ],
         "latest_commit": {
             "commit_id": latest_commit.commit_id,
