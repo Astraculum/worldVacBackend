@@ -609,10 +609,10 @@ async def background_scene_initialization(
         else:
             fast_chat_llm_client = manager_fast_chat_llm_client.copy()
             # change language type to match G.language_type
-            fast_chat_llm_client.language_type = G.language_type
+            fast_chat_llm_client.set_language_type(G.language_type)
         # force set language type to G.language_type
-        G.llm_client.language_type = G.language_type
-        G.org_tree.layer_manager.llm_client.language_type = G.language_type
+        G.llm_client.set_language_type(G.language_type)
+        G.org_tree.layer_manager.llm_client.set_language_type(G.language_type)
         get_logger_backend().debug(
             f"({user_id}, {world_id}, {commit_id}) force set to G.language_type: {G.language_type}"
         )
