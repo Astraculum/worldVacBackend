@@ -303,6 +303,9 @@ async def load_graph():
                 llm_config.language_type = LanguageType(
                     json_data["llm_config"]["language_type"]
                 )
+            # 如果数据中有独立的 language_type 字段，优先使用它
+            if json_data.get("language_type", None) is not None:
+                llm_config.language_type = LanguageType(json_data["language_type"])
             json_data["llm_config"] = llm_config.to_json()
             G = await Graph.from_json(
                 data=json_data,
