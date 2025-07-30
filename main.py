@@ -14,42 +14,26 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response
 from starlette.requests import Request
 
-from AgentMatrix.model import (
-    CharacterModel,
-    CommitIdentifier,
-    CreateWorldModel,
-    DeleteWorldCommitModel,
-    ForkRelationModel,
-    ForkWorldModel,
-    GetAllWorldsModel,
-    GetCharactersModel,
-    InputActionModel,
-    LoginModel,
-    LoginResponse,
-    MissionModel,
-    PublicWorldModel,
-    RegisterModel,
-    RegisterResponse,
-    SceneModel,
-    SeedPromptToWorldModel,
-    SelectOptionModel,
-    User,
-    WorldCharacteristicModel,
-    WorldIdentifier,
-    WorldModel,
-    WorldNewsModel,
-    character_info_to_model,
-    create_access_token,
-    get_current_user,
-    hash_password,
-    message_to_event_model,
-    verify_password,
-)
-from AgentMatrix.src.graph import ForkRelationEntity, Graph, GroupChatStatus, HostLayer
+from AgentMatrix.model import (CharacterModel, CommitIdentifier,
+                               CreateWorldModel, DeleteWorldCommitModel,
+                               ForkRelationModel, ForkWorldModel,
+                               GetAllWorldsModel, GetCharactersModel,
+                               InputActionModel, LoginModel, LoginResponse,
+                               MissionModel, PublicWorldModel, RegisterModel,
+                               RegisterResponse, SceneModel,
+                               SeedPromptToWorldModel, SelectOptionModel, User,
+                               WorldCharacteristicModel, WorldIdentifier,
+                               WorldModel, WorldNewsModel,
+                               character_info_to_model, create_access_token,
+                               get_current_user, hash_password,
+                               message_to_event_model, verify_password)
+from AgentMatrix.src.graph import (ForkRelationEntity, Graph, GroupChatStatus,
+                                   HostLayer)
 from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
 from AgentMatrix.src.memory import SentenceEmbedding
 from AgentMatrix.src.spritesheet_generator import AnnotationParams
-from AgentMatrix.src.spritesheet_generator.auto_download import CharacterImageDownloader
+from AgentMatrix.src.spritesheet_generator.auto_download import \
+    CharacterImageDownloader
 from AgentMatrix.src.world import seed_prompt_to_universe_metadata
 from backend.utils import start_scene_from_graph
 from backend.utils.commit_task import commit_task_manager
@@ -88,18 +72,18 @@ app.add_middleware(
     max_age=86400,  # 预检请求缓存时间
 )
 
-# # LLM 配置
+# LLM 配置
 GLOBAL_LLM_CONFIG = LLMConfig(
     api_key="NULL",
     model="NULL",
     provider=LLMProvider.SiliconFlow,
-    language_type=LanguageType.Chinese,
+    language_type=LanguageType.NotSpecified,
 )
 GLOBAL_FAST_CHAT_LLM_CONFIG = LLMConfig(
     api_key="NULL",
     model="NULL",
     provider=LLMProvider.SiliconFlow,
-    language_type=LanguageType.Chinese,
+    language_type=LanguageType.NotSpecified,
 )
 
 WORLD_JSON_PATH = "worlds-json"
@@ -626,6 +610,12 @@ async def background_scene_initialization(
             fast_chat_llm_client = manager_fast_chat_llm_client.copy()
             # change language type to match G.language_type
             fast_chat_llm_client.language_type = G.language_type
+        # force set language type to G.language_type
+        G.llm_client.language_type = G.language_type
+        G.org_tree.layer_manager.llm_client.language_type = G.language_type
+        get_logger_backend().debug(
+            f"({user_id}, {world_id}, {commit_id}) force set to G.language_type: {G.language_type}"
+        )
         get_logger_backend().debug(
             f"({user_id}, {world_id}, {commit_id}) fast chat llm client language type: {fast_chat_llm_client.language_type if fast_chat_llm_client is not None else None}"
         )
