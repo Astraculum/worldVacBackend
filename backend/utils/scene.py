@@ -67,7 +67,6 @@ async def start_scene_from_graph(
             fast_chat_llm_client=fast_chat_llm_client,
             is_first_scene=is_first_scene,
             terms=G.terms,
-            language_type=G.language_type,
             character_image_downloader=character_image_downloader,
             character_image_output_path=character_image_output_path,
             annotation_params=annotation_params,

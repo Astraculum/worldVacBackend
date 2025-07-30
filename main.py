@@ -319,7 +319,7 @@ async def load_graph():
                     )
                 ] = G
             get_logger_backend().debug(
-                f"World loaded: ({user_id}, {world_id}, {commit_id}) language type: {G.language_type, G.llm_client.language_type, G.org_tree.layer_manager.llm_client.language_type}"
+                f"World loaded: ({user_id}, {world_id}, {commit_id}) language type: {G.llm_client.language_type, G.org_tree.layer_manager.llm_client.language_type}"
             )
             # Check scene status and initialize if needed
             context = G.org_tree.layer_manager.group_chat_context
@@ -612,12 +612,6 @@ async def background_scene_initialization(
             fast_chat_llm_client = manager_fast_chat_llm_client.copy()
             # change language type to match G.language_type
             fast_chat_llm_client.set_language_type(G.llm_client.language_type)
-        # # force set language type to G.language_type
-        # G.llm_client.set_language_type(G.language_type)
-        # G.org_tree.layer_manager.llm_client.set_language_type(G.language_type)
-        # get_logger_backend().debug(
-        #     f"({user_id}, {world_id}, {commit_id}) force set to G.language_type: {G.language_type}"
-        # )
         get_logger_backend().debug(
             f"({user_id}, {world_id}, {commit_id}) fast chat llm client language type: {fast_chat_llm_client.language_type if fast_chat_llm_client is not None else None}"
         )
