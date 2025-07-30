@@ -319,7 +319,7 @@ async def load_graph():
                     )
                 ] = G
             get_logger_backend().debug(
-                f"World loaded: ({user_id}, {world_id}, {commit_id})"
+                f"World loaded: ({user_id}, {world_id}, {commit_id}) language type: {G.llm_client.language_type, G.org_tree.layer_manager.llm_client.language_type}"
             )
             # Check scene status and initialize if needed
             context = G.org_tree.layer_manager.group_chat_context
@@ -1668,4 +1668,4 @@ if __name__ == "__main__":
             host=args.host,
             port=args.port,
             log_config=args.log_config,
-    )
+        )
