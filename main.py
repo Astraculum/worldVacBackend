@@ -12,6 +12,7 @@ import jwt
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response
+from starlette.background import BackgroundTask
 from starlette.requests import Request
 
 from AgentMatrix.model import (CharacterModel, CommitIdentifier,
@@ -567,19 +568,50 @@ async def background_world_initialization(
 
         # 下载角色图片 已下载的会跳过
         all_characters = await G.get_all_characters()
-        download_tasks = [
-            character_image_downloader.download_character_image(
-                params=c["sprite_sheet_annotation_string"],
-                output_dir=os.path.join(
-                    CHARACTER_IMAGES_PATH, user_id, world_id, commit_id
-                ),
-                output_filename=f"{c['id']}.png",
-                front_output_filename=f"{c['id']}_front.png",
-                regenerate=c.get("need_regenerate_sprite_sheet", False),
+        temp_dir = "/tmp/character_images_temp"
+        os.makedirs(temp_dir, exist_ok=True)
+
+        for character in all_characters:
+            # 创建临时文件路径
+            temp_path = os.path.join(temp_dir, f"{character['id']}.png")
+            temp_front_path = os.path.join(temp_dir, f"{character['id']}_front.png")
+            
+            # 下载图片到临时目录
+            await character_image_downloader.download_character_image(
+                params=character["sprite_sheet_annotation_string"],
+                output_dir=temp_dir,
+                output_filename=f"{character['id']}.png",
+                front_output_filename=f"{character['id']}_front.png",
+                regenerate=character.get("need_regenerate_sprite_sheet", False),
             )
-            for c in all_characters
-        ]
-        await asyncio.gather(*download_tasks)
+
+            # 读取图片数据
+            try:
+                with open(temp_path, "rb") as f:
+                    image_data = f.read()
+                with open(temp_front_path, "rb") as f:
+                    front_image_data = f.read()
+
+                # 保存到数据库
+                await save_character_image_to_db(
+                    character_id=UUID(character["id"]),
+                    image_data=image_data,
+                    front_image_data=front_image_data,
+                )
+
+                # 清理临时文件
+                os.remove(temp_path)
+                os.remove(temp_front_path)
+            except Exception as e:
+                get_logger_backend().error(f"Failed to save character image: {e}")
+                continue
+
+        # 清理临时目录
+        try:
+            os.rmdir(temp_dir)
+        except OSError:
+            pass
+
         for c in await G.character_map.get_all_characters():
             c.need_regenerate_sprite_sheet = False
 
@@ -1604,22 +1636,58 @@ async def get_character_portrait(
     character_id: str,
     current_user: str = Depends(get_current_user),
 ):
-    # Check if user has access to the world
-    if not await world_permission_manager.can_access(commit_id, current_user):
+    # 转换ID为UUID
+    try:
+        commit_id_uuid = UUID(commit_id)
+        character_id_uuid = UUID(character_id)
+        current_user_uuid = UUID(current_user)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="无效的ID格式")
+
+    # 检查访问权限
+    if not await db.can_access_world(commit_id_uuid, current_user_uuid):
         raise HTTPException(status_code=403, detail="无权限访问该世界")
 
-    # Construct the image path
-    image_path = os.path.join(
-        CHARACTER_IMAGES_PATH, user_id, world_id, commit_id, f"{character_id}_front.png"
+    # 获取角色图片
+    images = await db.get_character_images(character_id_uuid)
+    if not images or "front_image_data" not in images:
+        raise HTTPException(status_code=404, detail="Character portrait not found")
+    
+    # 创建临时文件并返回
+    temp_dir = "/tmp/character_portraits"
+    os.makedirs(temp_dir, exist_ok=True)
+    temp_file = f"{temp_dir}/{character_id}_front.png"
+    
+    with open(temp_file, "wb") as f:
+        f.write(images["front_image_data"])
+    
+    return FileResponse(
+        temp_file,
+        media_type="image/png",
+        filename=f"{character_id}.png",
+        background=BackgroundTask(cleanup_temp_file, temp_file)
     )
 
-    # Check if image exists
-    if not os.path.exists(image_path):
-        raise HTTPException(status_code=404, detail="Character portrait not found")
+async def cleanup_temp_file(file_path: str):
+    """清理临时文件的后台任务"""
+    await asyncio.sleep(5)  # 等待文件被发送
+    try:
+        os.remove(file_path)
+    except OSError:
+        pass
 
-    # Return the image file
-    return FileResponse(
-        image_path, media_type="image/png", filename=f"{character_id}.png"
+async def save_character_image_to_db(
+    character_id: UUID,
+    image_data: bytes,
+    front_image_data: bytes,
+) -> None:
+    """保存角色图片到数据库"""
+    image_id = uuid4()
+    await db.save_character_image(
+        image_id=image_id,
+        character_id=character_id,
+        image_data=image_data,
+        front_image_data=front_image_data,
     )
 
 
