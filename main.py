@@ -23,7 +23,7 @@ from AgentMatrix.model import (CharacterModel, CommitIdentifier,
                                RegisterResponse, SceneModel,
                                SeedPromptToWorldModel, SelectOptionModel, User,
                                WorldCharacteristicModel, WorldIdentifier,
-                               WorldModel, WorldNewsModel,
+                               WorldModel, WorldNewsModel, WorldVisibility,
                                character_info_to_model, create_access_token,
                                get_current_user, hash_password,
                                message_to_event_model, verify_password)
@@ -108,10 +108,6 @@ GLOBAL_CHARACTER_IMAGE_DOWNLOADER = CharacterImageDownloader()
 GLOBAL_CHARACTER_IMAGE_DOWNLOADER.start_character_generation_server()
 
 
-class WorldVisibility(Enum):
-    PRIVATE = "private"
-    PUBLIC = "public"
-    SHARED = "shared"
 
 
 class PermissionCommitMetadata:
