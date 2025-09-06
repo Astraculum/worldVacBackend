@@ -6,7 +6,7 @@ import time
 import traceback
 from enum import Enum
 from typing import Optional
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import jwt
 from fastapi import Depends, FastAPI, HTTPException
@@ -45,6 +45,8 @@ from backend.utils.world_task import world_task_manager
 from logger import get_logger as get_logger_backend
 from logger import set_logger_file as set_logger_file_backend
 from logger import set_logger_level as set_logger_level_backend
+from AgentMatrix.database.postgre_sql import db
+from AgentMatrix.database.sql_base import SQLBaseDB
 
 # 设置logger级别
 set_logger_level_backend("DEBUG")
@@ -453,48 +455,55 @@ async def login(request: Request):
 # 世界主页
 @app.get("/user/{user_id}/world/{world_id}")
 async def world_home(user_id: str, world_id: str):
-    # 获取该世界的所有commit
-    commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
-    if commit_identifier not in commit_trees_dict:
+    # 转换ID为UUID
+    try:
+        user_id_uuid = UUID(user_id)
+        world_id_uuid = UUID(world_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="无效的ID格式")
+
+    # 获取世界信息
+    world_data = await db.get_world(world_id_uuid)
+    if not world_data:
         raise HTTPException(status_code=404, detail="世界不存在")
-    commit_tree = commit_trees_dict[commit_identifier]
-    world_commits = await commit_tree.get_all_commits()
-    latest_commit = await commit_tree.get_latest_commit()
-    if latest_commit is None:
+
+    # 获取该世界的所有commit
+    commits = await db.get_world_commits(world_id_uuid)
+    if not commits:
         raise HTTPException(status_code=404, detail="世界不存在commit")
-    latest_commit_parent = (
-        latest_commit.parent_id if latest_commit.parent_id is not None else "root"
-    )
-    all_world_identifiers: list[WorldIdentifier] = [
-        WorldIdentifier(user_id=user_id, world_id=world_id, commit_id=c.commit_id)
-        for c in world_commits
-    ]
-    commit_to_worlds: dict[str, Graph] = {
-        w_id.commit_id: world_dict[w_id]
-        for w_id in all_world_identifiers
-        if w_id in world_dict
-    }
+
+    # 获取最新的commit
+    latest_commit = commits[0]  # commits已按时间倒序排序
+    latest_commit_parent = latest_commit["parent_commit_id"] if latest_commit["parent_commit_id"] else "root"
+
+    # 从缓存中获取Graph对象
+    commit_to_worlds = {}
+    for commit in commits:
+        world_identifier = WorldIdentifier(
+            user_id=user_id,
+            world_id=world_id,
+            commit_id=str(commit["commit_id"])
+        )
+        if world_identifier in world_dict:
+            commit_to_worlds[str(commit["commit_id"])] = world_dict[world_identifier]
+
     return {
         "user_id": user_id,
         "world_id": world_id,
         "commits": [
             {
-                "commit_id": c.commit_id,
-                "topic": commit_to_worlds[c.commit_id].commit_metadata.topic,
-                "event_summary": commit_to_worlds[
-                    c.commit_id
-                ].commit_metadata.event_summary,
-                "parent_id": c.parent_id if c.parent_id is not None else "root",
+                "commit_id": str(commit["commit_id"]),
+                "topic": commit["topic"],
+                "event_summary": commit["event_summary"],
+                "parent_id": str(commit["parent_commit_id"]) if commit["parent_commit_id"] else "root",
             }
-            for c in world_commits
-            if c.commit_id in commit_to_worlds
+            for commit in commits
+            if str(commit["commit_id"]) in commit_to_worlds
         ],
         "latest_commit": {
-            "commit_id": latest_commit.commit_id,
-            "topic": commit_to_worlds[latest_commit.commit_id].commit_metadata.topic,
-            "event_summary": commit_to_worlds[
-                latest_commit.commit_id
-            ].commit_metadata.event_summary,
+            "commit_id": str(latest_commit["commit_id"]),
+            "topic": latest_commit["topic"],
+            "event_summary": latest_commit["event_summary"],
             "parent_id": latest_commit_parent,
         },
     }
@@ -503,22 +512,40 @@ async def world_home(user_id: str, world_id: str):
 # 用户主页
 @app.get("/user/{user_id}")
 async def user_home(user_id: str):
-    if user_id not in user_dict:
+    # 转换ID为UUID
+    try:
+        user_id_uuid = UUID(user_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="无效的用户ID格式")
+
+    # 获取用户信息
+    user_data = await db.get_user_by_id(user_id_uuid)
+    if not user_data:
         get_logger_backend().error(f"User {user_id} not found")
-        get_logger_backend().debug(f"User dict: {user_dict}")
         raise HTTPException(status_code=404, detail="用户不存在")
-    # 获取该用户的所有世界
-    user_worlds = [
-        {"world_id": w.world_id, "commit_id": w.commit_id}
-        for w in world_dict
-        if w.user_id == user_id
-    ]
-    async with user_lock:
-        user = user_dict[user_id]
+
+    # 获取用户的所有世界
+    user_worlds = await db.get_user_worlds(user_id_uuid)
+    
+    # 获取每个世界的最新commit
+    worlds_with_commits = []
+    for world in user_worlds:
+        commits = await db.get_world_commits(world["world_id"])
+        if commits:  # 如果有commit
+            worlds_with_commits.append({
+                "world_id": str(world["world_id"]),
+                "commit_id": str(commits[0]["commit_id"])  # 使用最新的commit
+            })
+        else:
+            worlds_with_commits.append({
+                "world_id": str(world["world_id"]),
+                "commit_id": None
+            })
+
     return {
         "user_id": user_id,
-        "username": user.username,
-        "worlds": user_worlds,
+        "username": user_data["username"],
+        "worlds": worlds_with_commits,
     }
 
 
