@@ -610,7 +610,15 @@ async def seed_prompt_to_world(
     data = SeedPromptToWorldModel(**(await request.json()))
     if data.user_id != user_id:
         raise HTTPException(status_code=403, detail="user_id不匹配")
+    
     try:
+        # 转换ID为UUID
+        user_id_uuid = UUID(user_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="无效的用户ID格式")
+
+    try:
+        # 生成世界元数据
         llm_client = LLMClient()
         llm_config = GLOBAL_LLM_CONFIG.copy()
         if data.language_type is not None:
@@ -625,6 +633,8 @@ async def seed_prompt_to_world(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"生成世界失败: {e}")
+
+    # 创建Graph对象
     G = Graph(
         protagonist_description=universe_metadata.protagonist_description,
         world_state=universe_metadata.world_state,
@@ -636,8 +646,33 @@ async def seed_prompt_to_world(
         embeddings=GLOBAL_EMBEDDINGS,
         annotation_params=GLOBAL_ANNOTATION_PARAMS,
     )
+
+    # 生成ID
     world_id = str(uuid4())
+    world_id_uuid = UUID(world_id)
     commit_id = await G.generate_world_status_uuid()
+    commit_id_uuid = UUID(commit_id)
+
+    # 创建世界记录
+    await db.create_world(
+        world_id=world_id_uuid,
+        user_id=user_id_uuid,
+        title=universe_metadata.world_title,
+        crisis=universe_metadata.world_crisis,
+    )
+
+    # 创建提交记录
+    graph_data = await G.to_json(user_id=user_id, world_id=world_id, commit_id=commit_id)
+    await db.create_world_commit(
+        commit_id=commit_id_uuid,
+        world_id=world_id_uuid,
+        parent_commit_id=None,
+        graph_data=graph_data,
+        topic=G.commit_metadata.topic,
+        event_summary=G.commit_metadata.event_summary,
+    )
+
+    # 更新提交树
     commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
     if commit_identifier not in commit_trees_dict:
         commit_trees_dict[commit_identifier] = CommitTree()
@@ -646,23 +681,24 @@ async def seed_prompt_to_world(
         world_id=world_id, user_id=user_id, commit_id=commit_id, graph=G, parent_id=None
     )
     await save_commit_tree(user_id, world_id, commit_tree)
-    # Create task and store graph
+
+    # 创建任务并存储图
     task = await world_task_manager.create_task(user_id, world_id, commit_id)
     world_dict[
         WorldIdentifier(user_id=user_id, world_id=world_id, commit_id=commit_id)
     ] = G
 
-    # Add permission for initial commit
+    # 设置初始权限
     permission_id = uuid4()
     await db.set_world_permission(
         permission_id=permission_id,
-        world_id=UUID(world_id),
-        commit_id=UUID(commit_id),
-        owner_id=UUID(user_id),
+        world_id=world_id_uuid,
+        commit_id=commit_id_uuid,
+        owner_id=user_id_uuid,
         visibility=WorldVisibility.PRIVATE,
     )
 
-    # Start background initialization
+    # 启动后台初始化
     background_task = asyncio.create_task(
         background_world_initialization(
             G, user_id, world_id, commit_id, GLOBAL_CHARACTER_IMAGE_DOWNLOADER
@@ -670,7 +706,7 @@ async def seed_prompt_to_world(
     )
     task.set_task(background_task)
 
-    # Return minimal response
+    # 返回最小响应
     return {
         "user_id": user_id,
         "world_id": world_id,
@@ -684,10 +720,21 @@ async def create_world(request: Request, user_id: str = Depends(get_current_user
     data = CreateWorldModel(**(await request.json()))
     if data.user_id != user_id:
         raise HTTPException(status_code=403, detail="user_id不匹配")
+    
+    try:
+        # 转换ID为UUID
+        user_id_uuid = UUID(user_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="无效的用户ID格式")
+
     get_logger_backend().debug(f"Create world: {data}")
+    
+    # 配置LLM
     llm_config = GLOBAL_LLM_CONFIG.copy()
     if data.language_type is not None:
         llm_config.language_type = LanguageType(data.language_type)
+    
+    # 创建Graph对象
     G = Graph(
         protagonist_description=data.protagonist_description,
         world_state=data.world_state,
@@ -697,8 +744,33 @@ async def create_world(request: Request, user_id: str = Depends(get_current_user
         embeddings=GLOBAL_EMBEDDINGS,
         annotation_params=GLOBAL_ANNOTATION_PARAMS,
     )
+
+    # 生成ID
     world_id = str(uuid4())
+    world_id_uuid = UUID(world_id)
     commit_id = await G.generate_world_status_uuid()
+    commit_id_uuid = UUID(commit_id)
+
+    # 创建世界记录
+    await db.create_world(
+        world_id=world_id_uuid,
+        user_id=user_id_uuid,
+        title=data.world_state,  # 使用world_state作为标题
+        crisis=data.protagonist_description,  # 使用protagonist_description作为crisis
+    )
+
+    # 创建提交记录
+    graph_data = await G.to_json(user_id=user_id, world_id=world_id, commit_id=commit_id)
+    await db.create_world_commit(
+        commit_id=commit_id_uuid,
+        world_id=world_id_uuid,
+        parent_commit_id=None,
+        graph_data=graph_data,
+        topic=G.commit_metadata.topic,
+        event_summary=G.commit_metadata.event_summary,
+    )
+
+    # 更新提交树
     commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
     if commit_identifier not in commit_trees_dict:
         commit_trees_dict[commit_identifier] = CommitTree()
@@ -707,22 +779,24 @@ async def create_world(request: Request, user_id: str = Depends(get_current_user
         world_id=world_id, user_id=user_id, commit_id=commit_id, graph=G, parent_id=None
     )
     await save_commit_tree(user_id, world_id, commit_tree)
-    # Create task and store graph
+
+    # 创建任务并存储图
     task = await world_task_manager.create_task(user_id, world_id, commit_id)
     world_dict[
         WorldIdentifier(user_id=user_id, world_id=world_id, commit_id=commit_id)
     ] = G
 
-    # Add permission for initial commit
+    # 设置初始权限
     permission_id = uuid4()
     await db.set_world_permission(
         permission_id=permission_id,
-        world_id=UUID(world_id),
-        commit_id=UUID(commit_id),
-        owner_id=UUID(user_id),
+        world_id=world_id_uuid,
+        commit_id=commit_id_uuid,
+        owner_id=user_id_uuid,
         visibility=WorldVisibility.PRIVATE,
     )
-    # Start background initialization
+
+    # 启动后台初始化
     background_task = asyncio.create_task(
         background_world_initialization(
             G, user_id, world_id, commit_id, GLOBAL_CHARACTER_IMAGE_DOWNLOADER
@@ -730,7 +804,7 @@ async def create_world(request: Request, user_id: str = Depends(get_current_user
     )
     task.set_task(background_task)
 
-    # Return minimal response
+    # 返回最小响应
     return {
         "user_id": user_id,
         "world_id": world_id,
@@ -1290,22 +1364,37 @@ async def delete_world_commit(
     data = DeleteWorldCommitModel(**(await request.json()))
     if current_user != data.user_id:
         raise HTTPException(status_code=403, detail="user_id不匹配 无权限删除")
+
+    try:
+        # 转换ID为UUID
+        user_id_uuid = UUID(data.user_id)
+        world_id_uuid = UUID(data.world_id)
+        commit_id_uuid = UUID(data.commit_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="无效的ID格式")
+
+    # 检查提交是否存在
+    commit = await db.get_world_commit(commit_id_uuid)
+    if not commit:
+        raise HTTPException(status_code=404, detail="World commit not found")
+
+    # 删除提交记录
+    await db.delete_world_commit(commit_id_uuid)
+
+    # 从内存中删除
     world_identifier = WorldIdentifier(
         user_id=data.user_id, world_id=data.world_id, commit_id=data.commit_id
     )
-    if world_identifier not in world_dict:
-        raise HTTPException(status_code=404, detail="World commit not found")
-    graph_path = (
-        f"{WORLD_JSON_PATH}/{data.user_id}_{data.world_id}_{data.commit_id}.json"
-    )
-    if os.path.exists(graph_path):
-        os.remove(graph_path)
     async with world_lock:
-        world_dict.pop(world_identifier)
+        if world_identifier in world_dict:
+            world_dict.pop(world_identifier)
+
+    # 更新提交树
     commit_identifier = CommitIdentifier(user_id=data.user_id, world_id=data.world_id)
     if commit_identifier in commit_trees_dict:
         async with commit_tree_lock:
             commit_trees_dict[commit_identifier].delete_commit(data.commit_id)
+
     return {"message": "World commit deleted successfully"}
 
 
