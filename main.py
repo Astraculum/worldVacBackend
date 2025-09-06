@@ -113,97 +113,6 @@ GLOBAL_CHARACTER_IMAGE_DOWNLOADER.start_character_generation_server()
 
 
 
-class PermissionCommitMetadata:
-    def __init__(
-        self,
-        world_id: str,
-        commit_id: str,
-        owner_id: str,
-        visibility: WorldVisibility = WorldVisibility.PRIVATE,
-    ):
-        self.world_id = world_id
-        self.commit_id = commit_id
-        self.owner_id = owner_id
-        self.visibility = visibility
-        self.shared_with: list[str] = []
-
-    def to_json(self):
-        return {
-            "world_id": self.world_id,
-            "commit_id": self.commit_id,
-            "owner_id": self.owner_id,
-            "visibility": WorldVisibility(self.visibility).value,
-            "shared_with": self.shared_with,
-        }
-
-    @staticmethod
-    def from_json(json_data: dict):
-        entity = PermissionCommitMetadata(
-            world_id=json_data["world_id"],
-            commit_id=json_data["commit_id"],
-            owner_id=json_data["owner_id"],
-            visibility=WorldVisibility(json_data["visibility"]),
-        )
-        entity.shared_with = json_data["shared_with"]
-        return entity
-
-
-class WorldPermissionManager:
-    def __init__(self):
-        self.commit_metadata: dict[str, PermissionCommitMetadata] = (
-            {}
-        )  # commit_id -> PermissionCommitMetadata
-
-    async def add_commit(
-        self,
-        world_id: str,
-        commit_id: str,
-        owner_id: str,
-        visibility: WorldVisibility = WorldVisibility.PRIVATE,
-    ):
-        self.commit_metadata[commit_id] = PermissionCommitMetadata(
-            world_id, commit_id, owner_id, visibility
-        )
-
-    async def get_commit_metadata(
-        self, commit_id: str
-    ) -> Optional[PermissionCommitMetadata]:
-        return self.commit_metadata.get(commit_id)
-
-    async def can_access(self, commit_id: str, user_id: str) -> bool:
-        metadata = await self.get_commit_metadata(commit_id)
-        if not metadata:
-            return False
-        return (
-            metadata.visibility == WorldVisibility.PUBLIC
-            or metadata.owner_id == user_id
-            or user_id in metadata.shared_with
-        )
-
-    async def set_visibility(self, commit_id: str, visibility: WorldVisibility):
-        if commit_id in self.commit_metadata:
-            self.commit_metadata[commit_id].visibility = visibility
-
-    async def share_with(self, commit_id: str, user_id: str):
-        if commit_id in self.commit_metadata:
-            if user_id not in self.commit_metadata[commit_id].shared_with:
-                self.commit_metadata[commit_id].shared_with.append(user_id)
-
-    def to_json(self):
-        return {
-            "commit_metadata": {k: v.to_json() for k, v in self.commit_metadata.items()}
-        }
-
-    def from_json(self, json_data: dict):
-        self.commit_metadata = {
-            k: PermissionCommitMetadata.from_json(v)
-            for k, v in json_data["commit_metadata"].items()
-        }
-
-
-# Initialize the permission manager
-world_permission_manager = WorldPermissionManager()
-
 # uuid -> graph
 
 world_dict: dict[WorldIdentifier, Graph] = {}  # (user_id, world_id, commit_id) -> graph
@@ -212,21 +121,8 @@ user_dict: dict[str, User] = {}  # user_id -> User
 user_lock = asyncio.Lock()
 commit_trees_dict: dict[CommitIdentifier, CommitTree] = {}
 commit_tree_lock = asyncio.Lock()
-world_permission_manager_lock = asyncio.Lock()
 
 
-async def load_world_permission_manager():
-    if os.path.exists(WORLD_PERMISSION_MANAGER_PATH):
-        async with world_permission_manager_lock:
-            with open(WORLD_PERMISSION_MANAGER_PATH, "r") as f:
-                json_data = json.load(f)
-                world_permission_manager.from_json(json_data)
-
-
-async def save_world_permission_manager():
-    async with world_permission_manager_lock:
-        with open(WORLD_PERMISSION_MANAGER_PATH, "w") as f:
-            json.dump(world_permission_manager.to_json(), f)
 
 
 async def load_commit_trees():
@@ -757,13 +653,14 @@ async def seed_prompt_to_world(
     ] = G
 
     # Add permission for initial commit
-    await world_permission_manager.add_commit(
-        world_id=world_id,
-        commit_id=commit_id,
-        owner_id=user_id,
+    permission_id = uuid4()
+    await db.set_world_permission(
+        permission_id=permission_id,
+        world_id=UUID(world_id),
+        commit_id=UUID(commit_id),
+        owner_id=UUID(user_id),
         visibility=WorldVisibility.PRIVATE,
     )
-    await save_world_permission_manager()
 
     # Start background initialization
     background_task = asyncio.create_task(
@@ -817,13 +714,14 @@ async def create_world(request: Request, user_id: str = Depends(get_current_user
     ] = G
 
     # Add permission for initial commit
-    await world_permission_manager.add_commit(
-        world_id=world_id,
-        commit_id=commit_id,
-        owner_id=user_id,
+    permission_id = uuid4()
+    await db.set_world_permission(
+        permission_id=permission_id,
+        world_id=UUID(world_id),
+        commit_id=UUID(commit_id),
+        owner_id=UUID(user_id),
         visibility=WorldVisibility.PRIVATE,
     )
-    await save_world_permission_manager()
     # Start background initialization
     background_task = asyncio.create_task(
         background_world_initialization(
@@ -1466,22 +1364,25 @@ async def background_commit_creation(
         await G.org_tree.layer_manager.group_chat_context.clear_all()
 
         # Add permission for new commit
-        old_metadata = await world_permission_manager.get_commit_metadata(commit_id)
-        if old_metadata:
-            await world_permission_manager.add_commit(
-                world_id=world_id,
-                commit_id=new_commit_id,
-                owner_id=user_id,
-                visibility=old_metadata.visibility,
+        old_permission = await db.get_world_permission(UUID(commit_id))
+        permission_id = uuid4()
+        if old_permission:
+            await db.set_world_permission(
+                permission_id=permission_id,
+                world_id=UUID(world_id),
+                commit_id=UUID(new_commit_id),
+                owner_id=UUID(user_id),
+                visibility=WorldVisibility(old_permission["visibility"]),
+                shared_with=old_permission["shared_with"],
             )
         else:
-            await world_permission_manager.add_commit(
-                world_id=world_id,
-                commit_id=new_commit_id,
-                owner_id=user_id,
+            await db.set_world_permission(
+                permission_id=permission_id,
+                world_id=UUID(world_id),
+                commit_id=UUID(new_commit_id),
+                owner_id=UUID(user_id),
                 visibility=WorldVisibility.PRIVATE,
             )
-        await save_world_permission_manager()
 
         task = await commit_task_manager.get_task(user_id, world_id, commit_id)
         if task:
@@ -1508,10 +1409,14 @@ async def public_world(request: Request, current_user: str = Depends(get_current
     new_world_id = str(uuid4())
 
     # Set world visibility to public
-    await world_permission_manager.add_commit(
-        data.world_id, data.commit_id, data.user_id, WorldVisibility.PUBLIC
+    permission_id = uuid4()
+    await db.set_world_permission(
+        permission_id=permission_id,
+        world_id=UUID(data.world_id),
+        commit_id=UUID(data.commit_id),
+        owner_id=UUID(data.user_id),
+        visibility=WorldVisibility.PUBLIC,
     )
-    await save_world_permission_manager()
     # Create fork task
     task = await fork_task_manager.create_task(
         user_id=data.user_id,  # Use original user as owner
@@ -1566,7 +1471,13 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
         raise HTTPException(status_code=404, detail="World commit not found")
 
     # Check if user has access to the world
-    if not await world_permission_manager.can_access(data.commit_id, current_user):
+    try:
+        commit_id_uuid = UUID(data.commit_id)
+        current_user_uuid = UUID(current_user)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="无效的ID格式")
+
+    if not await db.can_access_world(commit_id_uuid, current_user_uuid):
         raise HTTPException(status_code=403, detail="无权限访问该世界")
 
     # Create new world ID
@@ -1618,12 +1529,31 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
 async def get_all_public_worlds(
     current_user: str = Depends(get_current_user), response_model=list[WorldIdentifier]
 ):
-    # Get all worlds with public visibility
-    public_worlds = [
-        WorldIdentifier(user_id=w.user_id, world_id=w.world_id, commit_id=w.commit_id)
-        for w in world_dict
-        if await world_permission_manager.can_access(w.commit_id, current_user)
-    ]
+    try:
+        current_user_uuid = UUID(current_user)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="无效的用户ID格式")
+
+    # 获取所有世界
+    all_worlds = await db.get_all_worlds()
+    
+    # 检查每个世界的权限
+    public_worlds = []
+    for world in all_worlds:
+        # 获取世界的最新commit
+        commits = await db.get_world_commits(world["world_id"])
+        if not commits:
+            continue
+            
+        latest_commit = commits[0]  # commits已按时间倒序排序
+        if await db.can_access_world(latest_commit["commit_id"], current_user_uuid):
+            public_worlds.append(
+                WorldIdentifier(
+                    user_id=str(world["user_id"]),
+                    world_id=str(world["world_id"]),
+                    commit_id=str(latest_commit["commit_id"])
+                )
+            )
 
     return public_worlds
 
@@ -1742,7 +1672,6 @@ if __name__ == "__main__":
     get_logger_backend().debug(f"LLM config: {GLOBAL_LLM_CONFIG}")
     asyncio.run(load_commit_trees())
     asyncio.run(load_user_dict())
-    asyncio.run(load_world_permission_manager())
     asyncio.run(load_graph())
     # support for https
     if args.ssl_keyfile != "" and args.ssl_certfile != "":
