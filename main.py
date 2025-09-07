@@ -727,17 +727,6 @@ async def seed_prompt_to_world(
         WorldIdentifier(user_id=user_id, world_id=world_id, commit_id=commit_id)
     ] = G
 
-    # 创建初始提交记录
-    graph_data = await G.to_json(user_id=user_id, world_id=world_id, commit_id=commit_id)
-    await db.create_world_commit(
-        commit_id=commit_id_uuid,
-        world_id=world_id_uuid,
-        parent_commit_id=None,
-        graph_data=graph_data,
-        topic=G.commit_metadata.topic,
-        event_summary=G.commit_metadata.event_summary,
-    )
-
     # 设置初始权限
     permission_id = uuid4()
     await db.set_world_permission(
