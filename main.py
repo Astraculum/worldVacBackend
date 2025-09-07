@@ -1809,12 +1809,21 @@ if __name__ == "__main__":
             f"Fast chat LLM config: {GLOBAL_FAST_CHAT_LLM_CONFIG}"
         )
     get_logger_backend().debug(f"LLM config: {GLOBAL_LLM_CONFIG}")
-    # connect to database
-    asyncio.run(db.connect(args.dsn))
-    asyncio.run(db.initialize_tables())
-    asyncio.run(load_commit_trees())
-    asyncio.run(load_user_dict())
-    asyncio.run(load_graph())
+    async def initialize_database():
+        """Initialize database and load all required data"""
+        try:
+            await db.connect(args.dsn)
+            await db.initialize_tables()
+            await load_commit_trees()
+            await load_user_dict()
+            await load_graph()
+        except Exception as e:
+            get_logger_backend().error(f"Database initialization failed: {e}")
+            raise
+
+    # Initialize database
+    asyncio.run(initialize_database())
+    
     # support for https
     if args.ssl_keyfile != "" and args.ssl_certfile != "":
         uvicorn.run(
