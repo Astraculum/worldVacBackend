@@ -1888,38 +1888,68 @@ if __name__ == "__main__":
     async def initialize_database():
         """Initialize database and load all required data"""
         try:
+            # Ensure we're using the running event loop
+            loop = asyncio.get_running_loop()
+            
+            # Initialize database connection
             await db.connect(args.dsn)
+            
+            # Set up connection pool with proper event loop binding
             await db.initialize_tables()
+            
+            # Load data
             await load_commit_trees()
             await load_user_dict()
             await load_graph()
+            
+            get_logger_backend().info("Database initialization completed successfully")
         except Exception as e:
             get_logger_backend().error(f"Database initialization failed: {e}")
+            get_logger_backend().error(traceback.format_exc())
             raise
 
-    # Initialize database
-    try:
-        asyncio.run(initialize_database())
-    except Exception as e:
-        get_logger_backend().error(f"Database initialization failed: {e}")
-        raise
+    # Create startup event handler
+    @app.on_event("startup")
+    async def startup_event():
+        try:
+            await initialize_database()
+        except Exception as e:
+            get_logger_backend().error(f"Startup initialization failed: {e}")
+            raise
+
+    @app.on_event("shutdown")
+    async def shutdown_event():
+        try:
+            # Close database connections
+            if hasattr(db, 'pool') and db.pool is not None:
+                await db.pool.close()
+            get_logger_backend().info("Database connections closed successfully")
+        except Exception as e:
+            get_logger_backend().error(f"Error during shutdown: {e}")
+            get_logger_backend().error(traceback.format_exc())
     
-    # support for https
-    if args.ssl_keyfile != "" and args.ssl_certfile != "":
-        uvicorn.run(
-            app,
-            host=args.host,
-            port=args.port,
-            ssl_keyfile=args.ssl_keyfile,
-            ssl_certfile=args.ssl_certfile,
-            log_config=args.log_config,
-        )
+    # Configure uvicorn with proper settings
+    config = uvicorn.Config(
+        app,
+        host=args.host,
+        port=args.port,
+        log_config=args.log_config,
+        loop="auto",  # Let uvicorn choose the best event loop implementation
+        timeout_keep_alive=30,  # Reduce keep-alive timeout
+        access_log=True,
+    )
+
+    if args.ssl_keyfile and args.ssl_certfile:
+        config.ssl_keyfile = args.ssl_keyfile
+        config.ssl_certfile = args.ssl_certfile
     else:
-        # runs on http
-        get_logger_backend().warning("Runs on http!")
-        uvicorn.run(
-            app,
-            host=args.host,
-            port=args.port,
-            log_config=args.log_config,
-        )
+        get_logger_backend().warning("Running in HTTP mode!")
+
+    server = uvicorn.Server(config)
+    try:
+        get_logger_backend().info(f"Starting server on {args.host}:{args.port}")
+        server.run()
+    except Exception as e:
+        get_logger_backend().error(f"Server failed to start: {e}")
+        get_logger_backend().error(traceback.format_exc())
+        raise
