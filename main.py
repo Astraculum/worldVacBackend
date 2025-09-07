@@ -1822,12 +1822,11 @@ if __name__ == "__main__":
             raise
 
     # Initialize database
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
     try:
-        loop.run_until_complete(initialize_database())
-    finally:
-        loop.close()
+        asyncio.run(initialize_database())
+    except Exception as e:
+        get_logger_backend().error(f"Database initialization failed: {e}")
+        raise
     
     # support for https
     if args.ssl_keyfile != "" and args.ssl_certfile != "":
