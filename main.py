@@ -190,14 +190,32 @@ async def save_graph(user_id: str, world_id: str, commit_id: str, graph: Graph):
     except ValueError:
         raise ValueError("无效的ID格式")
 
+    # 从commit tree获取parent_commit_id
+    commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
+    parent_commit_id = None
+    
+    async with commit_tree_lock:
+        if commit_identifier in commit_trees_dict:
+            commit_tree = commit_trees_dict[commit_identifier]
+            # 如果commit已经在树中，获取其父提交ID
+            if commit_id in commit_tree.nodes:
+                parent_commit_id = commit_tree.nodes[commit_id].parent_id
+            # 如果commit不在树中，使用当前的root作为父提交
+            elif commit_tree.root_id is not None:
+                parent_commit_id = commit_tree.root_id
+
     async with world_lock:
         json_data = await graph.to_json(
             user_id=user_id, world_id=world_id, commit_id=commit_id
         )
+        
+        # 如果有parent_commit_id，转换为UUID
+        parent_commit_uuid = UUID(parent_commit_id) if parent_commit_id is not None else None
+        
         await db.create_world_commit(
             commit_id=commit_id_uuid,
             world_id=world_id_uuid,
-            parent_commit_id=None,  # TODO: 从commit tree获取
+            parent_commit_id=parent_commit_uuid,
             graph_data=json_data,
             topic=graph.commit_metadata.topic,
             event_summary=graph.commit_metadata.event_summary,
@@ -708,6 +726,17 @@ async def seed_prompt_to_world(
     world_dict[
         WorldIdentifier(user_id=user_id, world_id=world_id, commit_id=commit_id)
     ] = G
+
+    # 创建初始提交记录
+    graph_data = await G.to_json(user_id=user_id, world_id=world_id, commit_id=commit_id)
+    await db.create_world_commit(
+        commit_id=commit_id_uuid,
+        world_id=world_id_uuid,
+        parent_commit_id=None,
+        graph_data=graph_data,
+        topic=G.commit_metadata.topic,
+        event_summary=G.commit_metadata.event_summary,
+    )
 
     # 设置初始权限
     permission_id = uuid4()
