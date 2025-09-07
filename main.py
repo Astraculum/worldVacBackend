@@ -5,7 +5,7 @@ import os
 import time
 import traceback
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 from uuid import UUID, uuid4
 
 import jwt
@@ -89,12 +89,7 @@ GLOBAL_FAST_CHAT_LLM_CONFIG = LLMConfig(
     language_type=LanguageType.NotSpecified,
 )
 
-WORLD_JSON_PATH = "worlds-json"
-COMMIT_TREE_JSON_PATH = "commit-trees-json"
 CHARACTER_IMAGES_PATH = "character-images"
-WORLD_PERMISSION_MANAGER_PATH = "world-permission-manager.json"
-os.makedirs(WORLD_JSON_PATH, exist_ok=True)
-os.makedirs(COMMIT_TREE_JSON_PATH, exist_ok=True)
 os.makedirs(CHARACTER_IMAGES_PATH, exist_ok=True)
 CHOOSER_TO_AVAILABLE_OPTIONS_PATH = (
     "backend/spritesheet_generator/chooser_to_available_options.json"
@@ -126,61 +121,98 @@ commit_tree_lock = asyncio.Lock()
 
 
 async def load_commit_trees():
+    """从数据库加载提交树"""
     async with commit_tree_lock:
-        for file in os.listdir(COMMIT_TREE_JSON_PATH):
-            user_id, world_id = file.split(".")[0].split("_")
-            with open(f"{COMMIT_TREE_JSON_PATH}/{file}", "r") as f:
-                json_data = json.load(f)
-                commit_trees_dict[
-                    CommitIdentifier(user_id=user_id, world_id=world_id)
-                ] = CommitTree.from_json(json_data)
-                get_logger_backend().debug(
-                    f"Commit tree loaded: {CommitIdentifier(user_id=user_id, world_id=world_id)}"
-                )
+        trees = await db.get_all_commit_trees()
+        for tree in trees:
+            commit_trees_dict[
+                CommitIdentifier(user_id=tree["user_id"], world_id=tree["world_id"])
+            ] = CommitTree.from_json(tree["tree_data"])
+            get_logger_backend().debug(
+                f"Commit tree loaded: {CommitIdentifier(user_id=tree['user_id'], world_id=tree['world_id'])}"
+            )
 
 
 async def save_commit_tree(user_id: str, world_id: str, commit_tree: CommitTree):
+    """保存提交树到数据库"""
+    try:
+        user_id_uuid = UUID(user_id)
+        world_id_uuid = UUID(world_id)
+    except ValueError:
+        raise ValueError("无效的ID格式")
+
     async with commit_tree_lock:
-        os.makedirs(COMMIT_TREE_JSON_PATH, exist_ok=True)
-        with open(f"{COMMIT_TREE_JSON_PATH}/{user_id}_{world_id}.json", "w") as f:
-            json.dump(commit_tree.to_json(), f)
+        await db.save_commit_tree(
+            user_id=user_id_uuid,
+            world_id=world_id_uuid,
+            tree_data=commit_tree.to_json(),
+        )
 
 
 async def save_user_dict():
+    """保存用户字典到数据库"""
     async with user_lock:
-        with open("user_dict.json", "w") as f:
-            json.dump({k: v.model_dump() for k, v in user_dict.items()}, f)
+        users = [
+            {
+                "user_id": UUID(k),
+                "username": v.username,
+                "password_hash": v.password_hash,
+                "token": v.token,
+            }
+            for k, v in user_dict.items()
+        ]
+        await db.save_users(users)
 
 
 async def load_user_dict():
-    if os.path.exists("user_dict.json"):
-        async with user_lock:
-            with open("user_dict.json", "r") as f:
-                _user_dict = json.load(f)
-            _user_dict = {k: User(**v) for k, v in _user_dict.items()}
-            user_dict.update(_user_dict)
-            get_logger_backend().debug(f"User dict loaded: {_user_dict}")
+    """从数据库加载用户字典"""
+    async with user_lock:
+        users = await db.get_all_users()
+        _user_dict = {
+            str(user["user_id"]): User(
+                user_id=str(user["user_id"]),
+                username=user["username"],
+                password_hash=user["password_hash"],
+                token=user["token"],
+            )
+            for user in users
+        }
+        user_dict.update(_user_dict)
+        get_logger_backend().debug(f"User dict loaded: {_user_dict}")
 
 
 async def save_graph(user_id: str, world_id: str, commit_id: str, graph: Graph):
+    """保存图到数据库"""
+    try:
+        user_id_uuid = UUID(user_id)
+        world_id_uuid = UUID(world_id)
+        commit_id_uuid = UUID(commit_id)
+    except ValueError:
+        raise ValueError("无效的ID格式")
+
     async with world_lock:
-        os.makedirs(WORLD_JSON_PATH, exist_ok=True)
         json_data = await graph.to_json(
             user_id=user_id, world_id=world_id, commit_id=commit_id
         )
-        with open(f"{WORLD_JSON_PATH}/{user_id}_{world_id}_{commit_id}.json", "w") as f:
-            json.dump(json_data, f)
+        await db.create_world_commit(
+            commit_id=commit_id_uuid,
+            world_id=world_id_uuid,
+            parent_commit_id=None,  # TODO: 从commit tree获取
+            graph_data=json_data,
+            topic=graph.commit_metadata.topic,
+            event_summary=graph.commit_metadata.event_summary,
+        )
 
 
 async def load_graph():
-    async def load_graph_from_file(
-        file: str, embeddings: SentenceEmbedding, annotation_params: AnnotationParams
-    ):
-        user_id, world_id, commit_id = "-", "-", "-"
+    """从数据库加载图"""
+    async def load_graph_from_commit(commit: dict[str, Any]):
         try:
-            user_id, world_id, commit_id = file.split(".")[0].split("_")
-            with open(f"{WORLD_JSON_PATH}/{file}", "r") as f:
-                json_data = json.load(f)
+            user_id = str(commit["user_id"])
+            world_id = str(commit["world_id"])
+            commit_id = str(commit["commit_id"])
+            
+            json_data = commit["graph_data"]
             if json_data["user_id"] != user_id:
                 get_logger_backend().error(
                     f"User id mismatch: {json_data['user_id']} != {user_id}"
@@ -193,39 +225,46 @@ async def load_graph():
                 get_logger_backend().error(
                     f"Commit id mismatch: {json_data['commit_id']} != {commit_id}"
                 )
+
             llm_config = GLOBAL_LLM_CONFIG.copy()
             if json_data["llm_config"].get("language_type", None) is not None:
                 llm_config.language_type = LanguageType(
                     json_data["llm_config"]["language_type"]
                 )
             json_data["llm_config"] = llm_config.to_json()
+
             G = await Graph.from_json(
                 data=json_data,
-                embeddings=embeddings,
-                annotation_params=annotation_params,
+                embeddings=GLOBAL_EMBEDDINGS,
+                annotation_params=GLOBAL_ANNOTATION_PARAMS,
             )
+
             async with world_lock:
                 world_dict[
                     WorldIdentifier(
                         user_id=user_id, world_id=world_id, commit_id=commit_id
                     )
                 ] = G
+
             get_logger_backend().debug(
                 f"World loaded: ({user_id}, {world_id}, {commit_id}) language type: {G.llm_config.language_type}"
             )
-            # Check scene status and initialize if needed
+
+            # 检查场景状态并初始化
             context = G.org_tree.layer_manager.group_chat_context
             scene_status = await context.get_groupchat_status()
             if scene_status == GroupChatStatus.NOT_STARTED:
-                # Check if this is the first commit
+                # 检查是否是第一个提交
                 commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
                 async with commit_tree_lock:
                     previous_commit_id = commit_trees_dict[commit_identifier].root_id
                     is_first_scene = previous_commit_id == commit_id
+
                 # 创建场景任务
                 scene_task = await scene_task_manager.create_task(
                     user_id, world_id, commit_id
                 )
+
                 # 启动场景初始化
                 background_task = asyncio.create_task(
                     background_scene_initialization(
@@ -241,17 +280,20 @@ async def load_graph():
                 get_logger_backend().debug(
                     f"Started scene initialization for ({user_id}, {world_id}, {commit_id})"
                 )
+
         except Exception as e:
             get_logger_backend().debug(traceback.format_exc())
             get_logger_backend().error(
-                f"Error in loading graph ({user_id}, {world_id}, {commit_id}): {e}, skip loading graph"
+                f"Error in loading graph: {e}, skip loading graph"
             )
 
-    tasks = [
-        load_graph_from_file(file, GLOBAL_EMBEDDINGS, GLOBAL_ANNOTATION_PARAMS)
-        for file in os.listdir(WORLD_JSON_PATH)
-    ]
-    await asyncio.gather(*tasks)
+    # 获取所有世界
+    worlds = await db.get_all_worlds()
+    for world in worlds:
+        # 获取世界的所有提交
+        commits = await db.get_world_commits(world["world_id"])
+        tasks = [load_graph_from_commit(commit) for commit in commits]
+        await asyncio.gather(*tasks)
 
 
 ASYNC_SLEEP_TIME = 0.3
@@ -1437,14 +1479,21 @@ async def background_commit_creation(
             parent_id=commit_id,
         )
         await save_commit_tree(user_id, world_id, commit_tree)
-        # load old world to world_dict
+        # 从数据库加载旧的世界到world_dict
+        try:
+            commit_id_uuid = UUID(commit_id)
+        except ValueError:
+            raise ValueError("无效的提交ID格式")
+
+        old_commit = await db.get_world_commit(commit_id_uuid)
+        if not old_commit:
+            raise ValueError(f"找不到提交记录: {commit_id}")
+
         old_world_identifier = WorldIdentifier(
             user_id=user_id, world_id=world_id, commit_id=commit_id
         )
-        with open(f"{WORLD_JSON_PATH}/{user_id}_{world_id}_{commit_id}.json", "r") as f:
-            json_data = json.load(f)
         old_graph = await Graph.from_json(
-            json_data,
+            old_commit["graph_data"],
             embeddings=GLOBAL_EMBEDDINGS,
             annotation_params=GLOBAL_ANNOTATION_PARAMS,
         )
@@ -1715,6 +1764,7 @@ def get_args():
     parser.add_argument("--host", type=str, default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--api_key", type=str, default="")
+    parser.add_argument("--dsn", type=str, default="")
     parser.add_argument("--fast_chat_api_key", type=str, default="")
     parser.add_argument("--model", type=str, default="")
     parser.add_argument("--fast_chat_model", type=str, default="")
@@ -1759,6 +1809,9 @@ if __name__ == "__main__":
             f"Fast chat LLM config: {GLOBAL_FAST_CHAT_LLM_CONFIG}"
         )
     get_logger_backend().debug(f"LLM config: {GLOBAL_LLM_CONFIG}")
+    # connect to database
+    asyncio.run(db.connect(args.dsn))
+    asyncio.run(db.initialize_tables())
     asyncio.run(load_commit_trees())
     asyncio.run(load_user_dict())
     asyncio.run(load_graph())
