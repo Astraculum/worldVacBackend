@@ -727,15 +727,6 @@ async def seed_prompt_to_world(
         WorldIdentifier(user_id=user_id, world_id=world_id, commit_id=commit_id)
     ] = G
 
-    # 设置初始权限
-    permission_id = uuid4()
-    await db.set_world_permission(
-        permission_id=permission_id,
-        world_id=world_id_uuid,
-        commit_id=commit_id_uuid,
-        owner_id=user_id_uuid,
-        visibility=WorldVisibility.PRIVATE,
-    )
 
     # 获取当前事件循环
     loop = asyncio.get_running_loop()
@@ -783,7 +774,15 @@ async def seed_prompt_to_world(
                         topic=G.commit_metadata.topic,
                         event_summary=G.commit_metadata.event_summary,
                     )
-
+                    # 设置初始权限
+                    permission_id = uuid4()
+                    await db.set_world_permission(
+                        permission_id=permission_id,
+                        world_id=world_id_uuid,
+                        commit_id=commit_id_uuid,
+                        owner_id=user_id_uuid,
+                        visibility=WorldVisibility.PRIVATE,
+                    )
                     # 更新提交树
                     commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
                     if commit_identifier not in commit_trees_dict:
