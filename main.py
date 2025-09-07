@@ -719,8 +719,11 @@ async def seed_prompt_to_world(
         visibility=WorldVisibility.PRIVATE,
     )
 
-    # 启动后台初始化并等待完成
-    background_task = asyncio.create_task(
+    # 获取当前事件循环
+    loop = asyncio.get_running_loop()
+    
+    # 启动后台初始化
+    background_task = loop.create_task(
         background_world_initialization(
             G, user_id, world_id, commit_id, GLOBAL_CHARACTER_IMAGE_DOWNLOADER
         )
@@ -730,36 +733,58 @@ async def seed_prompt_to_world(
     # 创建另一个后台任务来处理数据库更新
     async def update_db_after_init():
         try:
-            await background_task
+            # 创建一个Future来跟踪初始化完成
+            init_done = loop.create_future()
+            
+            async def wait_for_init():
+                try:
+                    await background_task
+                    init_done.set_result(True)
+                except Exception as e:
+                    init_done.set_exception(e)
+            
+            # 在当前事件循环中启动等待任务
+            loop.create_task(wait_for_init())
+            
+            # 等待初始化完成
+            await init_done
+            
             # 初始化完成后，获取完整的graph数据
             graph_data = await G.to_json(user_id=user_id, world_id=world_id, commit_id=commit_id)
             
-            # 创建提交记录
-            await db.create_world_commit(
-                commit_id=commit_id_uuid,
-                world_id=world_id_uuid,
-                parent_commit_id=None,
-                graph_data=graph_data,
-                topic=G.commit_metadata.topic,
-                event_summary=G.commit_metadata.event_summary,
-            )
+            if db.pool is None:
+                raise RuntimeError("Database pool is not initialized")
+            async with db.pool.acquire() as conn:
+                async with conn.transaction():
+                    # 创建提交记录
+                    await db.create_world_commit(
+                        commit_id=commit_id_uuid,
+                        world_id=world_id_uuid,
+                        parent_commit_id=None,
+                        graph_data=graph_data,
+                        topic=G.commit_metadata.topic,
+                        event_summary=G.commit_metadata.event_summary,
+                    )
 
-            # 更新提交树
-            commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
-            if commit_identifier not in commit_trees_dict:
-                commit_trees_dict[commit_identifier] = CommitTree()
-            commit_tree = commit_trees_dict[commit_identifier]
-            await commit_tree.add_commit(
-                world_id=world_id, user_id=user_id, commit_id=commit_id, graph=G, parent_id=None
-            )
-            await save_commit_tree(user_id, world_id, commit_tree)
+                    # 更新提交树
+                    commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
+                    if commit_identifier not in commit_trees_dict:
+                        commit_trees_dict[commit_identifier] = CommitTree()
+                    commit_tree = commit_trees_dict[commit_identifier]
+                    await commit_tree.add_commit(
+                        world_id=world_id, user_id=user_id, commit_id=commit_id, graph=G, parent_id=None
+                    )
+                    await save_commit_tree(user_id, world_id, commit_tree)
+                    
+        except asyncio.CancelledError:
+            get_logger_backend().warning("Database update task was cancelled")
         except Exception as e:
             get_logger_backend().error(f"Failed to update database after initialization: {e}")
             get_logger_backend().error(traceback.format_exc())
             # 这里可以考虑添加一些错误恢复机制
 
-    # 启动数据库更新任务
-    asyncio.create_task(update_db_after_init())
+    # 在当前事件循环中启动数据库更新任务
+    loop.create_task(update_db_after_init())
 
     # 返回最小响应
     return {
@@ -830,8 +855,11 @@ async def create_world(request: Request, user_id: str = Depends(get_current_user
         visibility=WorldVisibility.PRIVATE,
     )
 
-    # 启动后台初始化并等待完成
-    background_task = asyncio.create_task(
+    # 获取当前事件循环
+    loop = asyncio.get_running_loop()
+    
+    # 启动后台初始化
+    background_task = loop.create_task(
         background_world_initialization(
             G, user_id, world_id, commit_id, GLOBAL_CHARACTER_IMAGE_DOWNLOADER
         )
@@ -841,36 +869,58 @@ async def create_world(request: Request, user_id: str = Depends(get_current_user
     # 创建另一个后台任务来处理数据库更新
     async def update_db_after_init():
         try:
-            await background_task
+            # 创建一个Future来跟踪初始化完成
+            init_done = loop.create_future()
+            
+            async def wait_for_init():
+                try:
+                    await background_task
+                    init_done.set_result(True)
+                except Exception as e:
+                    init_done.set_exception(e)
+            
+            # 在当前事件循环中启动等待任务
+            loop.create_task(wait_for_init())
+            
+            # 等待初始化完成
+            await init_done
+            
             # 初始化完成后，获取完整的graph数据
             graph_data = await G.to_json(user_id=user_id, world_id=world_id, commit_id=commit_id)
             
-            # 创建提交记录
-            await db.create_world_commit(
-                commit_id=commit_id_uuid,
-                world_id=world_id_uuid,
-                parent_commit_id=None,
-                graph_data=graph_data,
-                topic=G.commit_metadata.topic,
-                event_summary=G.commit_metadata.event_summary,
-            )
+            if db.pool is None:
+                raise RuntimeError("Database pool is not initialized")
+            async with db.pool.acquire() as conn:
+                async with conn.transaction():
+                    # 创建提交记录
+                    await db.create_world_commit(
+                        commit_id=commit_id_uuid,
+                        world_id=world_id_uuid,
+                        parent_commit_id=None,
+                        graph_data=graph_data,
+                        topic=G.commit_metadata.topic,
+                        event_summary=G.commit_metadata.event_summary,
+                    )
 
-            # 更新提交树
-            commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
-            if commit_identifier not in commit_trees_dict:
-                commit_trees_dict[commit_identifier] = CommitTree()
-            commit_tree = commit_trees_dict[commit_identifier]
-            await commit_tree.add_commit(
-                world_id=world_id, user_id=user_id, commit_id=commit_id, graph=G, parent_id=None
-            )
-            await save_commit_tree(user_id, world_id, commit_tree)
+                    # 更新提交树
+                    commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
+                    if commit_identifier not in commit_trees_dict:
+                        commit_trees_dict[commit_identifier] = CommitTree()
+                    commit_tree = commit_trees_dict[commit_identifier]
+                    await commit_tree.add_commit(
+                        world_id=world_id, user_id=user_id, commit_id=commit_id, graph=G, parent_id=None
+                    )
+                    await save_commit_tree(user_id, world_id, commit_tree)
+                    
+        except asyncio.CancelledError:
+            get_logger_backend().warning("Database update task was cancelled")
         except Exception as e:
             get_logger_backend().error(f"Failed to update database after initialization: {e}")
             get_logger_backend().error(traceback.format_exc())
             # 这里可以考虑添加一些错误恢复机制
 
-    # 启动数据库更新任务
-    asyncio.create_task(update_db_after_init())
+    # 在当前事件循环中启动数据库更新任务
+    loop.create_task(update_db_after_init())
 
     # 返回最小响应
     return {
