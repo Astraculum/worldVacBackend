@@ -221,6 +221,7 @@ async def save_graph(user_id: str, world_id: str, commit_id: str, graph: Graph):
         await db.create_world_commit(
             commit_id=commit_id_uuid,
             world_id=world_id_uuid,
+            user_id=user_id_uuid,
             parent_commit_id=parent_commit_uuid,
             graph_data=json_data,
             topic=graph.commit_metadata.topic,
@@ -784,6 +785,7 @@ async def seed_prompt_to_world(
                     await db.create_world_commit(
                         commit_id=commit_id_uuid,
                         world_id=world_id_uuid,
+                        user_id=user_id_uuid,
                         parent_commit_id=None,
                         graph_data=graph_data,
                         topic=G.commit_metadata.topic,
@@ -938,6 +940,7 @@ async def create_world(request: Request, user_id: str = Depends(get_current_user
                     await db.create_world_commit(
                         commit_id=commit_id_uuid,
                         world_id=world_id_uuid,
+                        user_id=user_id_uuid,
                         parent_commit_id=None,
                         graph_data=graph_data,
                         topic=G.commit_metadata.topic,
