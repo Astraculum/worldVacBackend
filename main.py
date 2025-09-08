@@ -540,7 +540,27 @@ async def background_world_initialization(
     character_image_downloader: CharacterImageDownloader,
 ):
     try:
+        # 初始化世界
         await G.init_world()
+        
+        # 首先保存初始的 commit 到数据库
+        try:
+            graph_data = await G.to_json(user_id=user_id, world_id=world_id, commit_id=commit_id)
+            await db.create_world_commit(
+                commit_id=UUID(commit_id),
+                world_id=UUID(world_id),
+                user_id=UUID(user_id),
+                parent_commit_id=None,
+                graph_data=graph_data,
+                topic=G.commit_metadata.topic if hasattr(G, 'commit_metadata') else "",
+                event_summary=G.commit_metadata.event_summary if hasattr(G, 'commit_metadata') else "",
+            )
+            get_logger_backend().info(f"Successfully saved initial commit for world {world_id}")
+        except Exception as e:
+            get_logger_backend().error(f"Failed to save initial commit: {e}")
+            get_logger_backend().error(traceback.format_exc())
+            raise
+
         task = await world_task_manager.get_task(user_id, world_id, commit_id)
         if task:
             task.set_completed()
