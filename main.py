@@ -140,9 +140,14 @@ async def load_commit_trees():
     async with commit_tree_lock:
         trees = await db.get_all_commit_trees()
         for tree in trees:
+            # Parse the tree_data from JSON string if it's a string
+            tree_data = tree["tree_data"]
+            if isinstance(tree_data, str):
+                tree_data = json.loads(tree_data)
+            
             commit_trees_dict[
                 CommitIdentifier(user_id=tree["user_id"], world_id=tree["world_id"])
-            ] = CommitTree.from_json(tree["tree_data"])
+            ] = CommitTree.from_json(tree_data)
             get_logger_backend().debug(
                 f"Commit tree loaded: {CommitIdentifier(user_id=tree['user_id'], world_id=tree['world_id'])}"
             )
