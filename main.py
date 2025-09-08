@@ -82,12 +82,22 @@ GLOBAL_LLM_CONFIG = LLMConfig(
     model="NULL",
     provider=LLMProvider.SiliconFlow,
     language_type=LanguageType.NotSpecified,
+    # Rate limiting configuration
+    max_tokens_per_minute=100000,  # 100K tokens per minute
+    max_requests_per_minute=1000,  # 1000 requests per minute
+    burst_capacity=10000,          # 10K token burst capacity
+    max_retries=5,                 # 5 retries on rate limit
 )
 GLOBAL_FAST_CHAT_LLM_CONFIG = LLMConfig(
     api_key="NULL",
     model="NULL",
     provider=LLMProvider.SiliconFlow,
     language_type=LanguageType.NotSpecified,
+    # Rate limiting configuration for fast chat
+    max_tokens_per_minute=150000,  # Higher limit for fast chat
+    max_requests_per_minute=1500,  # Higher request limit
+    burst_capacity=15000,          # Higher burst capacity
+    max_retries=3,                 # Fewer retries for fast chat
 )
 
 CHARACTER_IMAGES_PATH = "character-images"
@@ -2163,6 +2173,15 @@ def get_args():
         action="store_true",
         help="Clear all database tables before initialization",
     )
+    # Rate limiting arguments
+    parser.add_argument("--max_tokens_per_minute", type=int, default=100000,
+                       help="Maximum tokens per minute for rate limiting")
+    parser.add_argument("--max_requests_per_minute", type=int, default=500,
+                       help="Maximum requests per minute for rate limiting")
+    parser.add_argument("--burst_capacity", type=int, default=10000,
+                       help="Burst capacity for rate limiting")
+    parser.add_argument("--max_retries", type=int, default=5,
+                       help="Maximum retries on rate limit errors")
     return parser.parse_args()
 
 
@@ -2183,6 +2202,12 @@ if __name__ == "__main__":
             "http_proxy": f"http://localhost:{args.proxies_port}",
             "https_proxy": f"http://localhost:{args.proxies_port}",
         }
+    
+    # Update rate limiting configuration from command line arguments
+    GLOBAL_LLM_CONFIG.max_tokens_per_minute = args.max_tokens_per_minute
+    GLOBAL_LLM_CONFIG.max_requests_per_minute = args.max_requests_per_minute
+    GLOBAL_LLM_CONFIG.burst_capacity = args.burst_capacity
+    GLOBAL_LLM_CONFIG.max_retries = args.max_retries
     if (
         args.fast_chat_api_key != ""
         and args.fast_chat_model != ""
