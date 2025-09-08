@@ -140,6 +140,7 @@ async def load_commit_trees():
     async with commit_tree_lock:
         trees = await db.get_all_commit_trees()
         for tree in trees:
+            print("Tree: ", tree)
             # Parse the tree_data from JSON string if it's a string
             tree_data = tree["tree_data"]
             if isinstance(tree_data, str):
