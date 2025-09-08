@@ -1,10 +1,10 @@
 import argparse
 import asyncio
-from asyncio import Task
 import json
 import os
 import time
 import traceback
+from asyncio import Task
 from enum import Enum
 from typing import Any, Optional, cast
 from uuid import UUID, uuid4
@@ -19,43 +19,25 @@ from starlette.requests import Request
 from AgentMatrix.const import GroupChatStatus
 from AgentMatrix.database.postgre_sql import db
 from AgentMatrix.database.sql_base import SQLBaseDB
-from AgentMatrix.model import (
-    CharacterModel,
-    CommitIdentifier,
-    CreateWorldModel,
-    DeleteWorldCommitModel,
-    ForkRelationModel,
-    ForkWorldModel,
-    GetAllWorldsModel,
-    GetCharactersModel,
-    InputActionModel,
-    LoginModel,
-    LoginResponse,
-    MissionModel,
-    PublicWorldModel,
-    RegisterModel,
-    RegisterResponse,
-    SceneModel,
-    SeedPromptToWorldModel,
-    SelectOptionModel,
-    User,
-    WorldCharacteristicModel,
-    WorldIdentifier,
-    WorldModel,
-    WorldNewsModel,
-    WorldVisibility,
-    character_info_to_model,
-    create_access_token,
-    get_current_user,
-    hash_password,
-    message_to_event_model,
-    verify_password,
-)
+from AgentMatrix.model import (CharacterModel, CommitIdentifier,
+                               CreateWorldModel, DeleteWorldCommitModel,
+                               ForkRelationModel, ForkWorldModel,
+                               GetAllWorldsModel, GetCharactersModel,
+                               InputActionModel, LoginModel, LoginResponse,
+                               MissionModel, PublicWorldModel, RegisterModel,
+                               RegisterResponse, SceneModel,
+                               SeedPromptToWorldModel, SelectOptionModel, User,
+                               WorldCharacteristicModel, WorldIdentifier,
+                               WorldModel, WorldNewsModel, WorldVisibility,
+                               character_info_to_model, create_access_token,
+                               get_current_user, hash_password,
+                               message_to_event_model, verify_password)
 from AgentMatrix.src.graph import ForkRelationEntity, Graph, HostLayer
 from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
 from AgentMatrix.src.memory import SentenceEmbedding
 from AgentMatrix.src.spritesheet_generator import AnnotationParams
-from AgentMatrix.src.spritesheet_generator.auto_download import CharacterImageDownloader
+from AgentMatrix.src.spritesheet_generator.auto_download import \
+    CharacterImageDownloader
 from AgentMatrix.src.world import seed_prompt_to_universe_metadata
 from backend.utils import start_scene_from_graph
 from backend.utils.commit_task import commit_task_manager
@@ -140,17 +122,18 @@ async def load_commit_trees():
     async with commit_tree_lock:
         trees = await db.get_all_commit_trees()
         for tree in trees:
-            print("Tree: ", tree)
             # Parse the tree_data from JSON string if it's a string
             tree_data = tree["tree_data"]
             if isinstance(tree_data, str):
                 tree_data = json.loads(tree_data)
-            
+
             commit_trees_dict[
-                CommitIdentifier(user_id=tree["user_id"], world_id=tree["world_id"])
+                CommitIdentifier(
+                    user_id=str(tree["user_id"]), world_id=str(tree["world_id"])
+                )
             ] = CommitTree.from_json(tree_data)
             get_logger_backend().debug(
-                f"Commit tree loaded: {CommitIdentifier(user_id=tree['user_id'], world_id=tree['world_id'])}"
+                f"Commit tree loaded: {CommitIdentifier(user_id=str(tree['user_id']), world_id=str(tree['world_id']))}"
             )
 
 
