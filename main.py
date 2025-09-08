@@ -2119,6 +2119,11 @@ def get_args():
     parser.add_argument("--ssl_keyfile", type=str, default="")
     parser.add_argument("--ssl_certfile", type=str, default="")
     parser.add_argument("--log_config", type=str, default="uvicorn_logconfig.json")
+    parser.add_argument(
+        "--clear-tables",
+        action="store_true",
+        help="Clear all database tables before initialization",
+    )
     return parser.parse_args()
 
 
@@ -2163,6 +2168,12 @@ if __name__ == "__main__":
 
             # Initialize database connection
             await db.connect(args.dsn)
+
+            # Clear all tables if requested
+            if args.clear_tables:
+                get_logger_backend().info("Clearing all database tables...")
+                await db.clear_all_tables()
+                get_logger_backend().info("All database tables cleared successfully")
 
             # Set up connection pool with proper event loop binding
             await db.initialize_tables()
