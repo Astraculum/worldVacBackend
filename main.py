@@ -307,26 +307,28 @@ async def load_graph():
                     previous_commit_id = commit_trees_dict[commit_identifier].root_id
                     is_first_scene = previous_commit_id == commit_id
 
-                # 创建场景任务
-                scene_task = await scene_task_manager.create_task(
+                # 获取或创建场景任务
+                scene_task = await scene_task_manager.create_or_get_task(
                     user_id, world_id, commit_id
                 )
 
-                # 启动场景初始化
-                background_task = asyncio.create_task(
-                    background_scene_initialization(
-                        G,
-                        user_id,
-                        world_id,
-                        commit_id,
-                        is_first_scene,
-                        previous_commit_id,
+                # 只有当任务不在进行中时才启动新的初始化
+                if not scene_task.is_in_progress():
+                    # 启动场景初始化
+                    background_task = asyncio.create_task(
+                        background_scene_initialization(
+                            G,
+                            user_id,
+                            world_id,
+                            commit_id,
+                            is_first_scene,
+                            previous_commit_id,
+                        )
                     )
-                )
-                scene_task.set_task(background_task)
-                get_logger_backend().debug(
-                    f"Started scene initialization for ({user_id}, {world_id}, {commit_id})"
-                )
+                    scene_task.set_task(background_task)
+                    get_logger_backend().debug(
+                        f"Started scene initialization for ({user_id}, {world_id}, {commit_id})"
+                    )
 
         except Exception as e:
             get_logger_backend().debug(traceback.format_exc())
@@ -629,35 +631,54 @@ async def background_world_initialization(
 
         # 检查场景状态并自动开始场景
         context = G.org_tree.layer_manager.group_chat_context
-        scene_status = await context.get_groupchat_status()
-        if scene_status == GroupChatStatus.NOT_STARTED:
-            # 根据commit tree判断当前commit是否是第一个commit
-            commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
-            async with commit_tree_lock:
-                # Create commit tree if it doesn't exist
-                if commit_identifier not in commit_trees_dict:
-                    commit_trees_dict[commit_identifier] = CommitTree()
-                    await commit_trees_dict[commit_identifier].add_commit(
-                        world_id=world_id,
-                        user_id=user_id,
-                        commit_id=commit_id,
-                        graph=G,
-                        parent_id=None,
-                    )
-                    await save_commit_tree(user_id, world_id, commit_trees_dict[commit_identifier])
-                is_first_scene = commit_trees_dict[commit_identifier].root_id == commit_id
-                previous_commit_id = commit_trees_dict[commit_identifier].root_id
-            # 创建场景任务
-            scene_task = await scene_task_manager.create_task(
-                user_id, world_id, commit_id
-            )
-            # 启动场景初始化
-            background_task = asyncio.create_task(
-                background_scene_initialization(
-                    G, user_id, world_id, commit_id, is_first_scene, previous_commit_id
+        try:
+            scene_status = await context.get_groupchat_status()
+            if scene_status == GroupChatStatus.NOT_STARTED:
+                # 根据commit tree判断当前commit是否是第一个commit
+                commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
+                async with commit_tree_lock:
+                    # Create commit tree if it doesn't exist
+                    if commit_identifier not in commit_trees_dict:
+                        commit_trees_dict[commit_identifier] = CommitTree()
+                        await commit_trees_dict[commit_identifier].add_commit(
+                            world_id=world_id,
+                            user_id=user_id,
+                            commit_id=commit_id,
+                            graph=G,
+                            parent_id=None,
+                        )
+                        await save_commit_tree(user_id, world_id, commit_trees_dict[commit_identifier])
+                    
+                    # 安全获取commit tree信息
+                    commit_tree = commit_trees_dict[commit_identifier]
+                    root_id = commit_tree.root_id if commit_tree else None
+                    is_first_scene = root_id == commit_id if root_id else True
+                    previous_commit_id = root_id
+
+                # 获取或创建场景任务
+                scene_task = await scene_task_manager.create_or_get_task(
+                    user_id, world_id, commit_id
                 )
-            )
-            scene_task.set_task(background_task)
+                
+                # 只有当任务不在进行中时才启动新的初始化
+                if not scene_task.is_in_progress():
+                    # 启动场景初始化
+                    background_task = asyncio.create_task(
+                        background_scene_initialization(
+                            G, user_id, world_id, commit_id, is_first_scene, previous_commit_id
+                        )
+                    )
+                    scene_task.set_task(background_task)
+                    get_logger_backend().debug(
+                        f"Started scene initialization for ({user_id}, {world_id}, {commit_id})"
+                    )
+        except Exception as e:
+            get_logger_backend().error(f"Error during scene initialization setup: {e}")
+            get_logger_backend().error(traceback.format_exc())
+            # 确保任务状态被正确设置为失败
+            scene_task = await scene_task_manager.get_task(user_id, world_id, commit_id)
+            if scene_task:
+                scene_task.set_failed(str(e))
 
     except Exception as e:
         get_logger_backend().error(f"World initialization failed: {e}")
@@ -1085,39 +1106,78 @@ async def get_events(
     elif status == GroupChatStatus.EXECUTING_PLAYER_ACTION:
         pass
     elif status == GroupChatStatus.NOT_STARTED:
-        get_logger_backend().debug("Scene not started, start scene")
-        # Check if scene is already being initialized
-        scene_task = await scene_task_manager.get_task(user_id, world_id, commit_id)
-        if scene_task and scene_task.is_in_progress():
+        get_logger_backend().debug("Scene not started, checking initialization status")
+        try:
+            # 获取或创建场景任务
+            scene_task = await scene_task_manager.create_or_get_task(user_id, world_id, commit_id)
+            
+            # 检查任务状态
+            if scene_task.is_in_progress():
+                return {
+                    "user_id": user_id,
+                    "world_id": world_id,
+                    "commit_id": commit_id,
+                    "status": "initializing_scene",
+                }
+            elif scene_task.is_failed():
+                get_logger_backend().error(
+                    f"Scene initialization failed: {scene_task.error}"
+                )
+                # 可以选择重试或返回错误
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Scene initialization failed: {scene_task.error}"
+                )
+            elif scene_task.is_completed():
+                # 如果任务已完成但状态仍是NOT_STARTED，可能需要重新初始化
+                get_logger_backend().warning(
+                    f"Scene task completed but status is NOT_STARTED for ({user_id}, {world_id}, {commit_id})"
+                )
+            
+            # 安全获取commit tree信息
+            commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
+            async with commit_tree_lock:
+                if commit_identifier not in commit_trees_dict:
+                    commit_trees_dict[commit_identifier] = CommitTree()
+                    await commit_trees_dict[commit_identifier].add_commit(
+                        world_id=world_id,
+                        user_id=user_id,
+                        commit_id=commit_id,
+                        graph=G,
+                        parent_id=None,
+                    )
+                    await save_commit_tree(user_id, world_id, commit_trees_dict[commit_identifier])
+                
+                commit_tree = commit_trees_dict[commit_identifier]
+                root_id = commit_tree.root_id if commit_tree else None
+                is_first_scene = root_id == commit_id if root_id else True
+                previous_commit_id = root_id
+
+            # 启动场景初始化
+            background_task = asyncio.create_task(
+                background_scene_initialization(
+                    G, user_id, world_id, commit_id, is_first_scene, previous_commit_id
+                )
+            )
+            scene_task.set_task(background_task)
+            get_logger_backend().debug(
+                f"Started scene initialization for ({user_id}, {world_id}, {commit_id})"
+            )
+            
             return {
                 "user_id": user_id,
                 "world_id": world_id,
                 "commit_id": commit_id,
                 "status": "initializing_scene",
             }
-        elif scene_task and scene_task.is_failed():
-            get_logger_backend().error(
-                f"Scene initialization failed: {scene_task.error}"
+            
+        except Exception as e:
+            get_logger_backend().error(f"Error during scene initialization: {e}")
+            get_logger_backend().error(traceback.format_exc())
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to initialize scene: {str(e)}"
             )
-        # Start scene initialization
-        task = await scene_task_manager.create_task(user_id, world_id, commit_id)
-        # 根据commit tree判断当前commit是否是第一个commit
-        commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
-        async with commit_tree_lock:
-            previous_commit_id = commit_trees_dict[commit_identifier].root_id
-            is_first_scene = previous_commit_id == commit_id
-        background_task = asyncio.create_task(
-            background_scene_initialization(
-                G, user_id, world_id, commit_id, is_first_scene, previous_commit_id
-            )
-        )
-        task.set_task(background_task)
-        return {
-            "user_id": user_id,
-            "world_id": world_id,
-            "commit_id": commit_id,
-            "status": "initializing_scene",
-        }
     elif status == GroupChatStatus.STARTED:
         pass
     else:
@@ -1201,29 +1261,66 @@ async def is_event_generated(
     elif status == GroupChatStatus.EXECUTING_PLAYER_ACTION:
         pass
     elif status == GroupChatStatus.NOT_STARTED:
-        get_logger_backend().debug("Scene not started, start scene")
-        # Check if scene is already being initialized
-        scene_task = await scene_task_manager.get_task(user_id, world_id, commit_id)
-        if scene_task and scene_task.is_in_progress():
+        get_logger_backend().debug("Scene not started, checking initialization status")
+        try:
+            # 获取或创建场景任务
+            scene_task = await scene_task_manager.create_or_get_task(user_id, world_id, commit_id)
+            
+            # 检查任务状态
+            if scene_task.is_in_progress():
+                return False
+            elif scene_task.is_failed():
+                get_logger_backend().error(
+                    f"Scene initialization failed: {scene_task.error}"
+                )
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Scene initialization failed: {scene_task.error}"
+                )
+            elif scene_task.is_completed():
+                # 如果任务已完成但状态仍是NOT_STARTED，可能需要重新初始化
+                get_logger_backend().warning(
+                    f"Scene task completed but status is NOT_STARTED for ({user_id}, {world_id}, {commit_id})"
+                )
+            
+            # 安全获取commit tree信息
+            commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
+            async with commit_tree_lock:
+                if commit_identifier not in commit_trees_dict:
+                    commit_trees_dict[commit_identifier] = CommitTree()
+                    await commit_trees_dict[commit_identifier].add_commit(
+                        world_id=world_id,
+                        user_id=user_id,
+                        commit_id=commit_id,
+                        graph=G,
+                        parent_id=None,
+                    )
+                    await save_commit_tree(user_id, world_id, commit_trees_dict[commit_identifier])
+                
+                commit_tree = commit_trees_dict[commit_identifier]
+                root_id = commit_tree.root_id if commit_tree else None
+                is_first_scene = root_id == commit_id if root_id else True
+                previous_commit_id = root_id
+
+            # 启动场景初始化
+            background_task = asyncio.create_task(
+                background_scene_initialization(
+                    G, user_id, world_id, commit_id, is_first_scene, previous_commit_id
+                )
+            )
+            scene_task.set_task(background_task)
+            get_logger_backend().debug(
+                f"Started scene initialization for ({user_id}, {world_id}, {commit_id})"
+            )
             return False
-        elif scene_task and scene_task.is_failed():
-            get_logger_backend().error(
-                f"Scene initialization failed: {scene_task.error}"
+            
+        except Exception as e:
+            get_logger_backend().error(f"Error during scene initialization: {e}")
+            get_logger_backend().error(traceback.format_exc())
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to initialize scene: {str(e)}"
             )
-        # Start scene initialization
-        task = await scene_task_manager.create_task(user_id, world_id, commit_id)
-        # 根据commit tree判断当前commit是否是第一个commit
-        commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
-        async with commit_tree_lock:
-            previous_commit_id = commit_trees_dict[commit_identifier].root_id
-            is_first_scene = previous_commit_id == commit_id
-        background_task = asyncio.create_task(
-            background_scene_initialization(
-                G, user_id, world_id, commit_id, is_first_scene, previous_commit_id
-            )
-        )
-        task.set_task(background_task)
-        return False
     elif status == "started":
         pass
     else:
