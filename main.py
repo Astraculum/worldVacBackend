@@ -283,6 +283,17 @@ async def load_graph():
                 # 检查是否是第一个提交
                 commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
                 async with commit_tree_lock:
+                    # Create commit tree if it doesn't exist
+                    if commit_identifier not in commit_trees_dict:
+                        commit_trees_dict[commit_identifier] = CommitTree()
+                        await commit_trees_dict[commit_identifier].add_commit(
+                            world_id=world_id,
+                            user_id=user_id,
+                            commit_id=commit_id,
+                            graph=G,
+                            parent_id=None,
+                        )
+                        await save_commit_tree(user_id, world_id, commit_trees_dict[commit_identifier])
                     previous_commit_id = commit_trees_dict[commit_identifier].root_id
                     is_first_scene = previous_commit_id == commit_id
 
@@ -593,9 +604,18 @@ async def background_world_initialization(
             # 根据commit tree判断当前commit是否是第一个commit
             commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
             async with commit_tree_lock:
-                is_first_scene = (
-                    commit_trees_dict[commit_identifier].root_id == commit_id
-                )
+                # Create commit tree if it doesn't exist
+                if commit_identifier not in commit_trees_dict:
+                    commit_trees_dict[commit_identifier] = CommitTree()
+                    await commit_trees_dict[commit_identifier].add_commit(
+                        world_id=world_id,
+                        user_id=user_id,
+                        commit_id=commit_id,
+                        graph=G,
+                        parent_id=None,
+                    )
+                    await save_commit_tree(user_id, world_id, commit_trees_dict[commit_identifier])
+                is_first_scene = commit_trees_dict[commit_identifier].root_id == commit_id
                 previous_commit_id = commit_trees_dict[commit_identifier].root_id
             # 创建场景任务
             scene_task = await scene_task_manager.create_task(
@@ -1776,9 +1796,10 @@ async def delete_world_commit(
 
     # 更新提交树
     commit_identifier = CommitIdentifier(user_id=data.user_id, world_id=data.world_id)
-    if commit_identifier in commit_trees_dict:
-        async with commit_tree_lock:
+    async with commit_tree_lock:
+        if commit_identifier in commit_trees_dict:
             commit_trees_dict[commit_identifier].delete_commit(data.commit_id)
+            await save_commit_tree(data.user_id, data.world_id, commit_trees_dict[commit_identifier])
 
     return {"message": "World commit deleted successfully"}
 
@@ -1908,28 +1929,27 @@ async def public_world(request: Request, current_user: str = Depends(get_current
     async with world_lock:
         G = world_dict[world_identifier]
     # Start background fork process
-    background_task = asyncio.create_task(
-        background_fork_world(
-            world_dict=world_dict,
-            world_lock=world_lock,
-            commit_tree_lock=commit_tree_lock,
-            commit_trees_dict=commit_trees_dict,
-            source_graph=world_dict[world_identifier],
-            user_id=data.user_id,
-            world_id=data.world_id,
-            commit_id=data.commit_id,
-            new_user_id=data.user_id,  # Use original user as owner
-            new_world_id=new_world_id,
-            llm_client=G.llm_client,
-            llm_config=G.llm_config,
-            character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
-            character_images_path=CHARACTER_IMAGES_PATH,
-            embeddings=GLOBAL_EMBEDDINGS,
-            annotation_params=GLOBAL_ANNOTATION_PARAMS,
-            fork_seed_prompt=None,
-            mode="full",
-        )
+    coro = background_fork_world(
+        world_dict=world_dict,
+        world_lock=world_lock,
+        commit_tree_lock=commit_tree_lock,
+        commit_trees_dict=commit_trees_dict,
+        source_graph=world_dict[world_identifier],
+        user_id=data.user_id,
+        world_id=data.world_id,
+        commit_id=data.commit_id,
+        new_user_id=data.user_id,  # Use original user as owner
+        new_world_id=new_world_id,
+        llm_client=G.llm_client,
+        llm_config=G.llm_config,
+        character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
+        character_images_path=CHARACTER_IMAGES_PATH,
+        embeddings=GLOBAL_EMBEDDINGS,
+        annotation_params=GLOBAL_ANNOTATION_PARAMS,
+        fork_seed_prompt=None,
+        mode="full",
     )
+    background_task = asyncio.create_task(coro)
     task.set_task(background_task)
 
     return {
@@ -1975,28 +1995,27 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
         G = world_dict[world_identifier]
 
     # Start background fork process
-    background_task = asyncio.create_task(
-        background_fork_world(
-            world_dict=world_dict,
-            world_lock=world_lock,
-            commit_tree_lock=commit_tree_lock,
-            commit_trees_dict=commit_trees_dict,
-            source_graph=world_dict[world_identifier],
-            user_id=data.user_id,
-            world_id=data.world_id,
-            commit_id=data.commit_id,
-            new_user_id=current_user,
-            new_world_id=new_world_id,
-            llm_client=G.llm_client,
-            llm_config=G.llm_config,
-            character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
-            character_images_path=CHARACTER_IMAGES_PATH,
-            embeddings=GLOBAL_EMBEDDINGS,
-            annotation_params=GLOBAL_ANNOTATION_PARAMS,
-            fork_seed_prompt=data.fork_seed_prompt,
-            mode=data.mode,
-        )
+    coro = background_fork_world(
+        world_dict=world_dict,
+        world_lock=world_lock,
+        commit_tree_lock=commit_tree_lock,
+        commit_trees_dict=commit_trees_dict,
+        source_graph=world_dict[world_identifier],
+        user_id=data.user_id,
+        world_id=data.world_id,
+        commit_id=data.commit_id,
+        new_user_id=current_user,
+        new_world_id=new_world_id,
+        llm_client=G.llm_client,
+        llm_config=G.llm_config,
+        character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
+        character_images_path=CHARACTER_IMAGES_PATH,
+        embeddings=GLOBAL_EMBEDDINGS,
+        annotation_params=GLOBAL_ANNOTATION_PARAMS,
+        fork_seed_prompt=data.fork_seed_prompt,
+        mode=data.mode,
     )
+    background_task = asyncio.create_task(coro)
     task.set_task(background_task)
 
     return {
@@ -2177,6 +2196,36 @@ if __name__ == "__main__":
 
             # Set up connection pool with proper event loop binding
             await db.initialize_tables()
+
+            # Verify database schema
+            assert db.pool is not None, "Database pool is not initialized"
+            async with db.pool.acquire() as conn:
+                # Check if world_commits table has the correct schema
+                table_info = await conn.fetch("""
+                    SELECT column_name, data_type 
+                    FROM information_schema.columns 
+                    WHERE table_name = 'world_commits'
+                """)
+                columns = {row['column_name']: row['data_type'] for row in table_info}
+                
+                required_columns = {
+                    'commit_id': 'uuid',
+                    'world_id': 'uuid',
+                    'user_id': 'uuid',
+                    'parent_commit_id': 'uuid',
+                    'graph_data': 'jsonb',
+                    'topic': 'text',
+                    'event_summary': 'text',
+                    'created_at': 'timestamp without time zone'
+                }
+
+                missing_columns = set(required_columns.keys()) - set(columns.keys())
+                if missing_columns:
+                    get_logger_backend().error(f"Missing columns in world_commits table: {missing_columns}")
+                    # Drop and recreate the table
+                    get_logger_backend().info("Recreating world_commits table...")
+                    await conn.execute("DROP TABLE IF EXISTS world_commits CASCADE")
+                    await db.initialize_tables()
 
             # Load data
             await load_commit_trees()
