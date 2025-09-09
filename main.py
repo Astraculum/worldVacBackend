@@ -338,11 +338,13 @@ async def load_graph():
 
     # 获取所有世界
     worlds = await db.get_all_worlds()
+    get_logger_backend().debug(f"All Worlds: {len(worlds)}")
     for world in worlds:
         # 获取世界的所有提交
         commits = await db.get_world_commits(world["world_id"])
         tasks = [load_graph_from_commit(commit) for commit in commits]
         await asyncio.gather(*tasks)
+    get_logger_backend().debug(f"All Worlds loaded: {len(worlds)}")
 
 
 ASYNC_SLEEP_TIME = 0.3
