@@ -40,7 +40,7 @@ from AgentMatrix.src.spritesheet_generator.auto_download import \
     CharacterImageDownloader
 from AgentMatrix.src.world import seed_prompt_to_universe_metadata
 from backend.utils import start_scene_from_graph
-from backend.utils.commit_task import commit_task_manager
+from backend.utils.commit_task import commit_task_manager, CommitTask
 from backend.utils.commit_tree import CommitTree
 from backend.utils.fork_task import fork_task_manager
 from backend.utils.fork_world import background_fork_world
@@ -1429,27 +1429,40 @@ async def is_scene_finished(
     context = G.org_tree.layer_manager.group_chat_context
     scene_status = await context.get_groupchat_status()
     if scene_status == GroupChatStatus.TERMINATED:
-        # Check if commit creation is already in progress
-        commit_task = await commit_task_manager.get_task(user_id, world_id, commit_id)
-        if commit_task and commit_task.is_in_progress():
-            return {"is_finished": True, "status": "creating_new_commit"}
-        elif commit_task and commit_task.is_failed():
-            raise HTTPException(
-                status_code=500,
-                detail=f"Commit creation failed: {commit_task.error}",
-            )
-        elif commit_task and commit_task.is_completed():
-            new_commit_id = commit_task.commit_id
-            return {"is_finished": True, "commit_id": new_commit_id}
+        # First check if there's any existing commit task for the current commit
+        async with world_lock:
+            # Check all tasks for this world to find any in-progress or completed commits
+            all_tasks = []
+            for task_key, task in commit_task_manager._tasks.items():
+                task_user_id, task_world_id, task_commit_id = task_key
+                if task_user_id == user_id and task_world_id == world_id:
+                    all_tasks.append((task_commit_id, task))
 
-        # Start commit creation
-        new_commit_id = await G.generate_world_status_uuid()
-        task = await commit_task_manager.create_task(user_id, world_id, commit_id)
-        background_task = asyncio.create_task(
-            background_commit_creation(G, user_id, world_id, commit_id, new_commit_id)
-        )
-        task.set_task(background_task)
-        return {"is_finished": True, "status": "creating_new_commit"}
+            # Sort tasks by creation time (assuming commit ID is UUID which has timestamp)
+            all_tasks.sort(key=lambda x: x[0])
+            
+            # Check the most recent task first
+            for new_commit_id, task in reversed(all_tasks):
+                if task.is_in_progress():
+                    return {"is_finished": True, "status": "creating_new_commit", "new_commit_id": new_commit_id}
+                elif task.is_completed():
+                    return {"is_finished": True, "commit_id": new_commit_id}
+                elif task.is_failed():
+                    # Only raise error for the most recent failed task
+                    if new_commit_id == all_tasks[-1][0]:
+                        raise HTTPException(
+                            status_code=500,
+                            detail=f"Commit creation failed: {task.error}",
+                        )
+
+            # If no existing task found, create a new one
+            new_commit_id = await G.generate_world_status_uuid()
+            task = await commit_task_manager.create_task(user_id, world_id, new_commit_id)
+            background_task = asyncio.create_task(
+                background_commit_creation(G, user_id, world_id, commit_id, new_commit_id, task)
+            )
+            task.set_task(background_task)
+            return {"is_finished": True, "status": "creating_new_commit", "new_commit_id": new_commit_id}
     else:
         return {"is_finished": False}
 
@@ -1801,7 +1814,7 @@ async def delete_world_commit(
 
 
 async def background_commit_creation(
-    G: Graph, user_id: str, world_id: str, commit_id: str, new_commit_id: str
+    G: Graph, user_id: str, world_id: str, commit_id: str, new_commit_id: str, task: CommitTask
 ):
     try:
         # save graph (for commit metadata)
@@ -1882,14 +1895,10 @@ async def background_commit_creation(
                 visibility=WorldVisibility.PRIVATE,
             )
 
-        task = await commit_task_manager.get_task(user_id, world_id, commit_id)
-        if task:
-            task.set_completed()
+        task.set_completed()
     except Exception as e:
         get_logger_backend().error(f"Commit creation failed: {e}")
-        task = await commit_task_manager.get_task(user_id, world_id, commit_id)
-        if task:
-            task.set_failed(str(e))
+        task.set_failed(str(e))
 
 
 @app.post("/world/public_world")
