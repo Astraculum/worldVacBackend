@@ -248,7 +248,7 @@ async def load_graph():
             world_id = str(commit["world_id"])
             commit_id = str(commit["commit_id"])
 
-            json_data = commit["graph_data"]
+            json_data = json.loads(commit["graph_data"])
             if json_data["user_id"] != user_id:
                 get_logger_backend().error(
                     f"User id mismatch: {json_data['user_id']} != {user_id}"
