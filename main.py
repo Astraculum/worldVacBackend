@@ -1495,397 +1495,225 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
     get_logger_backend().debug(
         f"Entering world_commit endpoint with user_id={user_id}, world_id={world_id}, commit_id={commit_id}"
     )
+    
+    # 检查世界是否存在于数据库中
+    try:
+        world_id_uuid = UUID(world_id)
+        commit_id_uuid = UUID(commit_id)
+        world = await db.get_world(world_id_uuid)
+        if not world:
+            raise HTTPException(status_code=404, detail="World not found in database")
+        
+        commit = await db.get_world_commit(commit_id_uuid)
+        if not commit:
+            raise HTTPException(status_code=404, detail="Commit not found in database")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid UUID format")
+    except Exception as e:
+        get_logger_backend().error(f"Database error: {e}")
+        raise HTTPException(status_code=500, detail="Database error")
+
+    # 检查内存中的世界状态
     world_identifier = WorldIdentifier(
         user_id=user_id, world_id=world_id, commit_id=commit_id
     )
-    get_logger_backend().debug(f"Created world_identifier: {world_identifier}")
-
     G = world_dict.get(world_identifier)
-    get_logger_backend().debug(
-        f"Retrieved graph from world_dict: {'found' if G else 'not found'}"
-    )
-
+    
     if G is None:
-        get_logger_backend().error(
-            f"World not found for identifier: {world_identifier}. Available worlds: {list(world_dict.keys())}"
-        )
-        raise HTTPException(status_code=404, detail="World not found")
-
-    # Check if world is still being initialized
-    try:
-        world_task = await world_task_manager.get_task(user_id, world_id, commit_id)
-        get_logger_backend().debug(f"Retrieved world task: {world_task}")
-
-        if world_task and world_task.is_in_progress():
-            get_logger_backend().debug("World is still initializing")
-            return {
-                "user_id": user_id,
-                "world_id": world_id,
-                "commit_id": commit_id,
-                "status": "initializing_world",
-            }
-        elif world_task and world_task.is_failed():
-            get_logger_backend().error(
-                f"World initialization failed with error: {world_task.error}"
+        # 如果内存中没有，尝试从数据库加载
+        try:
+            graph_data = commit["graph_data"]
+            G = await Graph.from_json(
+                data=graph_data,
+                embeddings=GLOBAL_EMBEDDINGS,
+                annotation_params=GLOBAL_ANNOTATION_PARAMS,
             )
-            raise HTTPException(
-                status_code=500,
-                detail=f"World initialization failed: {world_task.error}",
-            )
-    except Exception as e:
-        get_logger_backend().error(f"Error checking world initialization status: {e}")
+            world_dict[world_identifier] = G
+        except Exception as e:
+            get_logger_backend().error(f"Error loading graph from database: {e}")
+            raise HTTPException(status_code=500, detail="Failed to load world data")
+
+    # 检查世界初始化状态
+    world_task = await world_task_manager.get_task(user_id, world_id, commit_id)
+    if world_task and world_task.is_in_progress():
+        return {
+            "user_id": user_id,
+            "world_id": world_id,
+            "commit_id": commit_id,
+            "status": "initializing_world",
+        }
+    elif world_task and world_task.is_failed():
         raise HTTPException(
-            status_code=500, detail=f"Error checking world status: {str(e)}"
+            status_code=500,
+            detail=f"World initialization failed: {world_task.error}",
         )
 
-    # World is initialized, check scene status
+    # 检查场景状态
     try:
         context = G.org_tree.layer_manager.group_chat_context
-        get_logger_backend().debug("Retrieved group chat context")
-
         scene_status = await context.get_groupchat_status()
-        get_logger_backend().debug(f"Current scene status: {scene_status}")
-
+        
         if scene_status == GroupChatStatus.NOT_STARTED:
-            get_logger_backend().debug(
-                "Scene not started, checking initialization status"
-            )
-            # Check if scene is already being initialized
-            scene_task = await scene_task_manager.get_task(user_id, world_id, commit_id)
-            get_logger_backend().debug(f"Retrieved scene task: {scene_task}")
-
+            # 获取或创建场景任务
+            scene_task = await scene_task_manager.create_or_get_task(user_id, world_id, commit_id)
+            
             if scene_task and scene_task.is_in_progress():
-                get_logger_backend().debug(
-                    "Scene task is in progress, checking task status"
-                )
-                # 检查任务是否真的在运行
-                task_exists = hasattr(scene_task, "_task")
-                task_not_none = scene_task._task is not None if task_exists else False
-                task_not_done = False
-                if task_not_none:
-                    try:
-                        task_not_done = not bool(scene_task._task.done)  # type: ignore
-                    except AttributeError:
-                        get_logger_backend().warning(
-                            "Task does not have 'done' attribute, assuming task is done"
-                        )
-    except Exception as e:
-        get_logger_backend().error(f"Error checking scene initialization: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Error checking scene initialization: {str(e)}"
-        )
-
-    # Check task status and handle scene initialization
-    task_exists = False
-    task_not_none = False
-    task_not_done = False
-    scene_task = None
-
-    try:
-        scene_task = await scene_task_manager.get_task(user_id, world_id, commit_id)
-        if scene_task and scene_task.is_in_progress():
-            task_exists = hasattr(scene_task, "_task")
-            task_not_none = scene_task._task is not None if task_exists else False
-            task_not_done = False
-            if task_not_none:
-                try:
-                    # Check if task is done by checking task status
-                    task_done = True  # Default to True (task is done)
-                    try:
-                        # Check task status through the task object's methods
-                        if isinstance(scene_task._task, Task):
-                            task = cast(Task, scene_task._task)
-                            task_done = task.cancelled() or task.exception() is not None
-                    except (AttributeError, TypeError):
-                        get_logger_backend().debug(
-                            "Could not check task status through standard methods"
-                        )
-                    task_not_done = not task_done
-                except AttributeError:
-                    get_logger_backend().warning(
-                        "Task does not have 'done' attribute, assuming task is done"
-                    )
-
-            get_logger_backend().debug(
-                f"Task status - exists: {task_exists}, not none: {task_not_none}, not done: {task_not_done}"
-            )
-
-            if not (task_exists and task_not_none and task_not_done):
-                # 如果任务不存在或已完成但没有更新状态，重新启动初始化
-                get_logger_backend().debug(
-                    f"Reactivating scene initialization for ({user_id}, {world_id}, {commit_id})"
-                )
-                # 根据commit tree判断当前commit是否是第一个commit
-                commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
-                get_logger_backend().debug(
-                    f"Created commit identifier: {commit_identifier}"
-                )
-
-                try:
-                    async with commit_tree_lock:
-                        previous_commit_id = commit_trees_dict[
-                            commit_identifier
-                        ].root_id
-                        is_first_scene = previous_commit_id == commit_id
-                        get_logger_backend().debug(
-                            f"Previous commit ID: {previous_commit_id}, is first scene: {is_first_scene}"
-                        )
-                except Exception as e:
-                    get_logger_backend().error(f"Error accessing commit tree: {e}")
-                    raise
-
-                # 重新启动场景初始化
-                try:
-                    background_task = asyncio.create_task(
-                        background_scene_initialization(
-                            G,
-                            user_id,
-                            world_id,
-                            commit_id,
-                            is_first_scene,
-                            previous_commit_id,
-                        )
-                    )
-                    if hasattr(scene_task, "set_task"):
-                        scene_task.set_task(background_task)
-                        get_logger_backend().debug(
-                            "Successfully created and set new background task"
-                        )
-                    else:
-                        get_logger_backend().error(
-                            "Scene task does not have set_task method"
-                        )
-                        raise AttributeError("Scene task does not have set_task method")
-                except Exception as e:
-                    get_logger_backend().error(f"Error creating background task: {e}")
-                    raise
-
                 return {
                     "user_id": user_id,
                     "world_id": world_id,
                     "commit_id": commit_id,
                     "status": "initializing_scene",
                 }
-        elif scene_task and scene_task.is_failed():
-            get_logger_backend().error(
-                f"Scene initialization failed: {scene_task.error}"
-            )
-    except Exception as e:
-        get_logger_backend().error(f"Error handling scene initialization: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Error handling scene initialization: {str(e)}"
-        )
-        # Start scene initialization
-        task = await scene_task_manager.create_task(user_id, world_id, commit_id)
-        # 根据commit tree判断当前commit是否是第一个commit
-        commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
-        async with commit_tree_lock:
-            previous_commit_id = commit_trees_dict[commit_identifier].root_id
-            is_first_scene = previous_commit_id == commit_id
-        background_task = asyncio.create_task(
-            background_scene_initialization(
-                G, user_id, world_id, commit_id, is_first_scene, previous_commit_id
-            )
-        )
-        task.set_task(background_task)
-        return {
-            "user_id": user_id,
-            "world_id": world_id,
-            "commit_id": commit_id,
-            "status": "initializing_scene",
-        }
-    else:
-        get_logger_backend().debug("Scene is in progress, retrieving scene data")
-        try:
-            # wait for dialogues
-            dialogues = await context.get_dialogues()
-            get_logger_backend().debug(
-                f"Retrieved dialogues: {'found' if dialogues else 'not found'}"
-            )
-            if dialogues is None:
-                return {
-                    "status": "waiting_for_dialogues",
-                }
-
-            # wait for options
-            options = await context.get_options()
-            get_logger_backend().debug(
-                f"Retrieved options: {'found' if options else 'not found'}"
-            )
-            if options is None:
-                return {
-                    "status": "waiting_for_options",
-                }
-
-            # Process events
-            try:
-                classified_events = [
-                    e for m in dialogues + [options] for e in message_to_event_model(m)
-                ]
-                get_logger_backend().debug(f"Processed {len(classified_events)} events")
-            except Exception as e:
-                get_logger_backend().error(f"Error processing events: {e}")
-                raise
-
-            # get missions
-            try:
-                missions = await context.get_scene_missions()
-                if missions is None:
-                    get_logger_backend().error("Missions is None when it shouldn't be")
-                    raise AssertionError("Missions not found")
-
-                _mission_jsons = [m.to_json() for m in missions]
-                get_logger_backend().debug(f"Retrieved {len(_mission_jsons)} missions")
-
-                processed_missions = [
-                    MissionModel(
-                        id=m["id"],
-                        name=m["name"],
-                        description=m["description"],
-                        status=m["status"],
-                        mission_type=m["mission_type"],
+            elif scene_task and scene_task.is_failed():
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Scene initialization failed: {scene_task.error}",
+                )
+            
+            # 初始化场景
+            commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
+            async with commit_tree_lock:
+                if commit_identifier not in commit_trees_dict:
+                    commit_trees_dict[commit_identifier] = CommitTree()
+                    await commit_trees_dict[commit_identifier].add_commit(
+                        world_id=world_id,
+                        user_id=user_id,
+                        commit_id=commit_id,
+                        graph=G,
+                        parent_id=None,
                     )
-                    for m in _mission_jsons
-                ]
-            except Exception as e:
-                get_logger_backend().error(f"Error processing missions: {e}")
-                raise
+                    await save_commit_tree(user_id, world_id, commit_trees_dict[commit_identifier])
+                
+                previous_commit_id = commit_trees_dict[commit_identifier].root_id
+                is_first_scene = previous_commit_id == commit_id if previous_commit_id else True
 
-            # get participants
-            try:
-                participants = await context.get_scene_participants()
-                if participants is None:
-                    get_logger_backend().error(
-                        "Participants is None when it shouldn't be"
-                    )
-                    raise AssertionError("Participants not found")
-                get_logger_backend().debug(
-                    f"Retrieved {len(participants)} participants"
+            background_task = asyncio.create_task(
+                background_scene_initialization(
+                    G, user_id, world_id, commit_id, is_first_scene, previous_commit_id
                 )
-
-                scene_meta = G.org_tree.layer_manager.scene_metadata
-                get_logger_backend().debug(
-                    f"Scene metadata - heading: {scene_meta.heading}, location: {scene_meta._location}"
-                )
-
-                current_scene = SceneModel(
-                    heading=scene_meta.heading,
-                    location=f"{scene_meta._location}",
-                    characterIds=[c.id for c in participants],
-                    eventList=classified_events,  # type: ignore
-                    missionList=processed_missions,
-                )
-                get_logger_backend().debug("Successfully created SceneModel")
-            except Exception as e:
-                get_logger_backend().error(
-                    f"Error processing participants or creating scene model: {e}"
-                )
-                raise
-        except Exception as e:
-            get_logger_backend().error(f"Error in scene data processing: {e}")
-            raise HTTPException(
-                status_code=500, detail=f"Error processing scene data: {str(e)}"
             )
+            if not scene_task:
+                scene_task = await scene_task_manager.create_or_get_task(user_id, world_id, commit_id)
+            scene_task.set_task(background_task)
+            
+            return {
+                "user_id": user_id,
+                "world_id": world_id,
+                "commit_id": commit_id,
+                "status": "initializing_scene",
+            }
 
-    try:
-        get_logger_backend().debug("Preparing final response")
-        # response: all characters
-        all_characters_list = await G.get_all_characters()
-        get_logger_backend().debug(f"Retrieved {len(all_characters_list)} characters")
+        # 处理场景数据
+        dialogues = await context.get_dialogues()
+        if dialogues is None:
+            return {"status": "waiting_for_dialogues"}
 
-        try:
-            all_characters = [character_info_to_model(c) for c in all_characters_list]
-            get_logger_backend().debug(
-                f"Processed {len(all_characters)} character models"
+        options = await context.get_options()
+        if options is None:
+            return {"status": "waiting_for_options"}
+
+        # 处理事件
+        classified_events = [
+            e for m in dialogues + [options] for e in message_to_event_model(m)
+        ]
+
+        # 获取任务
+        missions = await context.get_scene_missions()
+        if not missions:
+            raise HTTPException(status_code=500, detail="Missions not found")
+
+        processed_missions = [
+            MissionModel(
+                id=m["id"],
+                name=m["name"],
+                description=m["description"],
+                status=m["status"],
+                mission_type=m["mission_type"],
             )
-        except Exception as e:
-            get_logger_backend().error(f"Error converting characters to models: {e}")
-            raise
+            for m in [m.to_json() for m in missions]
+        ]
 
-        # world meta
-        try:
-            world_meta = G.universe_metadata
-            get_logger_backend().debug(
-                f"Retrieved world metadata - title: {world_meta.world_title}"
+        # 获取参与者
+        participants = await context.get_scene_participants()
+        if not participants:
+            raise HTTPException(status_code=500, detail="Participants not found")
+
+        # 创建场景模型
+        scene_meta = G.org_tree.layer_manager.scene_metadata
+        current_scene = SceneModel(
+            heading=scene_meta.heading,
+            location=f"{scene_meta._location}",
+            characterIds=[c.id for c in participants],
+            eventList=classified_events,  # type: ignore
+            missionList=processed_missions,
+        )
+
+        # 准备响应数据
+        all_characters = [
+            character_info_to_model(c)
+            for c in await G.get_all_characters()
+        ]
+
+        world_meta = G.universe_metadata
+        world_news = [
+            WorldNewsModel(
+                id=n.id,
+                title=n.title,
+                content=n.content,
+                date=n.date,
+                impact=n.impact,  # type: ignore
+                category=n.category,  # type: ignore
+                relatedLocation=n.related_location,
             )
+            for n in G.world_news
+        ]
 
-            # Process world news
-            world_news = [
-                WorldNewsModel(
-                    id=n.id,
-                    title=n.title,
-                    content=n.content,
-                    date=n.date,
-                    impact=n.impact,  # type: ignore
-                    category=n.category,  # type: ignore
-                    relatedLocation=n.related_location,
-                )
-                for n in G.world_news
-            ]
-            get_logger_backend().debug(f"Processed {len(world_news)} world news items")
-
-            # Process world characteristics
-            world_characteristics = [
-                WorldCharacteristicModel(
-                    name=n.name,
-                    description=n.description,
-                )
-                for n in world_meta.world_characteristics
-            ]
-            get_logger_backend().debug(
-                f"Processed {len(world_characteristics)} world characteristics"
+        world_characteristics = [
+            WorldCharacteristicModel(
+                name=n.name,
+                description=n.description,
             )
+            for n in world_meta.world_characteristics
+        ]
 
-            # Process fork relations
-            fork_from = [
-                ForkRelationModel(
-                    user_id=f.user_id,
-                    world_id=f.world_id,
-                    commit_id=f.commit_id,
-                    timestamp=f.timestamp,
-                )
-                for f in G.fork_from
-            ]
-            fork_to = [
-                ForkRelationModel(
-                    user_id=f.user_id,
-                    world_id=f.world_id,
-                    commit_id=f.commit_id,
-                    timestamp=f.timestamp,
-                )
-                for f in G.fork_to
-            ]
-            get_logger_backend().debug(
-                f"Processed fork relations - from: {len(fork_from)}, to: {len(fork_to)}"
+        fork_from = [
+            ForkRelationModel(
+                user_id=f.user_id,
+                world_id=f.world_id,
+                commit_id=f.commit_id,
+                timestamp=f.timestamp,
             )
+            for f in G.fork_from
+        ]
 
-            # Create final response
-            response = WorldModel(
-                id=world_id,
-                commit_id=commit_id,
-                title=world_meta.world_title,
-                crisis=world_meta.world_crisis,
-                allCharacters=all_characters,
-                currentScene=current_scene,
-                worldNews=world_news,
-                worldCharacteristics=world_characteristics,
-                forkFrom=fork_from,
-                forkTo=fork_to,
+        fork_to = [
+            ForkRelationModel(
+                user_id=f.user_id,
+                world_id=f.world_id,
+                commit_id=f.commit_id,
+                timestamp=f.timestamp,
             )
-            get_logger_backend().debug("Successfully created WorldModel response")
-            return response
+            for f in G.fork_to
+        ]
 
-        except Exception as e:
-            get_logger_backend().error(f"Error creating world model response: {e}")
-            raise HTTPException(
-                status_code=500, detail=f"Error creating world model: {str(e)}"
-            )
+        # 返回完整的世界模型
+        return WorldModel(
+            id=world_id,
+            commit_id=commit_id,
+            title=world_meta.world_title,
+            crisis=world_meta.world_crisis,
+            allCharacters=all_characters,
+            currentScene=current_scene,
+            worldNews=world_news,
+            worldCharacteristics=world_characteristics,
+            forkFrom=fork_from,
+            forkTo=fork_to,
+        )
 
     except Exception as e:
-        get_logger_backend().error(f"Error in final response preparation: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Error preparing response: {str(e)}"
-        )
+        get_logger_backend().error(f"Error in world_commit: {e}")
+        get_logger_backend().error(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/world/delete_world_commit")
