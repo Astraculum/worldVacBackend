@@ -85,8 +85,8 @@ GLOBAL_LLM_CONFIG = LLMConfig(
     # Rate limiting configuration
     max_tokens_per_minute=100000,  # 100K tokens per minute
     max_requests_per_minute=1000,  # 1000 requests per minute
-    burst_capacity=10000,          # 10K token burst capacity
-    max_retries=5,                 # 5 retries on rate limit
+    burst_capacity=10000,  # 10K token burst capacity
+    max_retries=5,  # 5 retries on rate limit
 )
 GLOBAL_FAST_CHAT_LLM_CONFIG = LLMConfig(
     api_key="NULL",
@@ -96,8 +96,8 @@ GLOBAL_FAST_CHAT_LLM_CONFIG = LLMConfig(
     # Rate limiting configuration for fast chat
     max_tokens_per_minute=150000,  # Higher limit for fast chat
     max_requests_per_minute=1500,  # Higher request limit
-    burst_capacity=15000,          # Higher burst capacity
-    max_retries=3,                 # Fewer retries for fast chat
+    burst_capacity=15000,  # Higher burst capacity
+    max_retries=3,  # Fewer retries for fast chat
 )
 
 CHARACTER_IMAGES_PATH = "character-images"
@@ -289,9 +289,13 @@ async def load_graph():
             # 检查场景状态并初始化
             context = G.org_tree.layer_manager.group_chat_context
             scene_status = await context.get_groupchat_status()
+            get_logger_backend().debug(
+                f"World ({user_id}, {world_id}, {commit_id}) Scene status: {scene_status}"
+            )
             if scene_status == GroupChatStatus.NOT_STARTED:
                 # 检查是否是第一个提交
                 commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
+                need_to_save_commit_tree = False
                 async with commit_tree_lock:
                     # Create commit tree if it doesn't exist
                     if commit_identifier not in commit_trees_dict:
@@ -303,9 +307,14 @@ async def load_graph():
                             graph=G,
                             parent_id=None,
                         )
-                        await save_commit_tree(user_id, world_id, commit_trees_dict[commit_identifier])
+                        need_to_save_commit_tree = True
                     previous_commit_id = commit_trees_dict[commit_identifier].root_id
                     is_first_scene = previous_commit_id == commit_id
+                if need_to_save_commit_tree:
+                    # save outside of commit_tree_lock, because it will cause deadlock
+                    await save_commit_tree(
+                        user_id, world_id, commit_trees_dict[commit_identifier]
+                    )
 
                 # 获取或创建场景任务
                 scene_task = await scene_task_manager.create_or_get_task(
@@ -556,20 +565,28 @@ async def background_world_initialization(
     try:
         # 初始化世界
         await G.init_world()
-        
+
         # 首先保存初始的 commit 到数据库
         try:
-            graph_data = await G.to_json(user_id=user_id, world_id=world_id, commit_id=commit_id)
+            graph_data = await G.to_json(
+                user_id=user_id, world_id=world_id, commit_id=commit_id
+            )
             await db.create_world_commit(
                 commit_id=UUID(commit_id),
                 world_id=UUID(world_id),
                 user_id=UUID(user_id),
                 parent_commit_id=None,
                 graph_data=graph_data,
-                topic=G.commit_metadata.topic if hasattr(G, 'commit_metadata') else "",
-                event_summary=G.commit_metadata.event_summary if hasattr(G, 'commit_metadata') else "",
+                topic=G.commit_metadata.topic if hasattr(G, "commit_metadata") else "",
+                event_summary=(
+                    G.commit_metadata.event_summary
+                    if hasattr(G, "commit_metadata")
+                    else ""
+                ),
             )
-            get_logger_backend().info(f"Successfully saved initial commit for world {world_id}")
+            get_logger_backend().info(
+                f"Successfully saved initial commit for world {world_id}"
+            )
         except Exception as e:
             get_logger_backend().error(f"Failed to save initial commit: {e}")
             get_logger_backend().error(traceback.format_exc())
@@ -649,8 +666,10 @@ async def background_world_initialization(
                             graph=G,
                             parent_id=None,
                         )
-                        await save_commit_tree(user_id, world_id, commit_trees_dict[commit_identifier])
-                    
+                        await save_commit_tree(
+                            user_id, world_id, commit_trees_dict[commit_identifier]
+                        )
+
                     # 安全获取commit tree信息
                     commit_tree = commit_trees_dict[commit_identifier]
                     root_id = commit_tree.root_id if commit_tree else None
@@ -661,13 +680,18 @@ async def background_world_initialization(
                 scene_task = await scene_task_manager.create_or_get_task(
                     user_id, world_id, commit_id
                 )
-                
+
                 # 只有当任务不在进行中时才启动新的初始化
                 if not scene_task.is_in_progress():
                     # 启动场景初始化
                     background_task = asyncio.create_task(
                         background_scene_initialization(
-                            G, user_id, world_id, commit_id, is_first_scene, previous_commit_id
+                            G,
+                            user_id,
+                            world_id,
+                            commit_id,
+                            is_first_scene,
+                            previous_commit_id,
                         )
                     )
                     scene_task.set_task(background_task)
@@ -1111,8 +1135,10 @@ async def get_events(
         get_logger_backend().debug("Scene not started, checking initialization status")
         try:
             # 获取或创建场景任务
-            scene_task = await scene_task_manager.create_or_get_task(user_id, world_id, commit_id)
-            
+            scene_task = await scene_task_manager.create_or_get_task(
+                user_id, world_id, commit_id
+            )
+
             # 检查任务状态
             if scene_task.is_in_progress():
                 return {
@@ -1128,14 +1154,14 @@ async def get_events(
                 # 可以选择重试或返回错误
                 raise HTTPException(
                     status_code=500,
-                    detail=f"Scene initialization failed: {scene_task.error}"
+                    detail=f"Scene initialization failed: {scene_task.error}",
                 )
             elif scene_task.is_completed():
                 # 如果任务已完成但状态仍是NOT_STARTED，可能需要重新初始化
                 get_logger_backend().warning(
                     f"Scene task completed but status is NOT_STARTED for ({user_id}, {world_id}, {commit_id})"
                 )
-            
+
             # 安全获取commit tree信息
             commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
             async with commit_tree_lock:
@@ -1148,8 +1174,10 @@ async def get_events(
                         graph=G,
                         parent_id=None,
                     )
-                    await save_commit_tree(user_id, world_id, commit_trees_dict[commit_identifier])
-                
+                    await save_commit_tree(
+                        user_id, world_id, commit_trees_dict[commit_identifier]
+                    )
+
                 commit_tree = commit_trees_dict[commit_identifier]
                 root_id = commit_tree.root_id if commit_tree else None
                 is_first_scene = root_id == commit_id if root_id else True
@@ -1165,20 +1193,19 @@ async def get_events(
             get_logger_backend().debug(
                 f"Started scene initialization for ({user_id}, {world_id}, {commit_id})"
             )
-            
+
             return {
                 "user_id": user_id,
                 "world_id": world_id,
                 "commit_id": commit_id,
                 "status": "initializing_scene",
             }
-            
+
         except Exception as e:
             get_logger_backend().error(f"Error during scene initialization: {e}")
             get_logger_backend().error(traceback.format_exc())
             raise HTTPException(
-                status_code=500,
-                detail=f"Failed to initialize scene: {str(e)}"
+                status_code=500, detail=f"Failed to initialize scene: {str(e)}"
             )
     elif status == GroupChatStatus.STARTED:
         pass
@@ -1266,8 +1293,10 @@ async def is_event_generated(
         get_logger_backend().debug("Scene not started, checking initialization status")
         try:
             # 获取或创建场景任务
-            scene_task = await scene_task_manager.create_or_get_task(user_id, world_id, commit_id)
-            
+            scene_task = await scene_task_manager.create_or_get_task(
+                user_id, world_id, commit_id
+            )
+
             # 检查任务状态
             if scene_task.is_in_progress():
                 return False
@@ -1277,14 +1306,14 @@ async def is_event_generated(
                 )
                 raise HTTPException(
                     status_code=500,
-                    detail=f"Scene initialization failed: {scene_task.error}"
+                    detail=f"Scene initialization failed: {scene_task.error}",
                 )
             elif scene_task.is_completed():
                 # 如果任务已完成但状态仍是NOT_STARTED，可能需要重新初始化
                 get_logger_backend().warning(
                     f"Scene task completed but status is NOT_STARTED for ({user_id}, {world_id}, {commit_id})"
                 )
-            
+
             # 安全获取commit tree信息
             commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
             async with commit_tree_lock:
@@ -1297,8 +1326,10 @@ async def is_event_generated(
                         graph=G,
                         parent_id=None,
                     )
-                    await save_commit_tree(user_id, world_id, commit_trees_dict[commit_identifier])
-                
+                    await save_commit_tree(
+                        user_id, world_id, commit_trees_dict[commit_identifier]
+                    )
+
                 commit_tree = commit_trees_dict[commit_identifier]
                 root_id = commit_tree.root_id if commit_tree else None
                 is_first_scene = root_id == commit_id if root_id else True
@@ -1315,13 +1346,12 @@ async def is_event_generated(
                 f"Started scene initialization for ({user_id}, {world_id}, {commit_id})"
             )
             return False
-            
+
         except Exception as e:
             get_logger_backend().error(f"Error during scene initialization: {e}")
             get_logger_backend().error(traceback.format_exc())
             raise HTTPException(
-                status_code=500,
-                detail=f"Failed to initialize scene: {str(e)}"
+                status_code=500, detail=f"Failed to initialize scene: {str(e)}"
             )
     elif status == "started":
         pass
@@ -1497,7 +1527,7 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
     get_logger_backend().debug(
         f"Entering world_commit endpoint with user_id={user_id}, world_id={world_id}, commit_id={commit_id}"
     )
-    
+
     # 检查世界是否存在于数据库中
     try:
         world_id_uuid = UUID(world_id)
@@ -1505,7 +1535,7 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
         world = await db.get_world(world_id_uuid)
         if not world:
             raise HTTPException(status_code=404, detail="World not found in database")
-        
+
         commit = await db.get_world_commit(commit_id_uuid)
         if not commit:
             raise HTTPException(status_code=404, detail="Commit not found in database")
@@ -1520,7 +1550,7 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
         user_id=user_id, world_id=world_id, commit_id=commit_id
     )
     G = world_dict.get(world_identifier)
-    
+
     if G is None:
         # 如果内存中没有，尝试从数据库加载
         try:
@@ -1554,11 +1584,13 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
     try:
         context = G.org_tree.layer_manager.group_chat_context
         scene_status = await context.get_groupchat_status()
-        
+
         if scene_status == GroupChatStatus.NOT_STARTED:
             # 获取或创建场景任务
-            scene_task = await scene_task_manager.create_or_get_task(user_id, world_id, commit_id)
-            
+            scene_task = await scene_task_manager.create_or_get_task(
+                user_id, world_id, commit_id
+            )
+
             if scene_task and scene_task.is_in_progress():
                 return {
                     "user_id": user_id,
@@ -1571,7 +1603,7 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
                     status_code=500,
                     detail=f"Scene initialization failed: {scene_task.error}",
                 )
-            
+
             # 初始化场景
             commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
             async with commit_tree_lock:
@@ -1584,10 +1616,14 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
                         graph=G,
                         parent_id=None,
                     )
-                    await save_commit_tree(user_id, world_id, commit_trees_dict[commit_identifier])
-                
+                    await save_commit_tree(
+                        user_id, world_id, commit_trees_dict[commit_identifier]
+                    )
+
                 previous_commit_id = commit_trees_dict[commit_identifier].root_id
-                is_first_scene = previous_commit_id == commit_id if previous_commit_id else True
+                is_first_scene = (
+                    previous_commit_id == commit_id if previous_commit_id else True
+                )
 
             background_task = asyncio.create_task(
                 background_scene_initialization(
@@ -1595,9 +1631,11 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
                 )
             )
             if not scene_task:
-                scene_task = await scene_task_manager.create_or_get_task(user_id, world_id, commit_id)
+                scene_task = await scene_task_manager.create_or_get_task(
+                    user_id, world_id, commit_id
+                )
             scene_task.set_task(background_task)
-            
+
             return {
                 "user_id": user_id,
                 "world_id": world_id,
@@ -1652,8 +1690,7 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
 
         # 准备响应数据
         all_characters = [
-            character_info_to_model(c)
-            for c in await G.get_all_characters()
+            character_info_to_model(c) for c in await G.get_all_characters()
         ]
 
         world_meta = G.universe_metadata
@@ -1756,7 +1793,9 @@ async def delete_world_commit(
     async with commit_tree_lock:
         if commit_identifier in commit_trees_dict:
             commit_trees_dict[commit_identifier].delete_commit(data.commit_id)
-            await save_commit_tree(data.user_id, data.world_id, commit_trees_dict[commit_identifier])
+            await save_commit_tree(
+                data.user_id, data.world_id, commit_trees_dict[commit_identifier]
+            )
 
     return {"message": "World commit deleted successfully"}
 
@@ -2101,14 +2140,30 @@ def get_args():
         help="Clear all database tables before initialization",
     )
     # Rate limiting arguments
-    parser.add_argument("--max_tokens_per_minute", type=int, default=100000,
-                       help="Maximum tokens per minute for rate limiting")
-    parser.add_argument("--max_requests_per_minute", type=int, default=500,
-                       help="Maximum requests per minute for rate limiting")
-    parser.add_argument("--burst_capacity", type=int, default=10000,
-                       help="Burst capacity for rate limiting")
-    parser.add_argument("--max_retries", type=int, default=5,
-                       help="Maximum retries on rate limit errors")
+    parser.add_argument(
+        "--max_tokens_per_minute",
+        type=int,
+        default=100000,
+        help="Maximum tokens per minute for rate limiting",
+    )
+    parser.add_argument(
+        "--max_requests_per_minute",
+        type=int,
+        default=500,
+        help="Maximum requests per minute for rate limiting",
+    )
+    parser.add_argument(
+        "--burst_capacity",
+        type=int,
+        default=10000,
+        help="Burst capacity for rate limiting",
+    )
+    parser.add_argument(
+        "--max_retries",
+        type=int,
+        default=5,
+        help="Maximum retries on rate limit errors",
+    )
     return parser.parse_args()
 
 
@@ -2129,7 +2184,7 @@ if __name__ == "__main__":
             "http_proxy": f"http://localhost:{args.proxies_port}",
             "https_proxy": f"http://localhost:{args.proxies_port}",
         }
-    
+
     # Update rate limiting configuration from command line arguments
     GLOBAL_LLM_CONFIG.max_tokens_per_minute = args.max_tokens_per_minute
     GLOBAL_LLM_CONFIG.max_requests_per_minute = args.max_requests_per_minute
@@ -2173,27 +2228,31 @@ if __name__ == "__main__":
             assert db.pool is not None, "Database pool is not initialized"
             async with db.pool.acquire() as conn:
                 # Check if world_commits table has the correct schema
-                table_info = await conn.fetch("""
+                table_info = await conn.fetch(
+                    """
                     SELECT column_name, data_type 
                     FROM information_schema.columns 
                     WHERE table_name = 'world_commits'
-                """)
-                columns = {row['column_name']: row['data_type'] for row in table_info}
-                
+                """
+                )
+                columns = {row["column_name"]: row["data_type"] for row in table_info}
+
                 required_columns = {
-                    'commit_id': 'uuid',
-                    'world_id': 'uuid',
-                    'user_id': 'uuid',
-                    'parent_commit_id': 'uuid',
-                    'graph_data': 'jsonb',
-                    'topic': 'text',
-                    'event_summary': 'text',
-                    'created_at': 'timestamp without time zone'
+                    "commit_id": "uuid",
+                    "world_id": "uuid",
+                    "user_id": "uuid",
+                    "parent_commit_id": "uuid",
+                    "graph_data": "jsonb",
+                    "topic": "text",
+                    "event_summary": "text",
+                    "created_at": "timestamp without time zone",
                 }
 
                 missing_columns = set(required_columns.keys()) - set(columns.keys())
                 if missing_columns:
-                    get_logger_backend().error(f"Missing columns in world_commits table: {missing_columns}")
+                    get_logger_backend().error(
+                        f"Missing columns in world_commits table: {missing_columns}"
+                    )
                     # Drop and recreate the table
                     get_logger_backend().info("Recreating world_commits table...")
                     await conn.execute("DROP TABLE IF EXISTS world_commits CASCADE")
