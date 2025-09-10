@@ -1423,20 +1423,36 @@ async def is_scene_finished(
 ):
     if user_id != current_user:
         raise HTTPException(status_code=403, detail="user_id不匹配")
-    G = world_dict[
-        WorldIdentifier(user_id=user_id, world_id=world_id, commit_id=commit_id)
-    ]
+    
+    world_identifier = WorldIdentifier(user_id=user_id, world_id=world_id, commit_id=commit_id)
+    if world_identifier not in world_dict:
+        raise HTTPException(status_code=404, detail="World not found")
+        
+    G = world_dict[world_identifier]
     context = G.org_tree.layer_manager.group_chat_context
     scene_status = await context.get_groupchat_status()
+    
     if scene_status == GroupChatStatus.TERMINATED:
         # First check if there's any existing commit task for the current commit
         async with world_lock:
+            # Check if the commit already exists in database
+            try:
+                existing_commit = await db.get_world_commit(UUID(commit_id))
+                if existing_commit is None:
+                    # If commit doesn't exist in database, we need to save it first
+                    await save_graph(user_id, world_id, commit_id, G)
+            except Exception as e:
+                get_logger_backend().error(f"Error checking existing commit: {e}")
+                get_logger_backend().error(traceback.format_exc())
+                
             # Check all tasks for this world to find any in-progress or completed commits
             all_tasks = []
             for task_key, task in commit_task_manager._tasks.items():
                 task_user_id, task_world_id, task_commit_id = task_key
                 if task_user_id == user_id and task_world_id == world_id:
-                    all_tasks.append((task_commit_id, task))
+                    # Only include tasks that are not for the current commit
+                    if task_commit_id != commit_id:
+                        all_tasks.append((task_commit_id, task))
 
             # Sort tasks by creation time (assuming commit ID is UUID which has timestamp)
             all_tasks.sort(key=lambda x: x[0])
@@ -1455,8 +1471,22 @@ async def is_scene_finished(
                             detail=f"Commit creation failed: {task.error}",
                         )
 
-            # If no existing task found, create a new one
-            new_commit_id = await G.generate_world_status_uuid()
+            # If no existing task found, create a new one with a new commit ID
+            while True:
+                try:
+                    new_commit_id = await G.generate_world_status_uuid()
+                    # Verify this commit ID doesn't exist
+                    existing_commit = await db.get_world_commit(UUID(new_commit_id))
+                    if existing_commit is None:
+                        break
+                except Exception as e:
+                    get_logger_backend().error(f"Error generating new commit ID: {e}")
+                    get_logger_backend().error(traceback.format_exc())
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Failed to generate new commit ID: {str(e)}",
+                    )
+
             task = await commit_task_manager.create_task(user_id, world_id, new_commit_id)
             background_task = asyncio.create_task(
                 background_commit_creation(G, user_id, world_id, commit_id, new_commit_id, task)
