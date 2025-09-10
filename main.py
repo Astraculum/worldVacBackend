@@ -40,7 +40,7 @@ from AgentMatrix.src.spritesheet_generator.auto_download import \
     CharacterImageDownloader
 from AgentMatrix.src.world import seed_prompt_to_universe_metadata
 from backend.utils import start_scene_from_graph
-from backend.utils.commit_task import commit_task_manager, CommitTask
+from backend.utils.commit_task import CommitTask, commit_task_manager
 from backend.utils.commit_tree import CommitTree
 from backend.utils.fork_task import fork_task_manager
 from backend.utils.fork_world import background_fork_world
@@ -1415,6 +1415,9 @@ async def input_action(
 @app.post(
     "/{user_id}/{world_id}/{commit_id}/scene/is_finished",
 )
+@app.post(
+    "/{user_id}/{world_id}/{commit_id}/scene/is_finished",
+)
 async def is_scene_finished(
     user_id: str,
     world_id: str,
@@ -1423,28 +1426,42 @@ async def is_scene_finished(
 ):
     if user_id != current_user:
         raise HTTPException(status_code=403, detail="user_id不匹配")
-    
-    world_identifier = WorldIdentifier(user_id=user_id, world_id=world_id, commit_id=commit_id)
+
+    world_identifier = WorldIdentifier(
+        user_id=user_id, world_id=world_id, commit_id=commit_id
+    )
     if world_identifier not in world_dict:
         raise HTTPException(status_code=404, detail="World not found")
-        
+
     G = world_dict[world_identifier]
     context = G.org_tree.layer_manager.group_chat_context
     scene_status = await context.get_groupchat_status()
-    
+
     if scene_status == GroupChatStatus.TERMINATED:
-        # First check if there's any existing commit task for the current commit
         async with world_lock:
-            # Check if the commit already exists in database
+            # 确保当前 commit_id 对应的世界已保存（UPSERT）
             try:
-                existing_commit = await db.get_world_commit(UUID(commit_id))
+                commit_uuid = UUID(commit_id)
+                existing_commit = await db.get_world_commit(commit_uuid)
                 if existing_commit is None:
-                    # If commit doesn't exist in database, we need to save it first
+                    # 插入新记录
                     await save_graph(user_id, world_id, commit_id, G)
+                    get_logger_backend().info(
+                        f"Upserted missing world commit: {commit_id}"
+                    )
+                else:
+                    # 只读，不需要更新
+                    pass
             except Exception as e:
-                get_logger_backend().error(f"Error checking existing commit: {e}")
+                get_logger_backend().error(
+                    f"Error upserting current commit {commit_id}: {e}"
+                )
                 get_logger_backend().error(traceback.format_exc())
-                
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to ensure current world is saved: {str(e)}",
+                )
+
             # Check all tasks for this world to find any in-progress or completed commits
             all_tasks = []
             for task_key, task in commit_task_manager._tasks.items():
@@ -1454,13 +1471,17 @@ async def is_scene_finished(
                     if task_commit_id != commit_id:
                         all_tasks.append((task_commit_id, task))
 
-            # Sort tasks by creation time (assuming commit ID is UUID which has timestamp)
+            # Sort tasks by commit_id (assuming UUID has timestamp)
             all_tasks.sort(key=lambda x: x[0])
-            
+
             # Check the most recent task first
             for new_commit_id, task in reversed(all_tasks):
                 if task.is_in_progress():
-                    return {"is_finished": True, "status": "creating_new_commit", "new_commit_id": new_commit_id}
+                    return {
+                        "is_finished": True,
+                        "status": "creating_new_commit",
+                        "new_commit_id": new_commit_id,
+                    }
                 elif task.is_completed():
                     return {"is_finished": True, "commit_id": new_commit_id}
                 elif task.is_failed():
@@ -1471,28 +1492,48 @@ async def is_scene_finished(
                             detail=f"Commit creation failed: {task.error}",
                         )
 
-            # If no existing task found, create a new one with a new commit ID
-            while True:
+            # Generate a new unique commit ID for the forked world
+            new_commit_id = None
+            max_retries = 5
+            for _ in range(max_retries):
                 try:
                     new_commit_id = await G.generate_world_status_uuid()
-                    # Verify this commit ID doesn't exist
-                    existing_commit = await db.get_world_commit(UUID(new_commit_id))
-                    if existing_commit is None:
+                    existing_new_commit = await db.get_world_commit(UUID(new_commit_id))
+                    if existing_new_commit is None:
                         break
+                    else:
+                        new_commit_id = None  # 重置，继续循环
                 except Exception as e:
-                    get_logger_backend().error(f"Error generating new commit ID: {e}")
-                    get_logger_backend().error(traceback.format_exc())
-                    raise HTTPException(
-                        status_code=500,
-                        detail=f"Failed to generate new commit ID: {str(e)}",
-                    )
+                    get_logger_backend().error(f"Error checking new commit ID: {e}")
+                    continue
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail="Failed to generate a unique new commit ID after multiple retries",
+                )
 
-            task = await commit_task_manager.create_task(user_id, world_id, new_commit_id)
+            if not new_commit_id:
+                raise HTTPException(
+                    status_code=500, detail="Generated commit ID is invalid"
+                )
+
+            # Create and start background commit task
+            task = await commit_task_manager.create_task(
+                user_id, world_id, new_commit_id
+            )
             background_task = asyncio.create_task(
-                background_commit_creation(G, user_id, world_id, commit_id, new_commit_id, task)
+                background_commit_creation(
+                    G, user_id, world_id, commit_id, new_commit_id, task
+                )
             )
             task.set_task(background_task)
-            return {"is_finished": True, "status": "creating_new_commit", "new_commit_id": new_commit_id}
+
+            return {
+                "is_finished": True,
+                "status": "creating_new_commit",
+                "new_commit_id": new_commit_id,
+            }
+
     else:
         return {"is_finished": False}
 
@@ -1844,7 +1885,12 @@ async def delete_world_commit(
 
 
 async def background_commit_creation(
-    G: Graph, user_id: str, world_id: str, commit_id: str, new_commit_id: str, task: CommitTask
+    G: Graph,
+    user_id: str,
+    world_id: str,
+    commit_id: str,
+    new_commit_id: str,
+    task: CommitTask,
 ):
     try:
         # save graph (for commit metadata)
