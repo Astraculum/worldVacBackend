@@ -2,9 +2,10 @@ import asyncio
 import os
 from typing import Optional
 
+from AgentMatrix.const import GroupChatStatus
 from AgentMatrix.model import MissionModel, SceneModel, message_to_event_model
 from AgentMatrix.src.character import CharacterType
-from AgentMatrix.src.graph import Graph, GroupChatStatus, HostLayer
+from AgentMatrix.src.graph import Graph, HostLayer
 from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
 from AgentMatrix.src.spritesheet_generator import (AnnotationParams,
                                                    CharacterImageDownloader)

@@ -53,24 +53,58 @@ class SceneTaskManager:
         self._lock = asyncio.Lock()
         self.fast_chat_llm_client = fast_chat_llm_client
 
-    async def create_task(
+    async def create_or_get_task(
         self, user_id: str, world_id: str, commit_id: str
     ) -> SceneTask:
+        """创建新任务或获取现有任务。如果任务已存在且未完成，返回现有任务。"""
         async with self._lock:
+            key = (user_id, world_id, commit_id)
+            existing_task = self._tasks.get(key)
+            
+            if existing_task:
+                if existing_task.is_in_progress():
+                    return existing_task
+                elif existing_task.is_failed():
+                    # 如果任务失败，创建新任务
+                    task = SceneTask(user_id, world_id, commit_id)
+                    self._tasks[key] = task
+                    return task
+                elif existing_task.is_completed():
+                    # 如果任务已完成，返回现有任务
+                    return existing_task
+            
+            # 如果没有现有任务，创建新任务
             task = SceneTask(user_id, world_id, commit_id)
-            self._tasks[(user_id, world_id, commit_id)] = task
+            self._tasks[key] = task
             return task
 
     async def get_task(
         self, user_id: str, world_id: str, commit_id: str
     ) -> Optional[SceneTask]:
+        """获取任务，如果不存在返回None"""
         async with self._lock:
             return self._tasks.get((user_id, world_id, commit_id))
 
     async def remove_task(self, user_id: str, world_id: str, commit_id: str):
+        """移除任务，如果任务正在进行中会被取消"""
         async with self._lock:
-            if (user_id, world_id, commit_id) in self._tasks:
-                del self._tasks[(user_id, world_id, commit_id)]
+            key = (user_id, world_id, commit_id)
+            if key in self._tasks:
+                task = self._tasks[key]
+                if task.is_in_progress() and task._task:
+                    task._task.cancel()
+                del self._tasks[key]
+
+    async def cleanup_completed_tasks(self):
+        """清理已完成或失败的任务"""
+        async with self._lock:
+            keys_to_remove = []
+            for key, task in self._tasks.items():
+                if task.is_completed() or task.is_failed():
+                    keys_to_remove.append(key)
+            
+            for key in keys_to_remove:
+                del self._tasks[key]
 
 
 # Global task manager instance
