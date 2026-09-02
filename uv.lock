@@ -1,5 +1,5 @@
 version = 1
-revision = 1
+revision = 3
 requires-python = ">=3.9, <4"
 resolution-markers = [
     "python_full_version >= '3.12.4'",
@@ -865,6 +865,11 @@ dependencies = [
 sdist = { url = "http://mirrors.aliyun.com/pypi/packages/b1/df/48c586a5fe32a0f01324ee087459e112ebb7224f646c0b5023f5e79e9956/httpx-0.28.1.tar.gz", hash = "sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc" }
 wheels = [
     { url = "http://mirrors.aliyun.com/pypi/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad" },
+]
+
+[package.optional-dependencies]
+socks = [
+    { name = "socksio" },
 ]
 
 [[package]]
@@ -2797,6 +2802,15 @@ wheels = [
 ]
 
 [[package]]
+name = "socksio"
+version = "1.0.0"
+source = { registry = "http://mirrors.aliyun.com/pypi/simple/" }
+sdist = { url = "http://mirrors.aliyun.com/pypi/packages/f8/5c/48a7d9495be3d1c651198fd99dbb6ce190e2274d0f28b9051307bdec6b85/socksio-1.0.0.tar.gz", hash = "sha256:f88beb3da5b5c38b9890469de67d0cb0f9d494b78b106ca1845f96c10b91c4ac" }
+wheels = [
+    { url = "http://mirrors.aliyun.com/pypi/packages/37/c3/6eeb6034408dac0fa653d126c9204ade96b819c936e136c5e8a6897eee9c/socksio-1.0.0-py3-none-any.whl", hash = "sha256:95dc1f15f9b34e8d7b16f06d74b8ccf48f609af32ab33c608d08761c5dcbb1f3" },
+]
+
+[[package]]
 name = "sqlalchemy"
 version = "2.0.40"
 source = { registry = "http://mirrors.aliyun.com/pypi/simple/" }
@@ -3162,6 +3176,7 @@ dependencies = [
     { name = "dotenv" },
     { name = "faiss-cpu" },
     { name = "fastapi" },
+    { name = "httpx", extra = ["socks"] },
     { name = "json-with-comments" },
     { name = "langchain" },
     { name = "langchain-community" },
@@ -3193,6 +3208,7 @@ requires-dist = [
     { name = "dotenv", specifier = ">=0.9.9,<0.10" },
     { name = "faiss-cpu", specifier = ">=1.10.0" },
     { name = "fastapi", specifier = ">=0.115.12" },
+    { name = "httpx", extras = ["socks"], specifier = ">=0.28.1" },
     { name = "json-with-comments", specifier = ">=1.2.10" },
     { name = "langchain", specifier = ">=0.3.22" },
     { name = "langchain-community", specifier = ">=0.3.20" },

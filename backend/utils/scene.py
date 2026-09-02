@@ -1,5 +1,4 @@
 import asyncio
-import os
 from typing import Optional
 
 from AgentMatrix.const import GroupChatStatus
@@ -10,6 +9,8 @@ from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
 from AgentMatrix.src.spritesheet_generator import (AnnotationParams,
                                                    CharacterImageDownloader)
 from logger import get_logger
+
+from .character_sprites import optional_prepare_character_sprites
 
 ASNYC_SLEEP_TIME = 0.3
 
@@ -23,27 +24,12 @@ async def start_scene_from_graph(
     is_first_scene: bool = False,
     fast_chat_llm_client: Optional[LLMClient] = None,
 ) -> SceneModel:
-    # 标注角色sprite sheet 如果已经标注过则跳过
-    await G.annotate_all_characters_sprite_sheet()
-
-    # 下载角色图片 已下载的会跳过
-    all_characters = await G.get_all_characters()
-    download_tasks = [
-        character_image_downloader.download_character_image(
-            params=c["sprite_sheet_annotation_string"],
-            output_dir=character_image_output_path,
-            output_filename=f"{c['id']}.png",
-            front_output_filename=f"{c['id']}_front.png",
-            generated_image_path=os.path.join(
-                generated_character_image_output_path, f"{c['id']}.png"
-            ),
-            regenerate=c.get("need_regenerate_sprite_sheet", False),
-        )
-        for c in all_characters
-    ]
-    await asyncio.gather(*download_tasks)
-    for c in await G.character_map.get_all_characters():
-        c.need_regenerate_sprite_sheet = False
+    await optional_prepare_character_sprites(
+        graph=G,
+        downloader=character_image_downloader,
+        output_dir=character_image_output_path,
+        generated_image_dir=generated_character_image_output_path,
+    )
     # start scene
     player_layer: HostLayer = None  # type: ignore
     universe_metadata = G.universe_metadata

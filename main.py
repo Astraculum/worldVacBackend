@@ -5,11 +5,13 @@ import os
 import time
 import traceback
 from asyncio import Task
+from contextlib import asynccontextmanager
 from enum import Enum
 from typing import Any, Optional, cast
 from uuid import UUID, uuid4
 
 import jwt
+from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response
@@ -34,12 +36,12 @@ from AgentMatrix.model import (CharacterModel, CommitIdentifier,
                                message_to_event_model, verify_password)
 from AgentMatrix.src.graph import ForkRelationEntity, Graph, HostLayer
 from AgentMatrix.src.llm import LanguageType, LLMClient, LLMConfig, LLMProvider
-from AgentMatrix.src.memory import SentenceEmbedding
 from AgentMatrix.src.spritesheet_generator import AnnotationParams
 from AgentMatrix.src.spritesheet_generator.auto_download import \
     CharacterImageDownloader
 from AgentMatrix.src.world import seed_prompt_to_universe_metadata
 from backend.utils import start_scene_from_graph
+from backend.utils.character_sprites import optional_prepare_character_sprites
 from backend.utils.commit_task import CommitTask, commit_task_manager
 from backend.utils.commit_tree import CommitTree
 from backend.utils.fork_task import fork_task_manager
@@ -49,6 +51,16 @@ from backend.utils.world_task import world_task_manager
 from logger import get_logger as get_logger_backend
 from logger import set_logger_file as set_logger_file_backend
 from logger import set_logger_level as set_logger_level_backend
+
+load_dotenv()
+
+GEMINI_OPENAI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+DEFAULT_GEMINI_CHAT_MODEL = "gemini-flash-lite-latest"
+DEFAULT_SOCKS_PROXY = (
+    os.getenv("ALL_PROXY")
+    or os.getenv("SOCKS_PROXY")
+    or "socks5h://127.0.0.1:7891"
+)
 
 # 设置logger级别
 set_logger_level_backend("DEBUG")
@@ -76,12 +88,20 @@ app.add_middleware(
     max_age=86400,  # 预检请求缓存时间
 )
 
-# LLM 配置
+# LLM 配置（默认：Gemini OpenAI 兼容接口 + SOCKS5 代理）
+_google_api_key = os.getenv("GOOGLE_API_KEY") or "NULL"
+_default_proxies = {
+    "all_proxy": DEFAULT_SOCKS_PROXY,
+    "http_proxy": DEFAULT_SOCKS_PROXY,
+    "https_proxy": DEFAULT_SOCKS_PROXY,
+}
 GLOBAL_LLM_CONFIG = LLMConfig(
-    api_key="NULL",
-    model="NULL",
-    provider=LLMProvider.SiliconFlow,
+    api_key=_google_api_key,
+    model=os.getenv("GEMINI_MODEL", DEFAULT_GEMINI_CHAT_MODEL),
+    provider=LLMProvider.Gemini,
+    base_url=os.getenv("GEMINI_BASE_URL", GEMINI_OPENAI_BASE_URL),
     language_type=LanguageType.NotSpecified,
+    proxies=_default_proxies,
     # Rate limiting configuration
     max_tokens_per_minute=100000,  # 100K tokens per minute
     max_requests_per_minute=1000,  # 1000 requests per minute
@@ -89,10 +109,12 @@ GLOBAL_LLM_CONFIG = LLMConfig(
     max_retries=5,  # 5 retries on rate limit
 )
 GLOBAL_FAST_CHAT_LLM_CONFIG = LLMConfig(
-    api_key="NULL",
-    model="NULL",
-    provider=LLMProvider.SiliconFlow,
+    api_key=_google_api_key,
+    model=os.getenv("GEMINI_FAST_CHAT_MODEL", DEFAULT_GEMINI_CHAT_MODEL),
+    provider=LLMProvider.Gemini,
+    base_url=os.getenv("GEMINI_BASE_URL", GEMINI_OPENAI_BASE_URL),
     language_type=LanguageType.NotSpecified,
+    proxies=_default_proxies,
     # Rate limiting configuration for fast chat
     max_tokens_per_minute=150000,  # Higher limit for fast chat
     max_requests_per_minute=1500,  # Higher request limit
@@ -106,7 +128,6 @@ CHOOSER_TO_AVAILABLE_OPTIONS_PATH = (
     "backend/spritesheet_generator/chooser_to_available_options.json"
 )
 DICT_CHOOSER_PARAMS_PATH = "backend/spritesheet_generator/chooser_params.json"
-GLOBAL_EMBEDDINGS = SentenceEmbedding()
 GLOBAL_ANNOTATION_PARAMS = AnnotationParams(
     chooser_to_available_options=json.load(
         open(CHOOSER_TO_AVAILABLE_OPTIONS_PATH, "r")
@@ -161,6 +182,31 @@ async def save_commit_tree(user_id: str, world_id: str, commit_tree: CommitTree)
             world_id=world_id_uuid,
             tree_data=commit_tree.to_json(),
         )
+
+
+async def ensure_commit_tree_root(
+    user_id: str, world_id: str, commit_id: str, graph: Graph
+) -> tuple[Optional[str], bool]:
+    """Create the commit tree root if missing. Persist outside the lock to avoid deadlock."""
+    need_to_save = False
+    commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
+    async with commit_tree_lock:
+        if commit_identifier not in commit_trees_dict:
+            commit_trees_dict[commit_identifier] = CommitTree()
+            await commit_trees_dict[commit_identifier].add_commit(
+                world_id=world_id,
+                user_id=user_id,
+                commit_id=commit_id,
+                graph=graph,
+                parent_id=None,
+            )
+            need_to_save = True
+        commit_tree = commit_trees_dict[commit_identifier]
+        root_id = commit_tree.root_id if commit_tree else None
+    if need_to_save:
+        await save_commit_tree(user_id, world_id, commit_trees_dict[commit_identifier])
+    is_first_scene = root_id == commit_id if root_id else True
+    return root_id, is_first_scene
 
 
 async def save_user_dict():
@@ -271,7 +317,6 @@ async def load_graph():
 
             G = await Graph.from_json(
                 data=json_data,
-                embeddings=GLOBAL_EMBEDDINGS,
                 annotation_params=GLOBAL_ANNOTATION_PARAMS,
             )
 
@@ -294,27 +339,9 @@ async def load_graph():
             )
             if scene_status == GroupChatStatus.NOT_STARTED:
                 # 检查是否是第一个提交
-                commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
-                need_to_save_commit_tree = False
-                async with commit_tree_lock:
-                    # Create commit tree if it doesn't exist
-                    if commit_identifier not in commit_trees_dict:
-                        commit_trees_dict[commit_identifier] = CommitTree()
-                        await commit_trees_dict[commit_identifier].add_commit(
-                            world_id=world_id,
-                            user_id=user_id,
-                            commit_id=commit_id,
-                            graph=G,
-                            parent_id=None,
-                        )
-                        need_to_save_commit_tree = True
-                    previous_commit_id = commit_trees_dict[commit_identifier].root_id
-                    is_first_scene = previous_commit_id == commit_id
-                if need_to_save_commit_tree:
-                    # save outside of commit_tree_lock, because it will cause deadlock
-                    await save_commit_tree(
-                        user_id, world_id, commit_trees_dict[commit_identifier]
-                    )
+                previous_commit_id, is_first_scene = await ensure_commit_tree_root(
+                    user_id, world_id, commit_id, G
+                )
 
                 # 获取或创建场景任务
                 scene_task = await scene_task_manager.create_or_get_task(
@@ -596,57 +623,17 @@ async def background_world_initialization(
         if task:
             task.set_completed()
 
-        # 标注角色sprite sheet 如果已经标注过则跳过
-        await G.annotate_all_characters_sprite_sheet()
-
-        # 下载角色图片 已下载的会跳过
-        all_characters = await G.get_all_characters()
         temp_dir = "/tmp/character_images_temp"
-        os.makedirs(temp_dir, exist_ok=True)
-
-        for character in all_characters:
-            # 创建临时文件路径
-            temp_path = os.path.join(temp_dir, f"{character['id']}.png")
-            temp_front_path = os.path.join(temp_dir, f"{character['id']}_front.png")
-
-            # 下载图片到临时目录
-            await character_image_downloader.download_character_image(
-                params=character["sprite_sheet_annotation_string"],
-                output_dir=temp_dir,
-                output_filename=f"{character['id']}.png",
-                front_output_filename=f"{character['id']}_front.png",
-                regenerate=character.get("need_regenerate_sprite_sheet", False),
-            )
-
-            # 读取图片数据
-            try:
-                with open(temp_path, "rb") as f:
-                    image_data = f.read()
-                with open(temp_front_path, "rb") as f:
-                    front_image_data = f.read()
-
-                # 保存到数据库
-                await save_character_image_to_db(
-                    character_id=UUID(character["id"]),
-                    image_data=image_data,
-                    front_image_data=front_image_data,
-                )
-
-                # 清理临时文件
-                os.remove(temp_path)
-                os.remove(temp_front_path)
-            except Exception as e:
-                get_logger_backend().error(f"Failed to save character image: {e}")
-                continue
-
-        # 清理临时目录
+        await optional_prepare_character_sprites(
+            graph=G,
+            downloader=character_image_downloader,
+            output_dir=temp_dir,
+            persist_to_db=save_character_image_to_db,
+        )
         try:
             os.rmdir(temp_dir)
         except OSError:
             pass
-
-        for c in await G.character_map.get_all_characters():
-            c.need_regenerate_sprite_sheet = False
 
         # 检查场景状态并自动开始场景
         context = G.org_tree.layer_manager.group_chat_context
@@ -654,27 +641,10 @@ async def background_world_initialization(
             scene_status = await context.get_groupchat_status()
             if scene_status == GroupChatStatus.NOT_STARTED:
                 # 根据commit tree判断当前commit是否是第一个commit
-                commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
-                async with commit_tree_lock:
-                    # Create commit tree if it doesn't exist
-                    if commit_identifier not in commit_trees_dict:
-                        commit_trees_dict[commit_identifier] = CommitTree()
-                        await commit_trees_dict[commit_identifier].add_commit(
-                            world_id=world_id,
-                            user_id=user_id,
-                            commit_id=commit_id,
-                            graph=G,
-                            parent_id=None,
-                        )
-                        await save_commit_tree(
-                            user_id, world_id, commit_trees_dict[commit_identifier]
-                        )
-
-                    # 安全获取commit tree信息
-                    commit_tree = commit_trees_dict[commit_identifier]
-                    root_id = commit_tree.root_id if commit_tree else None
-                    is_first_scene = root_id == commit_id if root_id else True
-                    previous_commit_id = root_id
+                root_id, is_first_scene = await ensure_commit_tree_root(
+                    user_id, world_id, commit_id, G
+                )
+                previous_commit_id = root_id
 
                 # 获取或创建场景任务
                 scene_task = await scene_task_manager.create_or_get_task(
@@ -815,7 +785,6 @@ async def seed_prompt_to_world(
             universe_metadata.tone if universe_metadata.tone is not None else "neutral"
         ),
         llm_config=llm_config,
-        embeddings=GLOBAL_EMBEDDINGS,
         annotation_params=GLOBAL_ANNOTATION_PARAMS,
     )
 
@@ -960,7 +929,6 @@ async def create_world(request: Request, user_id: str = Depends(get_current_user
         strategy=data.strategy,
         tone=data.tone if data.tone is not None else "neutral",
         llm_config=llm_config,
-        embeddings=GLOBAL_EMBEDDINGS,
         annotation_params=GLOBAL_ANNOTATION_PARAMS,
     )
 
@@ -1163,25 +1131,10 @@ async def get_events(
                 )
 
             # 安全获取commit tree信息
-            commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
-            async with commit_tree_lock:
-                if commit_identifier not in commit_trees_dict:
-                    commit_trees_dict[commit_identifier] = CommitTree()
-                    await commit_trees_dict[commit_identifier].add_commit(
-                        world_id=world_id,
-                        user_id=user_id,
-                        commit_id=commit_id,
-                        graph=G,
-                        parent_id=None,
-                    )
-                    await save_commit_tree(
-                        user_id, world_id, commit_trees_dict[commit_identifier]
-                    )
-
-                commit_tree = commit_trees_dict[commit_identifier]
-                root_id = commit_tree.root_id if commit_tree else None
-                is_first_scene = root_id == commit_id if root_id else True
-                previous_commit_id = root_id
+            root_id, is_first_scene = await ensure_commit_tree_root(
+                user_id, world_id, commit_id, G
+            )
+            previous_commit_id = root_id
 
             # 启动场景初始化
             background_task = asyncio.create_task(
@@ -1315,25 +1268,10 @@ async def is_event_generated(
                 )
 
             # 安全获取commit tree信息
-            commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
-            async with commit_tree_lock:
-                if commit_identifier not in commit_trees_dict:
-                    commit_trees_dict[commit_identifier] = CommitTree()
-                    await commit_trees_dict[commit_identifier].add_commit(
-                        world_id=world_id,
-                        user_id=user_id,
-                        commit_id=commit_id,
-                        graph=G,
-                        parent_id=None,
-                    )
-                    await save_commit_tree(
-                        user_id, world_id, commit_trees_dict[commit_identifier]
-                    )
-
-                commit_tree = commit_trees_dict[commit_identifier]
-                root_id = commit_tree.root_id if commit_tree else None
-                is_first_scene = root_id == commit_id if root_id else True
-                previous_commit_id = root_id
+            root_id, is_first_scene = await ensure_commit_tree_root(
+                user_id, world_id, commit_id, G
+            )
+            previous_commit_id = root_id
 
             # 启动场景初始化
             background_task = asyncio.create_task(
@@ -1641,7 +1579,6 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
             graph_data = commit["graph_data"]
             G = await Graph.from_json(
                 data=graph_data,
-                embeddings=GLOBAL_EMBEDDINGS,
                 annotation_params=GLOBAL_ANNOTATION_PARAMS,
             )
             world_dict[world_identifier] = G
@@ -1689,25 +1626,9 @@ async def world_commit(user_id: str, world_id: str, commit_id: str):
                 )
 
             # 初始化场景
-            commit_identifier = CommitIdentifier(user_id=user_id, world_id=world_id)
-            async with commit_tree_lock:
-                if commit_identifier not in commit_trees_dict:
-                    commit_trees_dict[commit_identifier] = CommitTree()
-                    await commit_trees_dict[commit_identifier].add_commit(
-                        world_id=world_id,
-                        user_id=user_id,
-                        commit_id=commit_id,
-                        graph=G,
-                        parent_id=None,
-                    )
-                    await save_commit_tree(
-                        user_id, world_id, commit_trees_dict[commit_identifier]
-                    )
-
-                previous_commit_id = commit_trees_dict[commit_identifier].root_id
-                is_first_scene = (
-                    previous_commit_id == commit_id if previous_commit_id else True
-                )
+            previous_commit_id, is_first_scene = await ensure_commit_tree_root(
+                user_id, world_id, commit_id, G
+            )
 
             background_task = asyncio.create_task(
                 background_scene_initialization(
@@ -1874,12 +1795,13 @@ async def delete_world_commit(
 
     # 更新提交树
     commit_identifier = CommitIdentifier(user_id=data.user_id, world_id=data.world_id)
+    tree_to_save = None
     async with commit_tree_lock:
         if commit_identifier in commit_trees_dict:
             commit_trees_dict[commit_identifier].delete_commit(data.commit_id)
-            await save_commit_tree(
-                data.user_id, data.world_id, commit_trees_dict[commit_identifier]
-            )
+            tree_to_save = commit_trees_dict[commit_identifier]
+    if tree_to_save is not None:
+        await save_commit_tree(data.user_id, data.world_id, tree_to_save)
 
     return {"message": "World commit deleted successfully"}
 
@@ -1903,7 +1825,6 @@ async def background_commit_creation(
         )
         new_graph = await Graph.from_json(
             await G.to_json(user_id, world_id, new_commit_id),
-            embeddings=GLOBAL_EMBEDDINGS,
             annotation_params=GLOBAL_ANNOTATION_PARAMS,
         )
         layer_manager = new_graph.org_tree.layer_manager
@@ -1943,7 +1864,6 @@ async def background_commit_creation(
         )
         old_graph = await Graph.from_json(
             old_commit["graph_data"],
-            embeddings=GLOBAL_EMBEDDINGS,
             annotation_params=GLOBAL_ANNOTATION_PARAMS,
         )
         world_dict[old_world_identifier] = old_graph
@@ -2025,7 +1945,6 @@ async def public_world(request: Request, current_user: str = Depends(get_current
         llm_config=G.llm_config,
         character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
         character_images_path=CHARACTER_IMAGES_PATH,
-        embeddings=GLOBAL_EMBEDDINGS,
         annotation_params=GLOBAL_ANNOTATION_PARAMS,
         fork_seed_prompt=None,
         mode="full",
@@ -2091,7 +2010,6 @@ async def fork_world(request: Request, current_user: str = Depends(get_current_u
         llm_config=G.llm_config,
         character_image_downloader=GLOBAL_CHARACTER_IMAGE_DOWNLOADER,
         character_images_path=CHARACTER_IMAGES_PATH,
-        embeddings=GLOBAL_EMBEDDINGS,
         annotation_params=GLOBAL_ANNOTATION_PARAMS,
         fork_seed_prompt=data.fork_seed_prompt,
         mode=data.mode,
@@ -2209,7 +2127,18 @@ def get_args():
     parser.add_argument("--host", type=str, default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--api_key", type=str, default="")
-    parser.add_argument("--dsn", type=str, default="")
+    parser.add_argument(
+        "--socks_proxy",
+        type=str,
+        default=DEFAULT_SOCKS_PROXY,
+        help="SOCKS/HTTP proxy URL for Gemini requests.",
+    )
+    parser.add_argument(
+        "--dsn",
+        type=str,
+        default=os.getenv("DATABASE_URL") or os.getenv("DSN") or "",
+        help="PostgreSQL DSN. Defaults to DATABASE_URL or DSN in .env.",
+    )
     parser.add_argument("--fast_chat_api_key", type=str, default="")
     parser.add_argument("--model", type=str, default="")
     parser.add_argument("--fast_chat_model", type=str, default="")
@@ -2264,25 +2193,42 @@ if __name__ == "__main__":
     if args.provider != "":
         GLOBAL_LLM_CONFIG.provider = LLMProvider(args.provider)
     if args.proxies_port != -1:
-        get_logger_backend().info(f"Proxies: http://localhost:{args.proxies_port}")
+        proxy_url = f"http://127.0.0.1:{args.proxies_port}"
+        get_logger_backend().info(f"Proxies: {proxy_url}")
         GLOBAL_LLM_CONFIG.proxies = {
-            "http_proxy": f"http://localhost:{args.proxies_port}",
-            "https_proxy": f"http://localhost:{args.proxies_port}",
+            "all_proxy": proxy_url,
+            "http_proxy": proxy_url,
+            "https_proxy": proxy_url,
         }
+    elif args.socks_proxy:
+        get_logger_backend().info(f"Proxies: {args.socks_proxy}")
+        GLOBAL_LLM_CONFIG.proxies = {
+            "all_proxy": args.socks_proxy,
+            "http_proxy": args.socks_proxy,
+            "https_proxy": args.socks_proxy,
+        }
+    GLOBAL_FAST_CHAT_LLM_CONFIG.proxies = GLOBAL_LLM_CONFIG.proxies
+    GLOBAL_FAST_CHAT_LLM_CONFIG.base_url = GLOBAL_LLM_CONFIG.base_url
 
     # Update rate limiting configuration from command line arguments
     GLOBAL_LLM_CONFIG.max_tokens_per_minute = args.max_tokens_per_minute
     GLOBAL_LLM_CONFIG.max_requests_per_minute = args.max_requests_per_minute
     GLOBAL_LLM_CONFIG.burst_capacity = args.burst_capacity
     GLOBAL_LLM_CONFIG.max_retries = args.max_retries
-    if (
-        args.fast_chat_api_key != ""
-        and args.fast_chat_model != ""
-        and args.fast_chat_provider != ""
-    ):
+    if args.fast_chat_api_key != "":
         GLOBAL_FAST_CHAT_LLM_CONFIG.api_key = args.fast_chat_api_key
+    if args.fast_chat_model != "":
         GLOBAL_FAST_CHAT_LLM_CONFIG.model = args.fast_chat_model
+    if args.fast_chat_provider != "":
         GLOBAL_FAST_CHAT_LLM_CONFIG.provider = LLMProvider(args.fast_chat_provider)
+    else:
+        GLOBAL_FAST_CHAT_LLM_CONFIG.provider = GLOBAL_LLM_CONFIG.provider
+    if (
+        GLOBAL_FAST_CHAT_LLM_CONFIG.api_key
+        and GLOBAL_FAST_CHAT_LLM_CONFIG.api_key != "NULL"
+        and GLOBAL_FAST_CHAT_LLM_CONFIG.model
+        and GLOBAL_FAST_CHAT_LLM_CONFIG.model != "NULL"
+    ):
         fast_chat_llm_client = LLMClient(semaphore=100)
         fast_chat_llm_client.set_llm_config(GLOBAL_FAST_CHAT_LLM_CONFIG)
         scene_task_manager.fast_chat_llm_client = fast_chat_llm_client
@@ -2290,6 +2236,12 @@ if __name__ == "__main__":
             f"Fast chat LLM config: {GLOBAL_FAST_CHAT_LLM_CONFIG}"
         )
     get_logger_backend().debug(f"LLM config: {GLOBAL_LLM_CONFIG}")
+
+    if not GLOBAL_LLM_CONFIG.api_key or GLOBAL_LLM_CONFIG.api_key == "NULL":
+        get_logger_backend().error(
+            "API key is required. Put GOOGLE_API_KEY in .env, or pass --api_key."
+        )
+        raise SystemExit(1)
 
     async def initialize_database():
         """Initialize database and load all required data"""
@@ -2354,25 +2306,23 @@ if __name__ == "__main__":
             get_logger_backend().error(traceback.format_exc())
             raise
 
-    # Create startup event handler
-    @app.on_event("startup")
-    async def startup_event():
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI):
         try:
             await initialize_database()
         except Exception as e:
             get_logger_backend().error(f"Startup initialization failed: {e}")
             raise
-
-    @app.on_event("shutdown")
-    async def shutdown_event():
+        yield
         try:
-            # Close database connections
             if hasattr(db, "pool") and db.pool is not None:
                 await db.pool.close()
             get_logger_backend().info("Database connections closed successfully")
         except Exception as e:
             get_logger_backend().error(f"Error during shutdown: {e}")
             get_logger_backend().error(traceback.format_exc())
+
+    app.router.lifespan_context = lifespan
 
     # Configure uvicorn with proper settings
     config = uvicorn.Config(

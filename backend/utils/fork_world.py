@@ -6,11 +6,11 @@ from typing import Literal, Optional
 from AgentMatrix.model import CommitIdentifier, WorldIdentifier
 from AgentMatrix.src.graph import ForkRelationEntity, Graph
 from AgentMatrix.src.llm import LLMClient, LLMConfig
-from AgentMatrix.src.memory import SentenceEmbedding
 from AgentMatrix.src.spritesheet_generator import (AnnotationParams,
                                                    CharacterImageDownloader)
 from logger import get_logger as get_logger_backend
 
+from .character_sprites import optional_prepare_character_sprites
 from .commit_tree import CommitTree
 from .fork_task import fork_task_manager
 
@@ -30,7 +30,6 @@ async def background_fork_world(
     llm_config: LLMConfig,
     character_image_downloader: CharacterImageDownloader,
     character_images_path: str,
-    embeddings: Optional[SentenceEmbedding] = None,
     annotation_params: Optional[AnnotationParams] = None,
     fork_seed_prompt: Optional[str] = None,
     mode: Literal["full", "remodify"] = "remodify",
@@ -42,40 +41,22 @@ async def background_fork_world(
             ask_for_forks_user_id=user_id,
             llm_client=llm_client,
             llm_config=llm_config,
-            embeddings=embeddings,
             fork_seed_prompt=fork_seed_prompt,
             mode=mode,
             annotation_params=annotation_params,
         )
         new_commit_id = await new_graph.generate_world_status_uuid()
 
-        # 标注角色sprite sheet 如果已经标注过则跳过
-        await new_graph.annotate_all_characters_sprite_sheet()
-
-        # 下载角色图片 已下载的会跳过
-        all_characters = await new_graph.get_all_characters()
-        download_tasks = [
-            character_image_downloader.download_character_image(
-                params=c["sprite_sheet_annotation_string"],
-                output_dir=os.path.join(
-                    character_images_path, new_user_id, new_world_id, new_commit_id
-                ),
-                output_filename=f"{c['id']}.png",
-                front_output_filename=f"{c['id']}_front.png",
-                generated_image_path=os.path.join(
-                    character_images_path,
-                    user_id,
-                    world_id,
-                    commit_id,
-                    f"{c['id']}.png",
-                ),  # if exists, use the generated image
-                regenerate=c.get("need_regenerate_sprite_sheet", False),
-            )
-            for c in all_characters
-        ]
-        await asyncio.gather(*download_tasks)
-        for c in await new_graph.character_map.get_all_characters():
-            c.need_regenerate_sprite_sheet = False
+        await optional_prepare_character_sprites(
+            graph=new_graph,
+            downloader=character_image_downloader,
+            output_dir=os.path.join(
+                character_images_path, new_user_id, new_world_id, new_commit_id
+            ),
+            generated_image_dir=os.path.join(
+                character_images_path, user_id, world_id, commit_id
+            ),
+        )
 
         # add `fork from` to new graph
         async with new_graph.fork_from_lock:
